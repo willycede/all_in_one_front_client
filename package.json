@@ -1,0 +1,55 @@
+{
+	"name": "embryo",
+	"version": "6.8.0",
+	"private": true,
+	"author": "The IRON Network",
+	"keywords": [
+		"vuejs",
+		"ecommerce",
+		"frontend-template"
+	],
+	"scripts": {
+		"serve": "vue-cli-service serve",
+		"build": "vue-cli-service build",
+		"lint": "vue-cli-service lint",
+		"test:e2e": "vue-cli-service test:e2e"
+	},
+	"dependencies": {
+		"algoliasearch": "^4.4.0",
+		"axios": "^0.23.0",
+		"babel-polyfill": "^6.26.0",
+		"chart.js": "^2.9.3",
+		"core-js": "^3.6.5",
+		"firebase": "^8.2.1",
+		"instantsearch.css": "^7.4.4",
+		"jquery": "^3.5.1",
+		"moment": "^2.27.0",
+		"nprogress": "^0.2.0",
+		"slick-carousel": "^1.8.1",
+		"vue": "^2.6.12",
+		"vue-chartjs": "^3.5.1",
+		"vue-i18n": "^8.21.0",
+		"vue-instantsearch": "^4.0.1",
+		"vue-moment": "^4.1.0",
+		"vue-nprogress": "^0.2.0",
+		"vue-perfect-scrollbar": "^0.2.1",
+		"vue-router": "^3.4.3",
+		"vue-server-renderer": "^2.6.12",
+		"vue-slick": "^1.1.15",
+		"vue-snotify": "^3.2.1",
+		"vue2-google-maps": "^0.10.7",
+		"vuetify": "^2.3.10",
+		"vuex": "^3.5.1"
+	},
+	"devDependencies": {
+		"@mdi/font": "^6.2.95",
+		"@vue/cli-plugin-babel": "^4.5.4",
+		"@vue/cli-plugin-eslint": "^4.5.4",
+		"@vue/cli-service": "^4.5.4",
+		"@vue/cli-service-global": "^4.5.4",
+		"node-sass": "^6.0.0",
+		"sass": "^1.26.10",
+		"sass-loader": "^10.2.0",
+		"vue-template-compiler": "^2.6.12"
+	}
+}
