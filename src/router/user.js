@@ -25,10 +25,12 @@ const EditProfileInfo = () => import ('Views/UserAccount/EditProfileInfo.vue');
 const BlogDetail = () => import('Views/Blogs/BlogDetails');
 const ContactUs = () => import('Views/Contact');
 const PrivacyPolicy = () => import('Views/PrivacyPolicy');
-const Register = () => import('Views/Sessions/Register');
 const ForgotPassword = () => import('Views/Sessions/ForgotPassword');
 const ThankYou = () => import('Views/Sessions/ThankYou');
 const SignIn = () => import('Views/Sessions/SignIn');
+
+//all_in_one
+const Register = () => import('Views/all_in_one/client/register/Register');
 
 
 export default {
@@ -157,7 +159,7 @@ export default {
 			name:'PrivacyPolicy'
 		},
 		{ 
-			path: '/session/signup',  
+			path: '/client/register',  
 			component: Register, 
 			name:'Register'
 		},
