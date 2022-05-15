@@ -113,7 +113,7 @@
 				this.$refs.form.validate();
 				if(this.valid){
 					api.post('/api/users/register', this.formData)
-                    .then((result) => {
+                    .then(() => {
                         this.$snotify.success('Registro éxitoso',{
                             closeOnClick: false,
                             pauseOnHover: false,
