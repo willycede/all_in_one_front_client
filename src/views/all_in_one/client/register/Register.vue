@@ -114,7 +114,6 @@
 				if(this.valid){
 					api.post('/api/users/register', this.formData)
                     .then((result) => {
-                        console.log("result", result)
                         this.$snotify.success('Registro éxitoso',{
                             closeOnClick: false,
                             pauseOnHover: false,
@@ -123,7 +122,6 @@
                         });
                         this.$router.go('/session/signup');
                     }).catch((err) => {
-                        console.log("error", err.response)
                         let defaultErrorMessage = err?.response?.data?.error?.message ? err?.response?.data?.error?.message :  'Ocurrio un error inesperado'; 
                         if (Object.keys(err?.response?.data?.error?.validationObject).length > 0) {
                             this.$snotify.error(err.response.data.error.validationObject.identification_number, {
