@@ -25,7 +25,7 @@
 										<v-btn class="accent mb-4 ml-0 mx-0" large to="/checkout/payment">
 											Sign In
 										</v-btn>
-										<p>Don't Have account? <router-link to="/session/signup">Click here to create One</router-link></p>
+										<p>Don't Have account? <router-link to="/client/register">Click here to create One</router-link></p>
 									</v-form>
 								</div>
 							</div>
