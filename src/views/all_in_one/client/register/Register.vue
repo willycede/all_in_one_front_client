@@ -120,7 +120,7 @@
                             timeout: 2000,
                             showProgressBar:false,
                         });
-                        this.$router.go('/session/signup');
+                        this.$router.go('/session/signin');
                     }).catch((err) => {
                         let defaultErrorMessage = err?.response?.data?.error?.message ? err?.response?.data?.error?.message :  'Ocurrio un error inesperado'; 
                         if (Object.keys(err?.response?.data?.error?.validationObject).length > 0) {
