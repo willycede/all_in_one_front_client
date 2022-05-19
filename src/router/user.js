@@ -25,11 +25,12 @@ const EditProfileInfo = () => import ('Views/UserAccount/EditProfileInfo.vue');
 const BlogDetail = () => import('Views/Blogs/BlogDetails');
 const ContactUs = () => import('Views/Contact');
 const PrivacyPolicy = () => import('Views/PrivacyPolicy');
-const Register = () => import('Views/Sessions/Register');
 const ForgotPassword = () => import('Views/Sessions/ForgotPassword');
 const ThankYou = () => import('Views/Sessions/ThankYou');
-const SignIn = () => import('Views/Sessions/SignIn');
 
+//all_in_one
+const Register = () => import('Views/all_in_one/client/register/Register');
+const Login = () => import('Views/all_in_one/client/login/Login');
 
 export default {
 	path: '/',
@@ -157,9 +158,14 @@ export default {
 			name:'PrivacyPolicy'
 		},
 		{ 
-			path: '/session/signup',  
+			path: '/client/register',  
 			component: Register, 
 			name:'Register'
+		},
+		{ 
+			path: '/client/login',  
+			component: Login, 
+			name:'Login'
 		},
 		{ 
 			path: '/session/forgot-password',  
@@ -171,10 +177,5 @@ export default {
 			component: ThankYou, 
 			name:'ThankYou'
 		},
-		{ 
-			path: '/session/signin',  
-			component: SignIn, 
-			name:'SignIn'
-		}
 	]
 }

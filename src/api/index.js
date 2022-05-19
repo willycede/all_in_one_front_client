@@ -1,6 +1,10 @@
 import axios from 'axios';
+import AppConfig from '../constants/AppConfig';
 
 export default
 	axios.create({
-		baseURL: 'https://embryo-vue.firebaseio.com/'
+		baseURL: AppConfig.apiUrl,
+		headers: {
+			authorization: localStorage.access_token
+		}
 	});

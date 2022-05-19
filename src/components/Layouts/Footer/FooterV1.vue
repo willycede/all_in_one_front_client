@@ -108,11 +108,11 @@ export default {
 			session:[
 				{
 					menuItem:"message.signIn",
-					path:"/session/signin"
+					path:"/client/login"
 				},
 				{
 					menuItem:"message.register",
-					path:'/session/signup',
+					path:'/client/register',
 				},
 				{
 					menuItem:"message.forgotPassword",
