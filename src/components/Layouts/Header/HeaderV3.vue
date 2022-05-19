@@ -98,7 +98,7 @@ export default {
 				{	
 					icon:'power_settings_new',
 					title: 'LogOut',
-					path:"/session/signin"
+					path:"/client/login"
 				}
 			],
 		}

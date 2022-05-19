@@ -60,7 +60,7 @@
 									<v-btn class="accent mx-0 mb-4" large  @click.stop.prevent="saveDetails">
 										Registrarse
 									</v-btn>
-									<p>Posees una cuenta? entonces<router-link to="/session/signin" class="accent--text"> Inicia Sesión</router-link></p>
+									<p>Posees una cuenta? entonces<router-link to="/client/login" class="accent--text"> Inicia Sesión</router-link></p>
 								</v-form>
 							</div>
 						</v-flex>
