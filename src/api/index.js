@@ -3,5 +3,8 @@ import AppConfig from '../constants/AppConfig';
 
 export default
 	axios.create({
-		baseURL: AppConfig.apiUrl
+		baseURL: AppConfig.apiUrl,
+		headers: {
+			authorization: localStorage.access_token
+		}
 	});

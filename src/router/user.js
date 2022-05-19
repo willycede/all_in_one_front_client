@@ -27,11 +27,10 @@ const ContactUs = () => import('Views/Contact');
 const PrivacyPolicy = () => import('Views/PrivacyPolicy');
 const ForgotPassword = () => import('Views/Sessions/ForgotPassword');
 const ThankYou = () => import('Views/Sessions/ThankYou');
-const SignIn = () => import('Views/Sessions/SignIn');
 
 //all_in_one
 const Register = () => import('Views/all_in_one/client/register/Register');
-
+const Login = () => import('Views/all_in_one/client/login/Login');
 
 export default {
 	path: '/',
@@ -164,6 +163,11 @@ export default {
 			name:'Register'
 		},
 		{ 
+			path: '/client/login',  
+			component: Login, 
+			name:'Login'
+		},
+		{ 
 			path: '/session/forgot-password',  
 			component: ForgotPassword, 
 			name:'ForgotPassword'
@@ -173,10 +177,5 @@ export default {
 			component: ThankYou, 
 			name:'ThankYou'
 		},
-		{ 
-			path: '/session/signin',  
-			component: SignIn, 
-			name:'SignIn'
-		}
 	]
 }

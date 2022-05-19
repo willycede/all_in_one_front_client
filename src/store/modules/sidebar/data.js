@@ -203,7 +203,7 @@ export const menus = [
 				children_menus:[
 					{
 						name: 'message.signIn',
-						path: '/session/signin'
+						path: '/client/login'
 					},
 					{
 						name: 'message.register',

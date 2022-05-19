@@ -19,7 +19,7 @@
 								<v-btn class="accent mb-4 ma-0" large @click.stop.prevent="saveDetails">
 									Submit
 								</v-btn>
-								<p>If have an account then <router-link to="/session/signin" class="accent--text">Sign In
+								<p>If have an account then <router-link to="/client/login" class="accent--text">Sign In
 									</router-link>
 								</p>
 							</v-form>

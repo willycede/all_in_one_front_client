@@ -108,7 +108,7 @@ export default {
 			session:[
 				{
 					menuItem:"message.signIn",
-					path:"/session/signin"
+					path:"/client/login"
 				},
 				{
 					menuItem:"message.register",
