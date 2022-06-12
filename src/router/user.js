@@ -1,6 +1,5 @@
 import UserPanel from 'Container/UserPanel';
 
-const HomeV1 = () => import('Views/HomeV1');
 const HomeV2 = () => import('Views/HomeV2');
 const HomeV3 = () => import('Views/HomeV3');
 const Accessory = () => import('Views/Accesory');
@@ -31,15 +30,16 @@ const ThankYou = () => import('Views/Sessions/ThankYou');
 //all_in_one
 const Register = () => import('Views/all_in_one/client/register/Register');
 const Login = () => import('Views/all_in_one/client/login/Login');
+const MainPage = () => import('Views/all_in_one/client/mainPage/MainPage');
 
 export default {
 	path: '/',
 	component: UserPanel,
-	redirect:'/home',
+	redirect:'/mainPage',
 	children:[
 		{ 
-			path: '/home',
-			component: HomeV1 ,
+			path: '/mainPage',
+			component: MainPage ,
 			meta: {
 				header: 1
 			 }

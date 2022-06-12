@@ -80,7 +80,8 @@
                         localStorage.id_rol = res.data.data.id_rol;
                         localStorage.id_company_user = res.data.data.id_company_user;
                         localStorage.access_token = res.data.data.access_token;
-                        // this.$router.go('/client/login');
+                        this.$router.push({ path: '/mainPage' });
+                        // this.$router.go('/mainPage');
                     }).catch((err) => {
                         let defaultErrorMessage = err?.response?.data?.error?.message ? err?.response?.data?.error?.message :  'Ocurrio un error inesperado'; 
                         if (Object.keys(err?.response?.data?.error?.validationObject).length > 0) {

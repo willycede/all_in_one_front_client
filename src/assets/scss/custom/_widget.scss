@@ -76,7 +76,17 @@
 	}
 
 }
-//---------------------| Home Banner v2 |--------------------------//
+//---------------------| General Categories Banner |--------------------------//
+.bold-white {
+	color: white;
+	font-weight: 600;
+}
+.flex-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
 .home-banner-v3{
 	.slick-slider{
 		direction: ltr;
@@ -274,6 +284,9 @@
 	}
 	.w-100{
 		width: 100%;
+	}
+	& .fixed {
+		height: 420px;
 	}
 }
 .primary-rgba {
