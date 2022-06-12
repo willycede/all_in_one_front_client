@@ -13,8 +13,9 @@ import payment from './modules/payment';
 import blog from './modules/blog';
 import productDetail from './modules/productDetail';
 import categories from './modules/client/categories';
-import companies from './modules/client/companies'
-
+import companies from './modules/client/companies';
+import generalCategories from './modules/client/generalCategories';
+import products from './modules/client/products';
 Vue.use(Vuex);
 
 export const store = new Vuex.Store({
@@ -27,5 +28,7 @@ export const store = new Vuex.Store({
         productDetail,
         categories,
         companies,
+        generalCategories,
+        products,
     }
 })

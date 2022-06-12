@@ -4,55 +4,42 @@
 			<h2>Categorías</h2>
 		</div>
 		<div class="main">
-			<emb-companies-list></emb-companies-list>
+			<emb-general-categories-banner :data="homeBannerV3Data"></emb-general-categories-banner>
 			<emb-product-list
-				secTitle="Productos"
-				:data="latestArrivalData"
+				secTitle="Algunos de nuestros productos"
 			>
 			</emb-product-list>
 		</div>
 	</div>
 </template>
 <script>
+import homeBannerV3Data from "Assets/data/homeBannerV3Data";
 // widgets
 import ProductList from "../widgets/ProductList";
-import CompaniesList from "../widgets/CompaniesList";
+import GeneralCategoriesBanner from "../widgets/GeneralCategoriesBanner";
 
-// data
-import latestArrivalData from "Assets/data/latestArrivalData";
 
-import api from "Api";
 import { mapActions, mapGetters } from 'vuex';
 
 export default {
   components: {
     embProductList: ProductList,
-    embCompaniesList: CompaniesList,
+    embGeneralCategoriesBanner: GeneralCategoriesBanner,
   },
   data() {
     return {
-      latestArrivalData,
+      homeBannerV3Data,
     };
   },
   mounted() {
-    this.getBlogData();
   },
   methods: {
-	...mapActions(['getCompanies']),
-    getBlogData() {
-      api
-        .get("blogs.json")
-        .then(response => {
-          this.blogData = response.data;
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    }
+	...mapActions(['getCompanies', 'getRandomProducts']),
   },
-  computed: mapGetters(['companies']),
-  created() {
-    this.getCompanies();
+  computed: mapGetters(['companies', 'productList']),
+  async created() {
+    await this.getCompanies();
+    await this.getRandomProducts();
   }
 };
 </script>

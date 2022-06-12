@@ -4,31 +4,22 @@
 			<div class="sec-title">
 				<h2>{{secTitle}}</h2>
 			</div>
-			<div class="tab-bar-wrap  text-center">
-				<div v-for="(tab,key, index) in products" :key="key" class="tab-bar d-inline-block">
-					<v-btn class="d-inline-block" @click="onTabChange(index)" :text="index === selectedTab">{{key}}</v-btn>
-				</div>	
-			</div>
 			<div class="tab-content">
-				<template v-for="(tab,title, index) in products">
-					<div v-if="index == selectedTab" :key="index">
-						<slick ref="carousel" :options="slickOptions" :key="title">
-							<div
-								v-for="(cateogary,subindex) in products[title]"
-								:key="subindex"
-								class="tab-item"
-							>
+				<template>
+					<div>
+						<slick ref="carousel" :options="slickOptions" :key="productList">
+							<div class="tab-item"  v-for="(product, key) in productList" :key="key">
 								<div class="emb-card">
 									<div class="thumb-wrap">
-										<router-link :to="'/products/'+title+'/'+cateogary.objectID">
+										<router-link :to="'/products/'+product.name+'/'+product.id_products">
 											<img 
 												alt="feature product image"
-												:src="cateogary.image"
+												:src="product.images[0].url"
 												width="626"
 												height="800"
 											>
 										</router-link>
-										<div class="wishlist-icon">
+										<!-- <div class="wishlist-icon">
 											<v-btn v-if="ifItemExistInWishlist(cateogary)" @click="addItemToWishlist(cateogary)" icon >
 												<v-icon  class="black--text">favorite</v-icon>
 											</v-btn>
@@ -43,24 +34,15 @@
 											<v-btn v-else @click="addProductToCart(cateogary)" class="accent" icon >
 												<v-icon>shopping_cart</v-icon>
 											</v-btn>
-										</div>
+										</div> -->
 									</div>
 									<div class="emb-card-content pa-4">
-										<h5  class="font-weight-medium" v-text="cateogary.name"></h5>
+										<h5  class="font-weight-medium" v-text="product.name"></h5>
 										<div class="emb-meta-info layout align-center my-1">
 											<div class="inline-block">
 												<h6 class="accent--text font-weight-medium">
-													<emb-currency-sign></emb-currency-sign>{{cateogary.price}}
+													<emb-currency-sign></emb-currency-sign>{{product.price}}
 												</h6>
-											</div>
-											<div class="inline-block ">
-												<v-rating 
-													v-model="cateogary.rate"
-													readonly
-													background-color="grey"
-													color="#edb876"
-												>
-												</v-rating>
 											</div>
 										</div>
 									</div>
@@ -76,15 +58,21 @@
 
 <script>
 import Slick from "vue-slick";
-import { mapGetters } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 
 export default {
   props: ["secTitle"],
   computed: {
-    ...mapGetters(["rtlLayout", "cart", "wishlist", "products"])
+    ...mapGetters(["rtlLayout", "cart", "wishlist", "products", "productList"])
   },
   components: {
     Slick
+  },
+  mounted() {
+    console.log("MOUNTEDDDD")
+  },
+  async created() {
+    await this.getRandomProducts();
   },
   data() {
     return {
@@ -94,8 +82,8 @@ export default {
         autoplay: true,
         slidesToShow: 4,
         infinite: true,
-        arrows: false,
-        dots: true,
+        arrows: true,
+        dots: false,
         rtl: this.rtlLayout,
         responsive: [
           {
@@ -123,6 +111,7 @@ export default {
     };
   },
   methods: {
+    ...mapActions(['getRandomProducts']),
     changeSelectedProduct(cateogary) {
       this.$store.dispatch("changeSelectedProduct", cateogary);
     },
