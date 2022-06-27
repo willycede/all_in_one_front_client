@@ -9,7 +9,6 @@ const Payment = () => import('Views/Payment/Payment');
 const Cart = () => import('Views/Cart');
 const Checkout = () => import('Views/Checkout');
 const FinalReceipt = () => import('Views/FinalReceipt');
-const ProductDetail = () => import('Views/ProductDetail');
 const AboutUs = () => import('Views/AboutUs');
 const TermCondiition = () => import('Views/TermsAndCondition');
 const Faq = () => import('Views/Faq');
@@ -31,6 +30,7 @@ const ThankYou = () => import('Views/Sessions/ThankYou');
 const Register = () => import('Views/all_in_one/client/register/Register');
 const Login = () => import('Views/all_in_one/client/login/Login');
 const MainPage = () => import('Views/all_in_one/client/mainPage/MainPage');
+const ProductDetail = () => import('Views/all_in_one/client/productDetail/ProductDetail');
 
 export default {
 	path: '/',
@@ -66,11 +66,11 @@ export default {
 			path: '/gadget',
 			component: Gadget 
 		},
-		{			
-			path: '/products/:title',
-			component: Product,
-			name: 'Products'
-		},
+		// {			
+		// 	path: '/products/:title',
+		// 	component: Product,
+		// 	name: 'Products'
+		// },
 		{			
 			path: '/products',
 			component: Product,
@@ -89,7 +89,7 @@ export default {
 			component: Checkout  
 		},
 		{ 
-			path: '/products/:title/:id',
+			path: '/products/:id',
 			component: ProductDetail, 
 			name:'productDetail'
 		},

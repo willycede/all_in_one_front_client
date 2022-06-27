@@ -107,7 +107,6 @@ export default {
   },
   computed: mapGetters(['generalCategories']),
   mounted() {
-	
   },
   async created() {
     await this.getGeneralCategories();

@@ -159,7 +159,7 @@
 	}
 }
 .admin-panel-toolbar.v-toolbar{
-	box-shadow: -2px -42px 34px 21px #283593;
+	box-shadow: -2px -42px 34px 21px $primary;
 	z-index: 10;
 	.v-toolbar__content{
 		justify-content: space-between;
