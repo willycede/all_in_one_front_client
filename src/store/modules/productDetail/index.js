@@ -3,7 +3,6 @@ import api from 'Api'
 
 const state = {
    products,
-   selectedProduct: null
 }
 
 // getters
@@ -11,16 +10,10 @@ const getters = {
    products: state => {
       return state.products
    },
-   selectedProduct: state => {
-      return state.selectedProduct
-   }
 }
 
 // actions 
 const actions = {
-   changeSelectedProduct(context, payload) {
-      context.commit('selectProductHandler', payload);
-   },
    getProducts(context) {
       context.commit('getProductsHandler')
    }
@@ -39,9 +32,6 @@ const mutations = {
             console.log(error);
          });
    },
-   selectProductHandler(state, category) {
-      state.selectedProduct = category;
-   }
 }
 
 export default {

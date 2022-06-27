@@ -5,7 +5,7 @@
             <v-layout  align-center justify-space-between row ma-0>
                <div class="site-logo d-inline-block">
                   <router-link to="/">
-                     <img alt="site-logo" height="34" :src="appLogo" width="224">
+                     <img alt="site-logo" class="logo-small" height="34" :src="appLogo" width="224">
                   </router-link>
                </div>
                <div>

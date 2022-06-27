@@ -6,13 +6,9 @@
 					<div class="top-header">
 						<v-container>
 							<v-layout align-center justify-space-between>
-								<div class="options hidden-md-and-down d-md-inline-flex align-items-center">
-									<emb-lang></emb-lang>
-									<emb-currency></emb-currency>
-								</div>
 								<div class="site-logo d-inline-block">
 									<router-link to="/">
-										<img alt="site-logo" height="34" :src="appLogo" width="224">
+										<img class="logo-small" alt="site-logo" height="34" :src="appLogo">
 									</router-link>
 								</div>
 								<div class="notifications d-inline-flex align-items-center">
@@ -49,8 +45,6 @@
 
 <script>
 import Menu from './Menu';
-import Lang from './Lang'
-import Currency from './Currency'
 import Cart from './Cart'
 import Wishlist from './Wishlist'
 import UserBlock from './UserBlock'
@@ -87,8 +81,6 @@ export default {
 	},
 	components: {
 		embMenu: Menu,
-		embLang: Lang,
-		embCurrency: Currency,
 		embCart:Cart,
 		embWishlist: Wishlist,
 		embUserBlock:UserBlock,

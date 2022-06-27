@@ -11,14 +11,13 @@
 							<div class="tab-item"  v-for="(product, key) in productList" :key="key">
 								<div class="emb-card">
 									<div class="thumb-wrap">
-										<router-link :to="'/products/'+product.name+'/'+product.id_products">
 											<img 
 												alt="feature product image"
 												:src="product.images[0].url"
 												width="626"
 												height="800"
+                        @click="goToDetail(product)"
 											>
-										</router-link>
 										<!-- <div class="wishlist-icon">
 											<v-btn v-if="ifItemExistInWishlist(cateogary)" @click="addItemToWishlist(cateogary)" icon >
 												<v-icon  class="black--text">favorite</v-icon>
@@ -145,6 +144,10 @@ export default {
         }
       }
       return exists;
+    },
+    goToDetail(product) {
+       this.$store.dispatch("setSelectedProduct", product);
+       this.$router.push({ path: `/products/${product.id_products}` });
     },
     // this method is use to add a product in wishlist
     addItemToWishlist(item) {
