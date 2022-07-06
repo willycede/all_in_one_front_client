@@ -3,9 +3,8 @@
 	<div class="product-item-wrap emb-card">
 		<div>
 			<div class="thumb-warp" >
-				<router-link to="/product/product-detail">
-					<img alt="product" :src="data.image" >
-				</router-link>
+				
+				<img alt="product" :src="imageUrl" @click="goToDetail(data)">
 				<div class="wishlist-icon">
 					<v-btn v-if="ifItemExistInWishlist(data)" @click="addItemToWishlist(data)" icon >
 						<v-icon  class="black--text">favorite</v-icon>
@@ -29,11 +28,11 @@
 				</div>
 			</div>
 			<div class="emb-card-content pa-4">
-				<h5 class="font-weight-medium text-capitalize">{{data.name}}</h5>
+				<h5 class="font-weight-medium text-capitalize">{{name}}</h5>
 				<div class="emb-meta-info layout align-center justify-space-between">
 					<div class="inline-block">
 						<h6 class="accent--text">
-							<emb-currency-sign></emb-currency-sign>{{data.price}}
+							<emb-currency-sign></emb-currency-sign>{{price}}
 						</h6>
 					</div>
 					<div class="inline-block">
@@ -60,6 +59,19 @@ export default {
 	props: ['data','colxs','colsm','colmd','collg','colxl'],
 	computed: {
 	  ...mapGetters(["cart","wishlist"])
+	},
+	data(){
+		return {
+			name: '',
+			price: 0,
+			imageUrl: '',
+		}
+	},
+	mounted(){
+		console.log("dataaaa", this.data)
+		this.name = this.data.name;
+		this.price = this.data.price;
+		this.imageUrl = this.data.images[0].url;
 	},
 	methods: {
 		/**
@@ -120,6 +132,10 @@ export default {
 			}
 			return exists;
 		}, 
+		goToDetail(product) {
+			this.$store.dispatch("setSelectedProduct", product);
+			this.$router.push({ path: `/products/${product.id_products}` });
+		},
   	}
 };
 </script>

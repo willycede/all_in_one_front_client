@@ -8,7 +8,7 @@
                   <div class="emb-banner-content">
                      <div class="slider-content-v3-inner ma-auto">
 						<h3 class="bold-white">{{category.name}}</h3>
-						<v-btn color="accent mt-0" to="/products">Ver productos</v-btn>
+						<v-btn color="accent mt-0" @click="goToProducts(category.idgeneral_categories)">Ver productos</v-btn>
                      </div>
                 </div>
                </div>
@@ -104,6 +104,9 @@ export default {
   },
   methods: {
 	...mapActions(['getGeneralCategories']),
+   goToProducts(generalCategoryId){
+      this.$router.push({path: 'products', query: {generalCategoryId} });
+   }
   },
   computed: mapGetters(['generalCategories']),
   mounted() {

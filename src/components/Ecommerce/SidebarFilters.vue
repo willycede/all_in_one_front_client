@@ -1,30 +1,58 @@
 <template>
    <div class="sidebar-filter-wrap">
       <div class="search-box emb-card white mb-6 pa-6">
-         <ais-search-box placeholder="Search a product"></ais-search-box>
+         <v-text-field  v-model="searchBy" label="Buscar producto"></v-text-field>
       </div>
       <div class="cateogary-block emb-card white mb-6 pa-6">
-         <h5>CATEGORIES</h5>
-         <ais-refinement-list attribute="category" :limit="5"></ais-refinement-list>
-      </div>
-      <div class="emb-card mb-6 white pa-6">
-         <h5>COLORS</h5>
-         <ais-refinement-list attribute="colors" :limit="5"></ais-refinement-list>
-      </div>
-     <div class="emb-card white mb-6 pa-6">
-         <h5>PRICE</h5>
-         <ais-range-input attribute="price"></ais-range-input>
-      </div>
-      <div class="emb-card white mb-6 pa-6 rating-filter">
-         <h5>RATING</h5>
-         <ais-rating-menu attribute="rating"></ais-rating-menu>
+         <h5>CATEGORÍAS GENERALES</h5>
+         <v-radio-group v-model="selectedCategory">
+            <v-radio
+            v-for="(category, key, index) in generalCategories"
+            :key="index"
+            :label="category.name"
+            :value="category.idgeneral_categories"
+            ></v-radio>
+         </v-radio-group>
       </div>
       <div class="emb-card white pa-6">
-			<div class="ais-ClearRefinements">
-				<button class="v-btn v-btn--contained cpx-0 v-size--large font-weight-medium accent ais-ClearRefinements-button">
-				  Clear all filters
-				</button>
-			</div>
+         <button class="v-btn v-btn--contained">
+            Limpiar filtros
+         </button>
       </div>
    </div>
 </template>
+<script>
+import { mapActions, mapGetters } from 'vuex';
+export default {
+	data() {
+    return {
+      selectedCategory: undefined,
+      searchBy: '',
+	 }
+  },
+  watch: {
+    selectedCategory(newCategory) {
+      this.selectedFilterCategory(newCategory);
+    },
+    searchBy(newSearchBy) {
+      console.log("SEarhc", newSearchBy)
+    }
+  },
+  methods: {
+	...mapActions(['getGeneralCategories', 'getProductsByCategoryIdAndFilters']),
+   selectedFilterCategory(newCategory) {
+      this.getProductsByCategoryIdAndFilters(newCategory)
+   }
+  },
+  computed: mapGetters(['generalCategories']),
+  mounted() {
+   if(this.$route.query?.generalCategoryId) {
+      this.selectedCategory = parseInt(this.$route.query.generalCategoryId);
+   }
+  },
+  async created() {
+    await this.getGeneralCategories();
+  }
+}
+</script>
+,

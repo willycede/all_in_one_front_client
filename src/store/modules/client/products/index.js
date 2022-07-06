@@ -1,9 +1,10 @@
 import api from 'Api';
+import Vue from "vue";
 
-const state = {
+const state =  Vue.observable({
    productList: [],
    selectedProduct: {},
-}
+}); 
 
 
 // getters
@@ -21,7 +22,11 @@ const actions = {
    async getRandomProducts(context) {
         const products = await api.get('/api/products/get/randomProducts');
         context.commit('onGetRandomProducts', products?.data?.data);
-   
+   },
+   async getProductsByCategoryIdAndFilters(context, category_id, filters) 
+   {  console.log("", filters)
+      const products = await api.get(`/api/products/${category_id}`);
+      context.commit('onGetAllProducts', products?.data?.data);
    },
    setSelectedProduct(context, payload) {
       context.commit('selectProductHandler', payload);
@@ -38,14 +43,15 @@ const mutations = {
    onGetRandomProducts(state, products) {
         state.productList = products;
    },
+   onGetAllProducts(state, products) {
+      state.productList = products;
+ },
    selectProductHandler(state, product) {
       state.selectedProduct = product;
    },
    setSelectedProductById(state, productId) {
       const products = state.productList;
-      console.log(products, "prrr")
       const foundProduct = products.filter(product => parseInt(product.id_products) == parseInt(productId));
-      console.log(foundProduct, "Sdsdsds",parseInt(productId) )
       state.selectedProduct = foundProduct[0];
    },
 }
