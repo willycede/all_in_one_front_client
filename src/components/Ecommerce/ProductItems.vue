@@ -28,12 +28,12 @@ import { mapActions, mapGetters } from 'vuex';
 		mounted(){
 			if(this.$route.query?.generalCategoryId) {
 				this.generalCategoryId = this.$route.query.generalCategoryId;
-				this.getProductsByCategoryIdAndFilters(this.generalCategoryId);
+				this.getProductsByCategoryIdAndFilters({categoryId: this.generalCategoryId});
 			}
 		},
 		computed: mapGetters(['productList']),
 		async created() {
-			await this.getProductsByCategoryIdAndFilters(this.generalCategoryId);
+			await this.getProductsByCategoryIdAndFilters({categoryId:this.generalCategoryId});
 		}
 	};
 </script>

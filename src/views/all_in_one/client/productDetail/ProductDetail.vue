@@ -36,7 +36,7 @@
 								<h3>{{selectedProduct.name}}</h3>
 								<a href="javascript:void(0)" class="color-inherit text-underline mb-4 d-inline-block" @click="showReviewPopup">ADD A REVIEW</a>
 								<emb-review-popup ref="productReviewPopup"></emb-review-popup>
-								<h4 class="accent--text"><emb-currency-sign></emb-currency-sign>{{selectedProduct.price}}</h4>
+								<h4 class="accent--text">{{selectedProduct.price}}</h4>
 								<ul class="product-availablity list-unstyled pl-0 mb-4 mt-4">
 									<li>
 										<template v-if="selectedProduct.status === true">
@@ -100,7 +100,7 @@
 
 <script>
 import {mapGetters} from "vuex";
-
+import {moneyMask} from "../../../../helpers/helpers"
 export default {
 	computed: {
 		...mapGetters(["selectedProduct"]),
@@ -109,6 +109,7 @@ export default {
 		this.id = this.$route.params.id;
 		await this.$store.dispatch("setSelectedProductById", this.id);
 		this.selectedImage = this.selectedProduct?.images[0].url;
+		this.selectedProduct.price = moneyMask(this.selectedProduct.price);
 	},
 	watch: {
     "$route"(to) {

@@ -32,7 +32,7 @@
 				<div class="emb-meta-info layout align-center justify-space-between">
 					<div class="inline-block">
 						<h6 class="accent--text">
-							<emb-currency-sign></emb-currency-sign>{{price}}
+							{{price}}
 						</h6>
 					</div>
 					<div class="inline-block">
@@ -53,7 +53,7 @@
 
 <script>
 import { mapGetters } from "vuex";
-
+import { moneyMask } from "../../helpers/helpers"
 export default {
 
 	props: ['data','colxs','colsm','colmd','collg','colxl'],
@@ -68,9 +68,8 @@ export default {
 		}
 	},
 	mounted(){
-		console.log("dataaaa", this.data)
 		this.name = this.data.name;
-		this.price = this.data.price;
+		this.price = moneyMask(this.data.price);
 		this.imageUrl = this.data.images[0].url;
 	},
 	methods: {

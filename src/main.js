@@ -25,6 +25,8 @@ import GlobalComponents from './globalComponents'
 //router 
 import router from './router'
 
+import money from 'v-money'
+
 // all css files included
 import './lib/EmbryoCss'
 
@@ -40,6 +42,7 @@ Vue.use(VueMoment)
 Vue.use(InstantSearch)
 Vue.use(VueI18n)
 Vue.use(Snotify, options)
+Vue.use(money, {precision: 4})
 Vue.use(VueGoogleMaps, {
 	load: {
 		key: "AIzaSyDC6tKEbtRlB6B0HgrFEN9P6ztTSJ89xt8",

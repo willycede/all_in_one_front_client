@@ -35,13 +35,13 @@ export default {
       this.selectedFilterCategory(newCategory);
     },
     searchBy(newSearchBy) {
-      console.log("SEarhc", newSearchBy)
+       this.getProductsByCategoryIdAndFilters({categoryId: this.selectedCategory, searchBy: newSearchBy});
     }
   },
   methods: {
 	...mapActions(['getGeneralCategories', 'getProductsByCategoryIdAndFilters']),
    selectedFilterCategory(newCategory) {
-      this.getProductsByCategoryIdAndFilters(newCategory)
+      this.getProductsByCategoryIdAndFilters({categoryId: newCategory})
    }
   },
   computed: mapGetters(['generalCategories']),
