@@ -5,6 +5,7 @@ export const menus = [
       path: '',
       name: "Inicio",
 		icon: "home",
+      path: "/mainPage"
    },
    {
       path:'',
@@ -15,17 +16,17 @@ export const menus = [
 			{
 				name: "Accesorios",
 				children_menus:null,
-            path: "/products/men/102"
+            path: "/products?generalCategoryId=1"
 			},
 			{
 				name: "Seguros",
 				children_menus:null,
-            path: "/cart"
+            path: "/products?generalCategoryId=2"
 			},
 			{
 				name: "Rastreo",
 				children_menus:null,
-            path: "/checkout",
+            path: "/products?generalCategoryId=3",
 			},
       ]
    } 

@@ -7,7 +7,7 @@
 						<v-container>
 							<v-layout align-center justify-space-between>
 								<div class="site-logo d-inline-block">
-									<router-link to="/">
+									<router-link to="/mainPage">
 										<img class="logo-small" alt="site-logo" height="34" :src="appLogo">
 									</router-link>
 								</div>
@@ -31,7 +31,6 @@
 									<i class="material-icons">menu</i>
 								</v-btn>
 							</div>
-							<emb-search></emb-search>
 						</div>
 					</v-container>
 				</div>
@@ -48,7 +47,6 @@ import Menu from './Menu';
 import Cart from './Cart'
 import Wishlist from './Wishlist'
 import UserBlock from './UserBlock'
-import Search from './Search'
 import AppConfig from "Constants/AppConfig";
 
 export default {
@@ -84,7 +82,6 @@ export default {
 		embCart:Cart,
 		embWishlist: Wishlist,
 		embUserBlock:UserBlock,
-		embSearch:Search,
 	},
 	mounted() {
 		this.fixedHeader();

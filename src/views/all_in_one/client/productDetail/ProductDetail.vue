@@ -99,7 +99,7 @@
 </template>
 
 <script>
-import {mapGetters} from "vuex";
+import {mapActions, mapGetters} from "vuex";
 import {moneyMask} from "../../../../helpers/helpers"
 export default {
 	computed: {
@@ -107,9 +107,12 @@ export default {
 	},
 	async mounted() {
 		this.id = this.$route.params.id;
-		await this.$store.dispatch("setSelectedProductById", this.id);
-		this.selectedImage = this.selectedProduct?.images[0].url;
-		this.selectedProduct.price = moneyMask(this.selectedProduct.price);
+		await this.getProductsByCategoryIdAndFilters(this.id);
+		setTimeout(() => {
+			this.selectedImage = this.selectedProduct?.images[0].url;
+			this.selectedProduct.price = moneyMask(this.selectedProduct.price);
+		}, 200);
+	
 	},
 	watch: {
     "$route"(to) {
@@ -124,6 +127,7 @@ export default {
 		}
 	},
 	methods: {
+		...mapActions(['getProductsByCategoryIdAndFilters']),
 		/* for opening the popup **/
 		showReviewPopup() {
 			this.$refs.productReviewPopup.open();

@@ -1,5 +1,5 @@
 <template>
-	<div class="shop-content-wrap">
+	<div class="shop-content-wrap" v-if="!isLoading">
 		<v-layout row>
 				<v-flex xs12 sm12 md4 lg4 v-for="(product, key, index) in productList" :key="index">
 					<product-item :data="product"></product-item>
@@ -18,6 +18,7 @@ import { mapActions, mapGetters } from 'vuex';
 		},
 		data(){
 			return {
+				isLoading: false,
 				generalCategoryId: undefined,
 			}
 		},
@@ -25,15 +26,14 @@ import { mapActions, mapGetters } from 'vuex';
 		methods: {
 			...mapActions(['getProductsByCategoryIdAndFilters']),
 		},
-		mounted(){
+		async mounted(){
 			if(this.$route.query?.generalCategoryId) {
 				this.generalCategoryId = this.$route.query.generalCategoryId;
-				this.getProductsByCategoryIdAndFilters({categoryId: this.generalCategoryId});
 			}
+			await this.getProductsByCategoryIdAndFilters({categoryId: this.generalCategoryId});
+		},
+		updated(){
 		},
 		computed: mapGetters(['productList']),
-		async created() {
-			await this.getProductsByCategoryIdAndFilters({categoryId:this.generalCategoryId});
-		}
 	};
 </script>

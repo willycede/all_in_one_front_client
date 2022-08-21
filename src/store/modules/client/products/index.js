@@ -22,16 +22,13 @@ const getters = {
 const actions = {
    async getRandomProducts(context) {
         const products = await api.get('/api/products/get/randomProducts');
-        console.log("productssss",  products?.data?.data)
-        console.log("productssss",  products?.data?.data.length)
         if(products?.data?.data &&  products?.data?.data.length > 0) {
             products?.data?.data.forEach((product) => { product.price = moneyMask(product.price)});
         }
         context.commit('onGetRandomProducts', products?.data?.data);
    },
    async getProductsByCategoryIdAndFilters(context, data) 
-   {  console.log("Filtersss", data.searchBy)
-      console.log("category", data.categoryId)
+   {  
       const products = await api.get(`/api/products/${data.categoryId}`,{ params: {searchBy:  data.searchBy} });
       context.commit('onGetAllProducts', products?.data?.data);
    },
@@ -51,7 +48,11 @@ const mutations = {
         state.productList = products;
    },
    onGetAllProducts(state, products) {
-      state.productList = products;
+      state.productList = [];
+      setTimeout(() => {
+         state.productList = products;
+      }, 200);
+     
  },
    selectProductHandler(state, product) {
       state.selectedProduct = product;

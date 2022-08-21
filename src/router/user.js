@@ -74,6 +74,10 @@ export default {
 			path: '/products',
 			component: ProductWithFilters,
 		},
+		{			
+			path: '/products/category/:generalCategoryId',
+			component: ProductWithFilters,
+		},
 		{ 
 			path: '/checkout/payment',
 			component: Payment 
