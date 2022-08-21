@@ -4,7 +4,6 @@ const HomeV2 = () => import('Views/HomeV2');
 const HomeV3 = () => import('Views/HomeV3');
 const Accessory = () => import('Views/Accesory');
 const Gadget = () => import('Views/Gadget');
-const Product = () => import('Views/Product');
 const Payment = () => import('Views/Payment/Payment');
 const Cart = () => import('Views/Cart');
 const Checkout = () => import('Views/Checkout');
@@ -31,7 +30,7 @@ const Register = () => import('Views/all_in_one/client/register/Register');
 const Login = () => import('Views/all_in_one/client/login/Login');
 const MainPage = () => import('Views/all_in_one/client/mainPage/MainPage');
 const ProductDetail = () => import('Views/all_in_one/client/productDetail/ProductDetail');
-
+const ProductWithFilters = () => import('Views/all_in_one/client/products/ProductsWithFilters');
 export default {
 	path: '/',
 	component: UserPanel,
@@ -73,8 +72,11 @@ export default {
 		// },
 		{			
 			path: '/products',
-			component: Product,
-			name: 'Fashion'
+			component: ProductWithFilters,
+		},
+		{			
+			path: '/products/category/:generalCategoryId',
+			component: ProductWithFilters,
 		},
 		{ 
 			path: '/checkout/payment',

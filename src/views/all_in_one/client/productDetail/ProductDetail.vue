@@ -36,7 +36,7 @@
 								<h3>{{selectedProduct.name}}</h3>
 								<a href="javascript:void(0)" class="color-inherit text-underline mb-4 d-inline-block" @click="showReviewPopup">ADD A REVIEW</a>
 								<emb-review-popup ref="productReviewPopup"></emb-review-popup>
-								<h4 class="accent--text"><emb-currency-sign></emb-currency-sign>{{selectedProduct.price}}</h4>
+								<h4 class="accent--text">{{selectedProduct.price}}</h4>
 								<ul class="product-availablity list-unstyled pl-0 mb-4 mt-4">
 									<li>
 										<template v-if="selectedProduct.status === true">
@@ -99,16 +99,20 @@
 </template>
 
 <script>
-import {mapGetters} from "vuex";
-
+import {mapActions, mapGetters} from "vuex";
+import {moneyMask} from "../../../../helpers/helpers"
 export default {
 	computed: {
 		...mapGetters(["selectedProduct"]),
 	},
 	async mounted() {
 		this.id = this.$route.params.id;
-		await this.$store.dispatch("setSelectedProductById", this.id);
-		this.selectedImage = this.selectedProduct?.images[0].url;
+		await this.getProductsByCategoryIdAndFilters(this.id);
+		setTimeout(() => {
+			this.selectedImage = this.selectedProduct?.images[0].url;
+			this.selectedProduct.price = moneyMask(this.selectedProduct.price);
+		}, 200);
+	
 	},
 	watch: {
     "$route"(to) {
@@ -123,6 +127,7 @@ export default {
 		}
 	},
 	methods: {
+		...mapActions(['getProductsByCategoryIdAndFilters']),
 		/* for opening the popup **/
 		showReviewPopup() {
 			this.$refs.productReviewPopup.open();

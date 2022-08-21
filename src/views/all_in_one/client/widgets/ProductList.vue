@@ -40,7 +40,7 @@
 										<div class="emb-meta-info layout align-center my-1">
 											<div class="inline-block">
 												<h6 class="accent--text font-weight-medium">
-													<emb-currency-sign></emb-currency-sign>{{product.price}}
+													{{product.price}}
 												</h6>
 											</div>
 										</div>
@@ -58,7 +58,6 @@
 <script>
 import Slick from "vue-slick";
 import { mapActions, mapGetters } from "vuex";
-
 export default {
   props: ["secTitle"],
   computed: {
@@ -68,10 +67,10 @@ export default {
     Slick
   },
   mounted() {
-    console.log("MOUNTEDDDD")
   },
   async created() {
     await this.getRandomProducts();
+    console.log("moneymask", this.productList)
   },
   data() {
     return {

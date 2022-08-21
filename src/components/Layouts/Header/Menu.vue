@@ -6,7 +6,7 @@
 				<template v-if="menuItem.type === 'sub_menu'">
 					<ul  class="sub-menu" v-if="menuItem.children && menuItem.children.length > 0">
 						<li v-for="(subMenuItem , subMenuKey) in menuItem.children" :key="subMenuKey">
-							<router-link :to="subMenuItem.path" :class="[ subMenuItem.type === 'sub_menu' ? 'menu-item-has-children':'']">{{$t(subMenuItem.name)}}</router-link>
+							<a :class="[ subMenuItem.type === 'sub_menu' ? 'menu-item-has-children':'']" :href="subMenuItem.path">{{$t(subMenuItem.name)}}</a>
 							<ul class="sub-menu" v-if="subMenuItem.children_menus">
 								<li  v-for="(childrenItem , childrenKey) in subMenuItem.children_menus" :key="childrenKey">
 									<router-link :to="childrenItem.path" >{{$t(childrenItem.name)}}</router-link>
@@ -21,7 +21,7 @@
 							<a>{{$t(megaitemkey)}}</a>
 							<ul class="sub-menu">
 								<li v-for="(submega,submegakey) in megaitem" :key="submegakey">
-									<router-link :to="{name: 'Products', params: {title:$t(megaitemkey)}, query: {category: submega.path}}">{{$t(submega.name)}}</router-link>
+									<router-link :to="submega.path">{{$t(submega.name)}}</router-link>
 								</li>
 								
 							</ul>
