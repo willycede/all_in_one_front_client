@@ -18,13 +18,13 @@
 							<v-flex sm12 md12 lg12 xl12 pa-0>
 								<v-layout row wrap align-center class="ma-0">
 									<v-flex xs3 sm3 md3 lg3 xl3 pa-0>
-										<img :src="cart.image" width="60" height="70">
+										<img :src="cart.url" width="60" height="70">
 									</v-flex>
 									<v-flex xs9 sm9 md9 lg9 xl9 pa-0>
 										<div class="pl-1">
 											<h6 class="word-wrap-break">{{cart.name}}</h6>
 											<span>
-												<emb-currency-sign></emb-currency-sign>{{cart.price * cart.quantity}}
+												<emb-currency-sign></emb-currency-sign>{{cart.details_price * cart.details_quantity}}
 											</span>
 										</div>
 									</v-flex>
@@ -47,7 +47,7 @@
 					message="Are you sure you want to delete this product?" @onConfirm="onDeleteProductFromCart">
 				</emb-delete-confirmation>
 				<v-layout align-center pa-3>
-					<v-btn class="accent white--text" block to="/checkout">Checkout</v-btn>
+					<v-btn class="accent white--text" block to="/cart">Carrito</v-btn>
 				</v-layout>
 			</div>
 			<div v-else class="text-center white pa-6">
@@ -63,6 +63,7 @@
 <script>
 	import { mapGetters } from 'vuex';
 	import VuePerfectScrollbar from 'vue-perfect-scrollbar';
+	import api from 'Api';
 
 	export default {
 		components: {
@@ -75,6 +76,22 @@
 					maxScrollbarLength: 160
 				}
 			};
+		},
+		async mounted() {
+
+			const shopCart = await api.get(
+			"/api/shoppingcar/get_shop/" + localStorage.id_users
+			);
+
+			let carts = shopCart?.data?.data;
+
+			console.log(carts);
+
+			const shopCartDetails = await api.get('/api/shoppingcar/get_shopDetails/'+carts[0].id_shopping_car);
+			let cartDetail = shopCartDetails?.data?.data;
+
+			this.$store.dispatch("addSetToCart", cartDetail);
+
 		},
 		computed: {
 			...mapGetters(["cart", "selectedCurrency", "currencies"]),

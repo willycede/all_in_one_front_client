@@ -133,16 +133,37 @@ export default {
 		},
 		/* for adding product in car	**/
 		addProductToCart(item) {
-			console.log(item)
-			// this.$snotify.success('Product adding to the cart',{
-			// 	closeOnClick: false,
-			// 	pauseOnHover: false,
-			// 	timeout: 1000,
-			// 	showProgressBar:false,
-			// });
-			// setTimeout(() => {
-			// 	this.$store.dispatch("addProductToCart", item);
-			// }, 50);
+
+			var img = (item.images)[0].url;
+
+			let newProduct = {
+				load_init:false,
+				id_user:localStorage.id_users,
+				url:img,
+				id_details:0,
+				name:item.name,
+				id_shopping_car:0,
+				id_product:item.id_products,
+				details_quantity:item.quantity,
+				details_price:item.price,
+				details_discount:0.00,
+				details_subtotal:(item.quantity*item.price),
+				details_iva:(item.quantity*item.price)*0.12,
+				details_total:(item.quantity*item.price)+(item.quantity*item.price)*0.12,
+				status:1
+			};
+
+			this.$snotify.success('Producto agregado al carrito',{
+				closeOnClick: false,
+				pauseOnHover: false,
+				timeout: 1000,
+				showProgressBar:false,
+			});
+			
+			setTimeout(() => {
+				this.$store.dispatch("addProductToCart", newProduct);
+			}, 500);
+
 		},
 		/* check weather the product exist in cart
 			* retun the boolean 

@@ -118,14 +118,17 @@ export default {
      * method for adding item to cart
      */
     addProductToCart(newItem) {
+      
       this.$snotify.success("Product adding to the cart", {
         closeOnClick: false,
         pauseOnHover: false,
         timeout: 1000
       });
+
       setTimeout(() => {
         this.$store.dispatch("addProductToCart", newItem);
       }, 100);
+
     },
     /**
      * method for to change item

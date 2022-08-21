@@ -13,5 +13,8 @@ module.exports = {
 			},
 			extensions: ['*', '.js', '.vue', '.json']
 		}
-	}
+	},
+	/*devServer:{
+		proxy:'http://pay.payphonetodoesposible.com/'
+	}*/
 }

@@ -11,6 +11,7 @@ import CurrencySign from './components/Global/CurrencySign';
 import DeleteConfirmationDialog from './components/Global/DeleteConfirmationDialog';
 import GoogleMap from "./components/Global/GoogleMap";
 import PageTitle from './components/Global/PageTitle';
+import PageTitleShopping from './components/Global/PageTitleShopping';
 import ReviewPopup from './components/Global/ReviewPopup';
 import Sidebar from './components/Layouts/Sidebar/Sidebar';
 import SidebarPanel from './components/Global/SidebarPanel';
@@ -32,6 +33,7 @@ const GlobalComponents = {
       Vue.component('embDeleteConfirmation', DeleteConfirmationDialog);
       Vue.component('embGoogleMap', GoogleMap);
       Vue.component('embPageTitle', PageTitle);
+      Vue.component('embPageTitleShopping', PageTitleShopping);
       Vue.component('embReviewPopup', ReviewPopup);
       Vue.component('embSidebar', Sidebar);
       Vue.component('embSidebarPanel', SidebarPanel);
