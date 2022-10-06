@@ -1,7 +1,7 @@
 //=======================| App Configuration |========================//
 export default {
-	appLogo: '/static/images/logo.svg', 
-	appLogoDark: '/static/images/logo-dark.png',                         // App Logo,
+	appLogo: '/static/images/logo2.svg', 
+	appLogoDark: '/static/images/logo2.svg',                         // App Logo,
 	brand: 'Embryo',                                        		   // Brand Name
 	copyrightText: '© All Rights Reversed | Made With Love by IRON NETWORK for better Web',     // Copyright Text
 	//theme color
