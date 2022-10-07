@@ -1,6 +1,6 @@
 <template>
    <div class="profile-wrapper emb-card pa-4">
-      <h4>Profile Information</h4>
+      <h4>Información del perfil</h4>
       <div class="pt-4">
          <div class="proflie-field mb-4" v-for="(info,key) in profileData" :key="key">
             <label>{{info.key}} :</label>

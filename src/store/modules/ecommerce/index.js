@@ -11,8 +11,6 @@ import api from 'Api';
 const state = {
       cart,
       wishlist,
-      tax: 27.95,
-      shipping: 12.95,
       invoiceData: {
             products: [],
             orderId: '',
@@ -95,8 +93,7 @@ const mutations = {
       onAddProductToCart(state, payload) {
 
             let newProduct = {};
-            var shooping_details = {};
-           
+            var shooping_details = {};         
            
 
             if(payload.load_init){
@@ -122,12 +119,12 @@ const mutations = {
 
                         
                         var id_shopp_car =  ((shopcar.data.data).length > 0) ? shopcar.data.data[0].id_shopping_car : 0;
-                        console.log(id_shopp_car);
-
+                     
                         if(id_shopp_car > 0){
       
                               shooping_details = 
                               {
+                                    "id_user": payload.id_user,
                                     "id_details": payload.id_details,
                                     "id_shopping_car": id_shopp_car,
                                     "id_product": payload.id_product,
@@ -159,15 +156,14 @@ const mutations = {
       
                         } else {
       
-                              console.log("Por aca");
-      
       
                               var shoppcar = {
                                     "id_user": payload.id_user,
                                     "shopping_car_quantity": 0,
-                                    "shopping_car_subtotal": 300,
-                                    "shopping_car_iva": 14.30,
-                                    "shopping_car_total": 400,
+                                    "shopping_car_subtotal": 0,
+                                    "shopping_car_total_discount":0,
+                                    "shopping_car_iva": 0,
+                                    "shopping_car_total": 0,
                                     "status": 1
                               }
       
@@ -177,6 +173,7 @@ const mutations = {
       
                                     shooping_details = 
                                     {
+                                          "id_user": payload.id_user,
                                           "id_details": payload.id_details,
                                           "id_shopping_car": id_shopp,
                                           "id_product": payload.id_product,
@@ -207,14 +204,9 @@ const mutations = {
             
                                     });
       
-                                    console.log(shooping_details);
-      
-                              });
-      
-                             
+                              });                             
                               
                         }
-
 
                   });
 
@@ -329,6 +321,8 @@ async function RegisShoppingCarDetails(shooping_details) {
 }
 
 async function getShoppCarByUser(id_user) {
+      debugger
+      console.log(id_user);
       return await api.get('/api/shoppingcar/get_shop/'+id_user);
 }
 

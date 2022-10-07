@@ -158,12 +158,25 @@
               </div>
             </v-flex>
           </v-layout>
+          <emb-confirmation-component
+            ref="confirmationDialog"
+            message="Por favor confirmar orden"
+            @onConfirm="onRegisterShop"
+          >
+          </emb-confirmation-component>
           <emb-delete-confirmation
             ref="deleteConfirmationDialog"
             message="Are you sure you want to delete this product?"
             @onConfirm="onDeleteProductFromCart"
           >
           </emb-delete-confirmation>
+
+          <emb-load-component
+            ref="loadComponent"
+            message="Registrando Orden.."
+          >
+          </emb-load-component>
+
         </div>
       </v-container>
     </div>
@@ -171,15 +184,14 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
-import axios from 'axios';
-import emailjs from '@emailjs/browser';
+import emailjs from "@emailjs/browser";
 import api from "Api";
-import AppConfig from '../constants/AppConfig';
+import AppConfig from "../constants/AppConfig";
+import HtmlElement from "../constants/HtmlBodyMail";
 
 export default {
   data() {
     return {
-      //cart: [],
       selectDeletedProduct: null,
       total: null,
       headers: [
@@ -197,20 +209,27 @@ export default {
     };
   },
   async mounted() {
+    this.tax = 0;
+    this.shipping = 0;
 
 
+    /* Cobtenemos la orden activa del usuario para mostrar en la lista */
     const shopCart = await api.get(
       "/api/shoppingcar/get_shop/" + localStorage.id_users
     );
 
-    let cartsshop = ((shopCart.data.data).length > 0) ? (shopCart.data.data)[0].id_shopping_car :0 ;
+    /* Guardamos sesion de id shopp */
+    localStorage.setItem('id_orden',shopCart.data.data[0].id_shopping_car)
 
+    let cartsshop =
+      shopCart.data.data.length > 0 ? shopCart.data.data[0].id_shopping_car : 0;
+
+   /* obtenemos todos los detalle del shopp activo */
     const shopCartDetails = await api.get(
       "/api/shoppingcar/get_shopDetails/" + cartsshop
     );
 
     this.cart = shopCartDetails;
-
   },
   computed: {
     ...mapGetters(["cart", "tax", "shipping"]),
@@ -218,6 +237,7 @@ export default {
     window: () => window,
     itemTotal() {
       let productTotal = null;
+
       if (this.cart.length > 0) {
         for (const item of this.cart) {
           productTotal += item.details_price * item.details_quantity;
@@ -227,12 +247,31 @@ export default {
         return productTotal.toFixed(2);
       }
     },
-    getTotalPrice() {
-      let totalPrice = this.tax + this.shipping;
+    shipping() {
+      return (0.0).toFixed(2);
+    },
+    tax() {
+      let tax = null;
+
       if (this.cart.length > 0) {
         for (const item of this.cart) {
-          totalPrice += item.details_price * item.details_quantity;
+          tax += item.details_price * item.details_quantity * 0.12;
         }
+        return tax.toFixed(2);
+      } else {
+        return tax.toFixed(2);
+      }
+    },
+    getTotalPrice() {
+      let totalPrice = 0;
+
+      let subtotal = parseFloat(this.itemTotal);
+      let descuento = parseFloat(this.shipping);
+      let impuesto = parseFloat(this.tax);
+
+      if (this.cart.length > 0) {
+        totalPrice += subtotal - descuento + impuesto;
+
         return totalPrice.toFixed(2);
       } else {
         return totalPrice.toFixed(2);
@@ -243,96 +282,116 @@ export default {
     formatNumber(num) {
       return parseFloat(num).toFixed(2);
     },
-    async registraConfirmaShop() {
 
+    registraConfirmaShop() {
+      this.$refs.confirmationDialog.openDialog();
+    },
 
-      const arr_pay = {
-        'amount':5060,
-        'tax':600,
-        'amountWithTax':5000,
-        'currency':'USD',
-        'clientTransactionId':'1@14563',
-        'reference':'PAGO ORDEN DE PAGO #'
+    async onRegisterShop() {
+      try {
+
+        /*Creramos variables de los totales de pago de la orden para crear arreglo payphone */
+        let subtotal = parseInt(parseFloat(this.itemTotal) * 100);
+        let impuesto = parseInt(parseFloat(this.tax) * 100);
+        let total = parseInt(parseFloat(this.getTotalPrice) * 100);
+
+        this.$refs.confirmationDialog.close();
+        this.$refs.loadComponent.openDialog();
+
+        const arr_pay = {
+          amount: total,
+          tax: impuesto,
+          amountWithTax: subtotal,
+          service: 0,
+          tip: 0,
+          currency: "USD",
+          clientTransactionId: "1@14563",
+          reference: "PAGO ORDEN DE PAGO #" + localStorage.id_orden,
+          oneTime: false,
+          expireIn: 0,
+        };
+
+        let detallefinal = "";
+
+        /*Recorremos detalle para crear plantilla del detalle para modelo de correo */
+
+        for (const item of this.cart) {
+          let totaldetalle = item.details_quantity * item.details_price;
+
+          detallefinal += HtmlElement.htmldetalle
+            .replace("@nombre", item.name)
+            .replace("@cantidad", item.details_quantity)
+            .replace("@totaldetalle", "$ " + totaldetalle);
+        }
+
+        /*fin recorrido*/
+
+        /*Ejecutamos api que genera link de pago payphone */
+        const urlPayphone = await api.post(
+          "/api/shoppingcar/payphone",
+          arr_pay
+        );
+
+        /*validamos si el link de pago se genero correctamente */
+        if (urlPayphone.data.errorCode === 200) {
+          /*Remplazamos las variables del formato html para envio de correo */
+          let html = HtmlElement.html_body
+            .replace("@url_payphone", urlPayphone.data.url)
+            .replace("@detalle", detallefinal)
+            .replace(
+              "@fecha",
+              new Date().toLocaleDateString() +
+                " " +
+                new Date().toLocaleTimeString()
+            )
+            .replace("@numeroorden", localStorage.id_orden)
+            .replace("@totalcantidad", this.cart.length)
+            .replace("@subtotal", subtotal / 100)
+            .replace("@impuesto", impuesto / 100)
+            .replaceAll("@total", total / 100);
+
+          /*Arreglo de elementos para envio de correo Jmail */
+          const ElementBodyMailModel = {
+            from_name: "ALL IN ONE",
+            email_to: localStorage.email,
+            orden_ped: localStorage.id_orden,
+            html: html,
+          };
+
+          /* Proceso de emision de correo electronico*/
+
+          emailjs
+            .send(
+              AppConfig.YOUR_SERVICE_ID,
+              AppConfig.YOUR_TEMPLATE_ID,
+              ElementBodyMailModel,
+              AppConfig.YOUR_PUBLIC_KEY
+            )
+            .then(
+              (result) => {
+               this.$refs.loadComponent.close();
+                console.log("SUCCESS!", result.text);
+              },
+              (error) => {
+               this.$refs.loadComponent.close();
+                console.log("FAILED...", error.text);
+              }
+            );
+        } else {
+          console.log(urlPayphone.data);
+        }
+      } catch (e) {
+        console.log(e);
+        this.$refs.loadComponent.close();
       }
-
-      const payload = JSON.stringify(arr_pay);
-      /*
-      axios.defaults.headers.common = {
-          //'Access-Control-Allow-Origin': '*',
-          "Content-Type": 'application/json',
-          "Authorization": 'Bearer ' + AppConfig.TOKEN_PAYPHONE
-      };*/
-     
-      //axios.defaults.crossDomain = true;
-
-      var config = {
-        method: 'post',
-        url: 'https://pay.payphonetodoesposible.com/api/Links',
-        headers: { 
-          "Authorization": 'Bearer ' + AppConfig.TOKEN_PAYPHONE,
-          'Content-Type': 'application/json'//, 
-          //'Cookie': 'ARRAffinity=3616f83a67001ded82ad968765451192706e5d85a8a318ef9103ad4b134204a0; ARRAffinitySameSite=3616f83a67001ded82ad968765451192706e5d85a8a318ef9103ad4b134204a0'
-        },
-        data : payload
-      };
-
-      axios(config)
-      .then(function (response) {
-        console.log(JSON.stringify(response.data));
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-
-
-      /*
-      axios.post('https://pay.payphonetodoesposible.com/api/Links',arr_pay,{
-        headers: {
-           "Access-Control-Allow-Origin": "*",
-           "Authorization": 'Bearer ' + AppConfig.TOKEN_PAYPHONE
-         }
-      }).then(response =>{
-        console.log(response)
-      })
-      .catch(() => {
-        console.log('dassadasdasdasdasd');
-      })
-      */
-     
-      //let response = await axios.post(AppConfig.URL_API_PAYPHONE,{payload});
-
-      
-
-
-        //console.log(response);
-        
-
-      const cod = {
-        "from_name":"PRuebas",
-        "email_to":localStorage.email,
-        "orden_ped":"8",
-        "html": "<div style='margin-bottom: 5px;'> <label><strong>Estimad@ </strong> </label> Jonathan Eduardo Mayorga, agradecemos su compra a continuacion encontrara el link para realizar el pago</div> "+
-        "</br> "+
-            "<div style='margin-bottom: 5px;'> <label><strong>IVA 12% : </strong> </label>$ 84.72</div> "+
-            "<div style='margin-bottom: 25px;'> <label><strong>Total a Pagar :</strong> </label>$ 790.72</div> "+
-            "<a style='padding: 10px;background: #007239;  color: #FFF;  text-decoration: none;   cursor: pointer;   border-radius: 5px;' href='https://ppls.me/QyjPcdoknbocBq8IpdZXxw'>PAGAR</a>"
-      }
-
-      emailjs.send(AppConfig.YOUR_SERVICE_ID, AppConfig.YOUR_TEMPLATE_ID, cod, AppConfig.YOUR_PUBLIC_KEY)
-      .then((result) => {
-          console.log('SUCCESS!', result.text);
-      }, (error) => {
-          console.log('FAILED...', error.text);
-      });
-
     },
     deleteProductFromCart(product) {
-      console.log(product);
 
       this.$refs.deleteConfirmationDialog.openDialog();
       this.selectDeletedProduct = product;
     },
     onDeleteProductFromCart() {
+
       this.$refs.deleteConfirmationDialog.close();
       this.$snotify.error("Product Removing from cart", {
         closeOnClick: false,
@@ -344,14 +403,8 @@ export default {
         this.selectDeletedProduct
       );
     },
+
   },
-
-  /*mounted: function () {
-        
-      const shopCart = await api.get('/api/shoppingcar/get_shop/1');
-      console.log(shopCart);
-
-   }*/
 };
 </script>
 

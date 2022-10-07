@@ -9,8 +9,8 @@
 								<img src="/static/images/user-3.jpg" width="70" alt="Active User">
 							</div>
 							<div class="px-4">
-								<h4>Hi, Alex Doe</h4>
-								<div class="text-muted text-xl">alexdoe@deo.com</div>
+								<h4>Hi, {{nombre_usuario}}</h4>
+								<div class="text-muted text-xl">{{correo}}</div>
 							</div>
 						</div>
 						<v-layout row wrap fill-height profile-list>
@@ -50,11 +50,16 @@
 <script>
 export default {
 	data(){
+
+
+
+console.log(localStorage);
+
 		return{
 			settings:{
 				orderHistory:[
 					{
-						title:"Order History",
+						title:"Historial ",
 						icon:"history",
 						path:"/account/order-history",
 						id:"orderHistory"
@@ -62,7 +67,7 @@ export default {
 				],
 				profile:[
 					{
-						title:"Profile",
+						title:"Perfil",
 						icon:"account_circle",
 						path:"/account/profile",
 						id:"profile"
@@ -70,12 +75,12 @@ export default {
 				],
 				address:[
 					{
-						title:"Addresses",
+						title:"Direcciones",
 						icon:"location_on",
 						path:"/account/address",
 						id:"addresses"
 					}
-				],
+				]/*,
 				cards:[
 					{
 						title:"Saved Cards",
@@ -83,9 +88,11 @@ export default {
 						path:"/account/cards",
 						id:"cards"
 					},
-				]
+				]*/
 			},
 			selectedTab: 0,
+			nombre_usuario:localStorage.name_user + ' '+ localStorage.last_name_user,
+			correo:localStorage.email
 		}
 	},
 	methods:{

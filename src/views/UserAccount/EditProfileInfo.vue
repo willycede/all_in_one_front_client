@@ -1,7 +1,7 @@
 <template>
    <div class="editInfo-wrap emb-card pa-4">
       <div class="">
-         <h4>Edit Profile Information</h4>
+         <h4>Edit Información del perfil</h4>
          <v-form ref="form" v-model="valid" class="mb-2">
             <v-layout row wrap>
                <v-flex xs12 sm12 md12 lg6 xl6>

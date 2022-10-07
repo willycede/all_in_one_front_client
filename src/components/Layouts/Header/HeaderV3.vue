@@ -82,22 +82,17 @@ export default {
 			userLinks: [
 				{
 					icon:'account_circle',
-					title: 'User Profile',
+					title: 'Perfil',
 					path:"/account/profile"
 				},
 				{
-					icon:'settings',
-					title:'Account',
-					path:"/account/profile"
-				},
-				{
-					icon:'local_post_office',
-					title:'Messages',
-					path:"/account/profile"
+					icon:'history',
+					title:'Historial',
+					path:"/account/order-history"
 				},
 				{	
 					icon:'power_settings_new',
-					title: 'LogOut',
+					title: 'Salir',
 					path:"/client/login"
 				}
 			],

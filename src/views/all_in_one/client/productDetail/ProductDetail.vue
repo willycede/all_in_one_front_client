@@ -140,6 +140,7 @@ export default {
 		addProductToCart(item) {
 
 			var img = (item.images)[0].url;
+			let price = parseFloat((item.price).replace('$',''));
 
 			let newProduct = {
 				load_init:false,
@@ -150,11 +151,11 @@ export default {
 				id_shopping_car:0,
 				id_product:item.id_products,
 				details_quantity:item.quantity,
-				details_price:item.price,
+				details_price:price,
 				details_discount:0.00,
-				details_subtotal:(item.quantity*item.price),
-				details_iva:(item.quantity*item.price)*0.12,
-				details_total:(item.quantity*item.price)+(item.quantity*item.price)*0.12,
+				details_subtotal:(item.quantity*price),
+				details_iva:(item.quantity*price)*0.12,
+				details_total:(item.quantity*price)+(item.quantity*price)*0.12,
 				status:1
 			};
 

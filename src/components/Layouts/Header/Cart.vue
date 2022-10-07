@@ -79,6 +79,7 @@
 		},
 		async mounted() {
 
+
 			const shopCart = await api.get(
 			"/api/shoppingcar/get_shop/" + localStorage.id_users
 			);
