@@ -3,12 +3,15 @@
 		<v-menu transition="scale-transition" class="cart" min-width="300" max-width="300" offset-y light>
 			<template v-slot:activator="{ on }">
 				<v-btn class="cart-btn" fab dark small color="accent" v-on="on">
-					<v-badge right large color="accent">
-						<template v-if="cart.length > 0">
+					<v-badge v-if="cart.length > 0" right large color="accent">
+						<template >
 							<span slot="badge">{{cart.length}}</span>
 						</template>
 						<v-icon dark>shopping_cart</v-icon>
 					</v-badge>
+
+					<v-icon dark v-if="cart.length == 0" >shopping_cart</v-icon>
+
 				</v-btn>
 			</template>
 			<div v-if="cart && cart.length > 0" class="cart-menu-list white">
@@ -85,8 +88,6 @@
 			);
 
 			let carts = shopCart?.data?.data;
-
-			console.log(carts);
 
 			const shopCartDetails = await api.get('/api/shoppingcar/get_shopDetails/'+carts[0].id_shopping_car);
 			let cartDetail = shopCartDetails?.data?.data;

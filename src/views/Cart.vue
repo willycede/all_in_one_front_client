@@ -189,6 +189,7 @@ import api from "Api";
 import AppConfig from "../constants/AppConfig";
 import HtmlElement from "../constants/HtmlBodyMail";
 
+
 export default {
   data() {
     return {
@@ -255,7 +256,7 @@ export default {
 
       if (this.cart.length > 0) {
         for (const item of this.cart) {
-          tax += item.details_price * item.details_quantity * 0.12;
+          tax += item.details_price * item.details_quantity * AppConfig.porcentajeIVa;
         }
         return tax.toFixed(2);
       } else {
@@ -290,10 +291,11 @@ export default {
     async onRegisterShop() {
       try {
 
+
         /*Creramos variables de los totales de pago de la orden para crear arreglo payphone */
         let subtotal = parseInt(parseFloat(this.itemTotal) * 100);
         let impuesto = parseInt(parseFloat(this.tax) * 100);
-        let total = parseInt(parseFloat(this.getTotalPrice) * 100);
+        let total = parseInt(parseFloat(this.getTotalPrice * 100).toFixed(2));
 
         this.$refs.confirmationDialog.close();
         this.$refs.loadComponent.openDialog();
@@ -305,7 +307,7 @@ export default {
           service: 0,
           tip: 0,
           currency: "USD",
-          clientTransactionId: "1@14563",
+          clientTransactionId: localStorage.id_orden+"@14563",
           reference: "PAGO ORDEN DE PAGO #" + localStorage.id_orden,
           oneTime: false,
           expireIn: 0,
@@ -369,8 +371,20 @@ export default {
             )
             .then(
               (result) => {
-               this.$refs.loadComponent.close();
-                console.log("SUCCESS!", result.text);
+
+                console.log("SUCCESS...", result);
+                this.$refs.loadComponent.close();
+
+                const upd_shop = {
+                  url_payphone: urlPayphone.data.url,
+                  status: 2,
+                  id_shopping_car: localStorage.id_orden
+                };
+
+                let status = this.updateShoppingPay(upd_shop);
+                console.log(status);
+                  
+               
               },
               (error) => {
                this.$refs.loadComponent.close();
@@ -403,6 +417,14 @@ export default {
         this.selectDeletedProduct
       );
     },
+    async updateShoppingPay(pay){
+
+      return await api.post(
+        "/api/shoppingcar/pay_shop",
+        pay
+      );
+
+    }
 
   },
 };

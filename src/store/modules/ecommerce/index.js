@@ -86,11 +86,14 @@ const actions = {
 
 // mutations
 const mutations = {
+
       onSetToCart(state, payload) {
             state.cart = payload
       },
 
       onAddProductToCart(state, payload) {
+
+            debugger
 
             let newProduct = {};
             var shooping_details = {};         
@@ -160,10 +163,10 @@ const mutations = {
                               var shoppcar = {
                                     "id_user": payload.id_user,
                                     "shopping_car_quantity": 0,
-                                    "shopping_car_subtotal": 0,
-                                    "shopping_car_total_discount":0,
-                                    "shopping_car_iva": 0,
-                                    "shopping_car_total": 0,
+                                    "shopping_car_subtotal":  payload.details_subtotal,
+                                    "shopping_car_total_discount":payload.details_discount,
+                                    "shopping_car_iva": payload.details_iva,
+                                    "shopping_car_total": payload.details_total,
                                     "status": 1
                               }
       
@@ -321,8 +324,6 @@ async function RegisShoppingCarDetails(shooping_details) {
 }
 
 async function getShoppCarByUser(id_user) {
-      debugger
-      console.log(id_user);
       return await api.get('/api/shoppingcar/get_shop/'+id_user);
 }
 

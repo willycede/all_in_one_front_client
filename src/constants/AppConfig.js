@@ -5,6 +5,7 @@ export default {
 	brand: 'Embryo',                                        		   // Brand Name
 	copyrightText: '© All Rights Reversed | Made With Love by IRON NETWORK for better Web',     // Copyright Text
 	//theme color
+	porcentajeIVa:0.12,
 	color: {
       primary: '#0000A0',
       accent : '#00FFFF',

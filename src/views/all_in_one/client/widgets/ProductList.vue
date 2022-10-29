@@ -118,7 +118,7 @@ export default {
      */
     addProductToCart(newItem) {
       
-      this.$snotify.success("Product adding to the cart", {
+      this.$snotify.success("ahora Product adding to the cart", {
         closeOnClick: false,
         pauseOnHover: false,
         timeout: 1000
