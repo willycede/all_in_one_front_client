@@ -40,6 +40,11 @@ const actions = {
       context.commit('onGetRandomProducts', products?.data?.data);
       context.commit('setSelectedProductById', payload);
    },
+   
+   /*async getRandomProducts(context) {
+      const products = await api.get('/api/products/get/randomProducts');
+      context.commit('onGetRandomProducts', products?.data?.data); 
+   },*/
 }
 
 // mutations

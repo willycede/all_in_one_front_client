@@ -1,28 +1,5 @@
 // this  data is used for cart content
-export const cart = [
-   {
-      "availablity": true,
-      "brand": "Liod Marcos",
-      "category": "Laptop",
-      "category_type": "accessories",
-      "color": "Black",
-      "description": "Adipisicing elit. Distinctio aperiam debitis ipsa veniam eos quas excepturi quae? Recusandae distinctio nihil quia quis, eaque aspernatur perferendis repudiandae adipisci labore, impedit beatae! Lorem ipsum dolor sit amet consectetur",
-      "discount_price": 88.0,
-      "features": ["Dell/Mac/Acer Laptop Bag", "Pure Leather", "20 Kg Capacity"],
-      "id": 116,
-      "image": "/static/images/accessroies/a-1-a.jpg",
-      "image_gallery": ["/static/images/accessroies/a-1-a.jpg", "/static/images/accessroies/a-1-b.jpg", "/static/images/accessroies/a-1-c.jpg", "/static/images/accessroies/a-1-d.jpg"],
-      "name": "Laptop Backpack",
-      "popular": true,
-      "price": 92.75,
-      "product_code": "#EM1215",
-      "quantity": 1,
-      "rating": 4,
-      "status": 0,
-      "tags": ["Black", "Laptop", "Bags"],
-      "type": "accessories"
-   }
-]
+export const cart = []
 
 // this data is used for wishlist 
 export const wishlist = [

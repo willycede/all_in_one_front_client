@@ -54,6 +54,7 @@
 <script>
 import { mapGetters } from "vuex";
 import { moneyMask } from "../../helpers/helpers"
+import AppConfig from "Constants/AppConfig";
 export default {
 
 	props: ['data','colxs','colsm','colmd','collg','colxl'],
@@ -77,7 +78,58 @@ export default {
 		 * method for adding item to cart
 		*/
 		addProductToCart(item) {
-			this.$snotify.success('Product adding to the cart',{
+
+
+			var img = (item.images)[0].url;
+			let price = parseFloat((item.price).replace('$',''));
+
+			let quantity = (typeof(item.quantity) !== 'undefined' && item.quantity !== null) ? item.quantity : 1;
+
+
+			if(typeof(localStorage.id_users) !== 'undefined' && localStorage.id_users !== null) {
+
+				let newProduct = {
+					load_init:false,
+					id_user:localStorage.id_users,
+					url:img,
+					id_details:0,
+					name:item.name,
+					id_shopping_car:0,
+					id_product:item.id_products,
+					details_quantity:quantity,
+					details_price:price,
+					details_discount:0.00,
+					details_subtotal:(quantity*price),
+					details_iva:(quantity*price)*AppConfig.porcentajeIVa,
+					details_total:(quantity*price)+(quantity*price)*AppConfig.porcentajeIVa,
+					status:1
+				};
+
+				this.$snotify.success('Producto agregado al carrito',{
+					closeOnClick: false,
+					pauseOnHover: false,
+					timeout: 1000,
+					showProgressBar:false,
+				});
+
+				setTimeout(() => {
+					this.$store.dispatch("addProductToCart", newProduct);
+				}, 500);
+
+			}else{
+
+				this.$snotify.success('Se requiere inicio de sesion para poder agregar productos al carrito.',{
+					closeOnClick: false,
+					pauseOnHover: false,
+					timeout: 4000,
+					showProgressBar:false,
+				});
+
+			}
+
+
+
+			/*this.$snotify.success('ahora Product adding to the cart',{
 				closeOnClick: false,
 				pauseOnHover: false,
 				timeout: 1000,
@@ -85,7 +137,7 @@ export default {
 			});
 			setTimeout(() => {
 				this.$store.dispatch("addProductToCart", item);
-			}, 500);
+			}, 500);*/
 		},
 		/**
 		 * method for checking if item exists in cart

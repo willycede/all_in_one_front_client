@@ -516,6 +516,23 @@
 		font-size: 1.28rem;
 	}
 }
+
+.page-title-bar-car {
+	padding: $page-title-padding-car;
+	text-align: center;
+	background-image: $page-title-bg-image-car;
+	background-size: cover;
+	background-position: center center;
+	background-repeat: no-repeat;
+	color:$base;
+	h1{
+		color: $base;
+	}
+	p{
+		font-size: 1.28rem;
+	}
+}
+
 //-----------------| Social Share |------------------//
 .social-icons{
 	.v-btn{

@@ -1,6 +1,6 @@
 <template>
    <div class="order-history-wrap emb-card pa-4">
-      <h4 class="mb-4">Order History</h4>
+      <h4 class="mb-4">Historial</h4>
       <v-data-table 
          :headers="headers"
 			:items="tableData"
