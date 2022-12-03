@@ -120,8 +120,11 @@
                             timeout: 2000,
                             showProgressBar:false,
                         });
-                        this.$router.go('/session/signin');
+                        setTimeout(() => {
+                            this.$router.push({ path: '/client/login' });
+                        }, 300);
                     }).catch((err) => {
+                          console.log("errr", err)
                         let defaultErrorMessage = err?.response?.data?.error?.message ? err?.response?.data?.error?.message :  'Ocurrio un error inesperado'; 
                         if (Object.keys(err?.response?.data?.error?.validationObject).length > 0) {
                             this.$snotify.error(err.response.data.error.validationObject.identification_number, {
