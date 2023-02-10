@@ -5,12 +5,8 @@
 				<div class="account-info">
 					<div class="container grid-list-xl">
 						<div class="layout justify-start mt-0 mb-4 mx-0">
-							<div class="login-user-img">
-								<img src="/static/images/user-3.jpg" width="70" alt="Active User">
-							</div>
 							<div class="px-4">
-								<h4>Hi, {{nombre_usuario}}</h4>
-								<div class="text-muted text-xl">{{correo}}</div>
+								<h4>Hola, {{nombre_usuario}}</h4>
 							</div>
 						</div>
 						<v-layout row wrap fill-height profile-list>
@@ -50,11 +46,6 @@
 <script>
 export default {
 	data(){
-
-
-
-console.log(localStorage);
-
 		return{
 			settings:{
 				orderHistory:[
@@ -73,27 +64,12 @@ console.log(localStorage);
 						id:"profile"
 					},
 				],
-				address:[
-					{
-						title:"Direcciones",
-						icon:"location_on",
-						path:"/account/address",
-						id:"addresses"
-					}
-				]/*,
-				cards:[
-					{
-						title:"Saved Cards",
-						icon:"credit_card",
-						path:"/account/cards",
-						id:"cards"
-					},
-				]*/
 			},
 			selectedTab: 0,
 			nombre_usuario:localStorage.name_user + ' '+ localStorage.last_name_user,
-			correo:localStorage.email
 		}
+	},
+	mounted() {
 	},
 	methods:{
 		onTabChange(key) {

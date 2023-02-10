@@ -4,7 +4,7 @@
 			max-width="200" class="userblock-dropdown" light>
 			<template v-slot:activator="{ on }">
 				<v-btn fab small v-on="on">
-					<img src="/static/images/user-3.jpg" width="40" height="40" class="v-btn--round">
+					<img src="/static/images/setting-img.png" width="40" height="40" class="v-btn--round">
 				</v-btn>
 			</template>
 			<v-list class="user-dropdown-list">
