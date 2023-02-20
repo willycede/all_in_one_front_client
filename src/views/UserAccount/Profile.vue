@@ -44,6 +44,10 @@ export default {
                   key: "Cedula/Ruc",
                   value: user.identification_number
                },
+               {
+                  key: "Dirección",
+                  value: user.address
+               },
             );
          }
          
