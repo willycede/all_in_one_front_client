@@ -362,14 +362,13 @@ export default {
             };
 
 
-            const EventoSendMail = await api.post(
+            await api.post(
               "/api/shoppingcar/sendmail",
               data_send_mail
             );
 
             //console.log(EventoSendMail);
 
-            console.log("SUCCESS...", EventoSendMail);
             this.$refs.loadComponent.close();
 
             const upd_shop = {
@@ -378,67 +377,25 @@ export default {
               id_shopping_car: localStorage.id_orden
             };
 
-            let status = this.updateShoppingPay(upd_shop);
-            console.log(status);
+            this.updateShoppingPay(upd_shop).then((data) => {
+                console.log(data);
 
-          /*Arreglo de elementos para envio de correo sendinblue */
+                if(data.status === 200){
 
-          
-          //sendSmtpEmail.cc = [{"email":"example2@example2.com","name":"Janice Doe"}];
-          //sendSmtpEmail.bcc = [{"email":"John Doe","name":"example@example.com"}];
-          //sendSmtpEmail.replyTo = {"email":"replyto@domain.com","name":"John Doe"};
-          //sendSmtpEmail.headers = {"Some-Custom-Name":"unique-id-1234"};
-          //sendSmtpEmail.params = {"parameter":"My param value","subject":"New Subject"};
+                  this.$router.push('/account/order-history');
 
+                }else{
 
+                  this.$snotify.error("El proceso no pudo ser gestionado", {
+                    closeOnClick: false,
+                    pauseOnHover: false,
+                    timeout: 1000,
+                  });
 
+                }
 
-
-          /*
-
-          opcion anterio 02/02/2023 jmail
-          const ElementBodyMailModel = {
-            from_name: "ALL IN ONE",
-            email_to: localStorage.email,
-            orden_ped: localStorage.id_orden,
-            html: html,
-          };*/
-
-          /* Proceso de emision de correo electronico*/
-
-          
-
-
-/*
-          emailjs
-            .send(
-              AppConfig.YOUR_SERVICE_ID,
-              AppConfig.YOUR_TEMPLATE_ID,
-              ElementBodyMailModel,
-              AppConfig.YOUR_PUBLIC_KEY
-            )
-            .then(
-              (result) => {
-
-                console.log("SUCCESS...", result);
-                this.$refs.loadComponent.close();
-
-                const upd_shop = {
-                  url_payphone: urlPayphone.data.url,
-                  status: 2,
-                  id_shopping_car: localStorage.id_orden
-                };
-
-                let status = this.updateShoppingPay(upd_shop);
-                console.log(status);
-                  
-               
-              },
-              (error) => {
-               this.$refs.loadComponent.close();
-                console.log("FAILED...", error.text);
-              }
-            );*/
+            });
+            
         } else {
           console.log(urlPayphone.data);
         }
