@@ -10,7 +10,6 @@
             {{ header.formatter(value) }}
          </template>
          <template v-slot:item.action="{ item }">
-            <a @click="greet(item)"><v-icon class="accent--text">payment</v-icon></a>
 				<a @click="greet(item)"><v-icon class="accent--text">payment</v-icon></a>
 			</template>
       </v-data-table>
