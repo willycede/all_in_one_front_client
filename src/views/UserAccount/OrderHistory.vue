@@ -17,10 +17,8 @@
 </template>
 
 <script>
-
 import api from "Api";
 import moment from "moment";
-
 export default {
    data(){
       return{
@@ -52,36 +50,23 @@ export default {
       }
    },
    async mounted() {
-
       console.log(localStorage.id_users);
-
-
       const shopCart = await api.get(
       "/api/order_history/get_order_history/" + localStorage.id_users
       );
-
       this.tableData = shopCart.data.data
-
-
-
-
    }, computed:{
-
       
-
    },methods: 
    {
-
       greet(item){
          console.log(item.url_payphone);
          window.open(item.url_payphone, '_blank');
       },
-
       formatCurrency (value) {
          console.log(value);
          return "$ " + parseFloat(value).toFixed(2);
       },
-
       formatEstatus (value) {
          console.log(value);
          return(value === 2) ? "PENDIENTE" : "PAGADO";
@@ -89,4 +74,3 @@ export default {
    }
 }
 </script>
-
