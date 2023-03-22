@@ -13,6 +13,7 @@
 								</div>
 								<div class="notifications d-inline-flex align-items-center">
 									<emb-cart></emb-cart>
+									<emb-wishlist></emb-wishlist>
 									<emb-user-block :data="userLinks"></emb-user-block>
 								</div>
 							</v-layout>
@@ -44,6 +45,7 @@
 <script>
 import Menu from './Menu';
 import Cart from './Cart'
+import Wishlist from './Wishlist'
 import UserBlock from './UserBlock'
 import AppConfig from "Constants/AppConfig";
 
@@ -57,6 +59,16 @@ export default {
 					title: 'Perfil Usuario',
 					path:"/account/profile"
 				},
+				{
+					icon:'settings',
+					title:'Configuración',
+					path:"/account/profile"
+				},
+				{
+					icon:'history',
+					title:'Historial',
+					path:"/account/order-history"
+				},
 				{	
 					icon:'power_settings_new',
 					title: 'Salir',
@@ -68,6 +80,7 @@ export default {
 	components: {
 		embMenu: Menu,
 		embCart:Cart,
+		embWishlist: Wishlist,
 		embUserBlock:UserBlock,
 	},
 	mounted() {
