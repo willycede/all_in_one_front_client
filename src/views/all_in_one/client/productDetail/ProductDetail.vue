@@ -87,7 +87,6 @@
 									>
 										Agregar al carrito
 									</v-btn>
-									<v-btn large to="/checkout" class="white buyProduct cpx-0">Comprar</v-btn>
 								</div>
 							</v-flex>
 						</v-layout>

@@ -6,7 +6,6 @@ const Accessory = () => import('Views/Accesory');
 const Gadget = () => import('Views/Gadget');
 const Payment = () => import('Views/Payment/Payment');
 const Cart = () => import('Views/Cart');
-const Checkout = () => import('Views/Checkout');
 const FinalReceipt = () => import('Views/FinalReceipt');
 const AboutUs = () => import('Views/AboutUs');
 const TermCondiition = () => import('Views/TermsAndCondition');
@@ -85,10 +84,6 @@ export default {
 		{ 
 			path: '/cart',
 			component: Cart,
-		},
-		{ 
-			path: '/checkout',
-			component: Checkout  
 		},
 		{ 
 			path: '/products/:id',
