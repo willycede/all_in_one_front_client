@@ -6,74 +6,71 @@
 			:items="tableData"
 			hide-default-footer
       >
+         <template v-for="header in headers.filter((header) => header.hasOwnProperty('formatter'))" v-slot:[`item.${header.value}`]="{ header, value }">
+            {{ header.formatter(value) }}
+         </template>
          <template v-slot:item.action="{ item }">
-				<a href="javascript:void(0)"><v-icon class="accent--text">remove_red_eye</v-icon></a>
+				<a @click="greet(item)"><v-icon class="accent--text">payment</v-icon></a>
 			</template>
       </v-data-table>
    </div>
 </template>
 
 <script>
+import api from "Api";
+import moment from "moment";
 export default {
    data(){
       return{
+         dateFormat: "DD/MM/YYYY",
          headers: [
-            {
-            text: 'No',
-            align: 'left',
-            sortable: false,
-            value: 'srno'
+            { text: 'N Orden', value: 'id_shopping_car' },
+            { 
+               text: 'Fecha Registro', 
+               value: 'created_at', 
+               formatter: (x) => (x ? moment(x).format(this.dateFormat) : null), 
             },
-            { text: 'Order Id', value: 'orderId' },
-            { text: 'Product Name', value: 'name' },
-            { text: 'Price', value: 'price' },
-            { text: 'Status', value: 'status' },
-            { text: 'Action', value: 'action' }
-         ],
-         tableData: [
-            {
-               value: false,
-               srno: 1,
-               orderId: 159,
-               name: "LEGITIM",
-               price: 24.44,
-               status: "Sent"
+            { 
+               text: 'Total', 
+               value: 'shopping_car_total',
+               align: 'right',  
+               formatter: this.formatCurrency  
             },
-            {
-               value: false,
-               srno: 2,
-               orderId: 237,
-               name: "GRUNDTAL",
-               price: 37.44,
-               status: "In Process"
+            { 
+               text: 'Estado', 
+               value: 'status',  
+               formatter: this.formatEstatus   
             },
-            {
-               value: false,
-               srno: 3,
-               orderId: 262,
-               name: "BOHOLMEN",
-               price: 23.85,
-               status: "Sent",
-            },
-            {
-               value: false,
-               srno: 4,
-               orderId: 305,
-               name: "ROSTAD LÖK",
-               price: 67.36,
-               status: "Return"
-            },
-            {
-               value: false,
-               srno: 5,
-               orderId: 356,
-               name: "TÅRTA CHOKLADKROKANT",
-               price: 49.36,
-               status: "In Process"
+            { 
+               text: 'Opciones', 
+               value: 'action' 
             }
-         ]
+         ],
+         tableData: []
       }
-   }   
+   },
+   async mounted() {
+      console.log(localStorage.id_users);
+      const shopCart = await api.get(
+      "/api/order_history/get_order_history/" + localStorage.id_users
+      );
+      this.tableData = shopCart.data.data
+   }, computed:{
+      
+   },methods: 
+   {
+      greet(item){
+         console.log(item.url_payphone);
+         window.open(item.url_payphone, '_blank');
+      },
+      formatCurrency (value) {
+         console.log(value);
+         return "$ " + parseFloat(value).toFixed(2);
+      },
+      formatEstatus (value) {
+         console.log(value);
+         return(value === 2) ? "PENDIENTE" : "PAGADO";
+      }
+   }
 }
 </script>
-
