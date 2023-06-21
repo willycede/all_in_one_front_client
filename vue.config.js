@@ -14,6 +14,9 @@ module.exports = {
 			extensions: ['*', '.js', '.vue', '.json']
 		}
 	},
+	devServer: {
+		disableHostCheck: true
+	}
 	/*devServer:{
 		proxy:'http://pay.payphonetodoesposible.com/'
 	}*/
