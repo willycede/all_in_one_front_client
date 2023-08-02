@@ -1,50 +1,56 @@
 <template>
    <div class="profile-wrapper emb-card pa-4">
-      <h4>Información del perfil</h4>
+      <h4>Información del usuario</h4>
       <div class="pt-4">
          <div class="proflie-field mb-4" v-for="(info,key) in profileData" :key="key">
             <label>{{info.key}} :</label>
             <span>{{info.value}}</span>
          </div>
-         <router-link :to="{name: 'EditProfileInfo', query: {type: 'info'}}" > <v-btn class="accent mx-0">Edit</v-btn> </router-link>
+         <router-link :to="{name: 'EditProfileInfo', query: {type: 'info'}}" > <v-btn class="accent mx-0">Editar</v-btn> </router-link>
       </div>
    </div>
 </template>
 
 <script>
+import api from 'Api';
 export default {
    data(){
       return{
-         profileData:[
-            {
-               key:"First Name",
-               value:"ALex",
-            },
-            {
-               key:"Last Name",
-               value:"Doe"
-            },
-            {
-               key:"Gender",
-               value:"Female"
-            },
-            {
-               key:"Date Of birth",
-               value:"9th May 1995"
-            },
-            {
-               key:"Mobile Number",
-               value:"+123 456 789 123"
-            },
-            {
-               key:"Location",
-               value:"San Francisco"
-            },
-            {
-               key:"E-mail id",
-               value:"leftredno@ruth.com"
-            }
-         ]
+         profileData:[]
+      }
+   },
+   async mounted(){
+		await this.populateUserInfo()
+	},
+   methods: {
+      async populateUserInfo() {
+         const response = await api.get(`/api/users/${localStorage.id_users}`);
+         if (response && response.data && response.data.data) {
+            const user = response.data.data;
+            this.profileData.push(
+               {
+                  key:"Nombres",
+                  value: user.name_user,
+               },
+               {
+                  key:"Apellidos",
+                  value: user.last_name_user
+               },
+               {
+                  key:"Email",
+                  value: user.email
+               },
+               {
+                  key: "Cedula/Ruc",
+                  value: user.identification_number
+               },
+               {
+                  key: "Dirección",
+                  value: user.address
+               },
+            );
+         }
+         
       }
    }
 }

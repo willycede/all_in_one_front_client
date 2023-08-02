@@ -18,10 +18,8 @@
 </template>
 
 <script>
-
 import api from "Api";
 import moment from "moment";
-
 export default {
    data() {
       return {
@@ -60,7 +58,6 @@ export default {
       const shopCart = await api.get(
          "/api/order_history/get_order_history/" + localStorage.id_users
       );
-
       this.tableData = shopCart.data.data
 
 
@@ -102,4 +99,3 @@ export default {
    }
 }
 </script>
-
