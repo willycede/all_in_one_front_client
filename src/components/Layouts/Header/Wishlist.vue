@@ -1,21 +1,11 @@
 <template>
 	<div class="mr-3">
 		<v-menu transition="scale-transition" class="wishlit-menu-wrap" max-width="300" min-width="300" offset-y light>
-			<template v-slot:activator="{ on }">
-				<v-btn class="wishlist-btn" fab dark small color="accent" v-on="on">
-						<v-badge right large color="accent">
-							<template  v-if="wishlist.length > 0">
-								<span slot="badge">{{wishlist.length}}</span>
-							</template>
-							<v-icon dark>favorite</v-icon>
-						</v-badge>
-					</v-btn>
-			</template>
 			<div class="text-center white pa-6" v-if="wishlist == ''">
 				<v-icon size="31" class="accent--text">
 					shopping_cart
 				</v-icon>
-				<h5>No Product Found</h5>
+				<h5>No Tienes Productos Agregados</h5>
 			</div>
 			<div v-else class="wishlist-menu white">
 				<emb-perfect-scrollbar class="scroll-area" style="max-height:280px">
@@ -49,7 +39,7 @@
 					</v-list>
 				</emb-perfect-scrollbar>
 				<emb-delete-confirmation ref="deleteConfirmationDialog"
-					message="Are you sure you want to delete this product?" @onConfirm="onDeleteProductFromWishlist">
+					message="¿Desea Eliminar El Producto?" @onConfirm="onDeleteProductFromWishlist">
 				</emb-delete-confirmation>
 				<v-layout align-center pa-3>
 					<v-btn class="accent white--text" block @click="addAllWishlistItemToCart">Add all to cart</v-btn>

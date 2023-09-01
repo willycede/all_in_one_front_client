@@ -93,8 +93,6 @@ const mutations = {
 
       onAddProductToCart(state, payload) {
 
-            debugger
-
             let newProduct = {};
             var shooping_details = {};         
            

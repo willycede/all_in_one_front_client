@@ -47,7 +47,7 @@
 					</v-list>
 				</emb-perfect-scrollbar>
 				<emb-delete-confirmation ref="deleteConfirmationDialog"
-					message="Are you sure you want to delete this product?" @onConfirm="onDeleteProductFromCart">
+					message="¿Desea Eliminar El Producto?" @onConfirm="onDeleteProductFromCart">
 				</emb-delete-confirmation>
 				<v-layout align-center pa-3>
 					<v-btn class="accent white--text" block to="/cart">Carrito</v-btn>
@@ -57,7 +57,7 @@
 				<v-icon size="31" class="accent--text">
 					shopping_cart
 				</v-icon>
-				<h5>No Product Found</h5>
+				<h5>No Tienes Productos Agregados</h5>
 			</div>
 		</v-menu>
 	</div>

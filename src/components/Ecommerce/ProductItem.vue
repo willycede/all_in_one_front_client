@@ -5,14 +5,6 @@
 			<div class="thumb-warp" >
 				
 				<img alt="product" :src="imageUrl" @click="goToDetail(data)">
-				<div class="wishlist-icon">
-					<v-btn v-if="ifItemExistInWishlist(data)" @click="addItemToWishlist(data)" icon >
-						<v-icon  class="black--text">favorite</v-icon>
-					</v-btn>
-					<v-btn v-else @click="addItemToWishlist(data)" icon >
-						<v-icon class="grey--text">favorite</v-icon>
-					</v-btn>
-				</div>
 				<div class="add-to-cart">
 					<v-btn v-if="ifItemExistInCart(data)" to="/cart" class="accent" small icon>
 						<v-icon>remove_red_eye</v-icon>
@@ -34,15 +26,6 @@
 						<h6 class="accent--text">
 							{{price}}
 						</h6>
-					</div>
-					<div class="inline-block">
-						<v-rating 
-							v-model="data.rating"
-							small
-							background-color="warning"
-							readonly
-							color="warning"
-						></v-rating>
 					</div>
 				</div>
 			</div>
@@ -183,7 +166,8 @@ export default {
 			}
 			return exists;
 		}, 
-		goToDetail(product) {
+		async goToDetail(product) {
+			console.log("sds", product)
 			this.$store.dispatch("setSelectedProduct", product);
 			this.$router.push({ path: `/products/${product.id_products}` });
 		},

@@ -34,7 +34,6 @@
 							<v-flex xs12 sm12 md6 lg6 xl5>
 								<router-link to="/">Back to shop</router-link>
 								<h3>{{selectedProduct.name}}</h3>
-								<a href="javascript:void(0)" class="color-inherit text-underline mb-4 d-inline-block" @click="showReviewPopup">ADD A REVIEW</a>
 								<emb-review-popup ref="productReviewPopup"></emb-review-popup>
 								<h4 class="accent--text"><emb-currency-sign></emb-currency-sign>{{selectedProduct.price}}</h4>
 								<ul class="product-availablity list-unstyled pl-0 mb-4 mt-4">

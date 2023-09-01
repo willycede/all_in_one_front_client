@@ -32,22 +32,20 @@
 								</v-layout>
 							</v-flex>
 							<v-flex xs12 sm12 md6 lg6 xl5>
-								<router-link to="/">Back to shop</router-link>
 								<h3>{{selectedProduct.name}}</h3>
-								<a href="javascript:void(0)" class="color-inherit text-underline mb-4 d-inline-block" @click="showReviewPopup">ADD A REVIEW</a>
 								<emb-review-popup ref="productReviewPopup"></emb-review-popup>
 								<h4 class="accent--text">{{selectedProduct.price}}</h4>
 								<ul class="product-availablity list-unstyled pl-0 mb-4 mt-4">
 									<li>
 										<template v-if="selectedProduct.status === true">
-											<span class="font-weight-medium">Availablity</span> : <span class="font-weight-regular">In Stocks</span>
+											<span class="font-weight-medium">Existencia</span> : <span class="font-weight-regular">En Stock</span>
 										</template>
 										<template v-else>
-											<span class="font-weight-medium">Availablity</span> : <span class="font-weight-regular">Out Of Stocks</span>
+											<span class="font-weight-medium">Existencia</span> : <span class="font-weight-regular">Fuera De Stock</span>
 										</template>
 									</li>
 									<li>
-										<span class="font-weight-medium">Product Code</span> : <span class="font-weight-regular">{{selectedProduct.external_product_id}}</span>
+										<span class="font-weight-medium">Código Producto</span> : <span class="font-weight-regular">{{selectedProduct.external_product_id}}</span>
 									</li>
 								</ul>
 								<p>{{selectedProduct.descpription}}</p>
@@ -108,10 +106,12 @@ export default {
 	async mounted() {
 		this.id = this.$route.params.id;
 		await this.getProductsByCategoryIdAndFilters(this.id);
+		await this.$store.dispatch("getProductsBId", this.id);
 		setTimeout(() => {
+			console.log(this.selectedProduct, "en el  set time ouyt")
 			this.selectedImage = this.selectedProduct?.images[0].url;
 			this.selectedProduct.price = moneyMask(this.selectedProduct.price);
-		}, 200);
+		}, 1000);
 	
 	},
 	watch: {
@@ -138,9 +138,6 @@ export default {
 		},
 		/* for adding product in car	**/
 		addProductToCart(item) {
-
-			debugger
-
 			var img = (item.images)[0].url;
 			let price = parseFloat((item.price).replace('$',''));
 			let quantity = (typeof(item.quantity) !== 'undefined' && item.quantity !== null) ? item.quantity : 1;
