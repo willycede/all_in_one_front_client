@@ -46,8 +46,8 @@
 						<div class="mb-6">
 							<img  alt="cart-empty" height="128" src="static/images/empty-cart.png" width="128">
 						</div>
-						<h4 > Your Shopping Bag is empty.</h4>
-						<router-link class="primary--text" to="/">Go to Shopping</router-link>
+						<h4 > Tu Carrito Se Encuentra Vacío.</h4>
+						<router-link class="primary--text" to="/">Ver Productos</router-link>
 					</div>
 				</template>
 			</v-container>

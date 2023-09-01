@@ -3,14 +3,14 @@ export default {
 	appLogo: '/static/images/logo2.png', 
 	appLogoDark: '/static/images/logo2.png',                         // App Logo,
 	brand: 'Embryo',                                        		   // Brand Name
-	copyrightText: '© All Rights Reversed | Made With Love by IRON NETWORK for better Web',     // Copyright Text
+	copyrightText: '© All Rights Reversed | Made With Love by All in one team',     // Copyright Text
 	//theme color
 	porcentajeIVa:0.12,
 	color: {
       primary: '#00006B',
       accent : '#0068FF',
 	},
-	apiUrl: process.env.VUE_APP_NODE_ENV == 'production' ? 'http://3.14.140.168:3500' :  'http://localhost:3500',
+	apiUrl: process.env.VUE_APP_NODE_ENV == 'production' ? 'http://localhost:3500' :  'http://localhost:3500',
 	algoliaApiKey: '6be0576ff61c053d5f9a3225e2a90f76',
 
 	//configuracion correo

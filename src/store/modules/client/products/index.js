@@ -32,6 +32,14 @@ const actions = {
       const products = await api.get(`/api/products/${data.categoryId}`,{ params: {searchBy:  data.searchBy} });
       context.commit('onGetAllProducts', products?.data?.data);
    },
+   async getProductsBId(context, data) 
+   {  
+      const productId = data;
+      const products = await api.get(`/api/products/by_product_id/${productId}`);
+      if (products?.data?.data && products?.data?.data.length > 0) {
+        context.commit('selectProductHandler', products?.data?.data[0]);
+      }
+   },
    setSelectedProduct(context, payload) {
       context.commit('selectProductHandler', payload);
    },

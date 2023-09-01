@@ -18,9 +18,9 @@
                 width="128"
               />
             </div>
-            <h4>Your Shopping Bag is empty</h4>
+            <h4>Tu Carrito Se Encuentra Vacío</h4>
             <router-link class="primary--text" to="/"
-              >Go to Shopping</router-link
+              >Ver Productos</router-link
             >
           </div>
         </div>
@@ -166,7 +166,7 @@
           </emb-confirmation-component>
           <emb-delete-confirmation
             ref="deleteConfirmationDialog"
-            message="Are you sure you want to delete this product?"
+            message="¿Desea Eliminar El Producto?"
             @onConfirm="onDeleteProductFromCart"
           >
           </emb-delete-confirmation>
@@ -341,7 +341,6 @@ export default {
               id_shopping_car: localStorage.id_orden
             };
             this.updateShoppingPay(upd_shop).then((data) => {
-                console.log(data);
                 if(data.status === 200){
                   this.$router.push('/account/order-history');
                 }else{
