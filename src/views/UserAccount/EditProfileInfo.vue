@@ -12,6 +12,15 @@
                       <v-flex xs12 sm12 md12 lg12 xl12 py-1>
                         <v-text-field label="Dirección(Provincia - Ciudad - Dirección)" :rules="addressRules" v-model="address"></v-text-field>
                      </v-flex>
+                     <v-flex xs12 sm12 md12 lg12 xl12 py-1>
+                        <v-text-field
+                           type="password"
+                           label="Contraseña(llenar unicamente si desea cambiarla)"
+                           :rules="passwordRules"
+                           v-model="password"
+                        >
+                        </v-text-field>
+                     </v-flex>
                      <v-flex xs12 sm12 md12 lg12 xl12 pt-1 pb-0>
                         <v-btn class="accent mx-0 mb-4" @click.stop.prevent="edit">Editar</v-btn>
                      </v-flex>
@@ -41,8 +50,13 @@
             addressRules: [
                v => !!v || 'La dirección es requerida',
             ],
+            passwordRules: [
+               v => !!v || 'La contraseña es requerida',
+               v => !(v?.length < 8) || 'La contraseña debe tener más de 8 caracteres',
+            ],
             email: '',
             address: '',
+            password:'',
          }
       },
       methods: {
@@ -61,7 +75,8 @@
                   const response = await api.post(`/api/users/update`, {
                      address: this.address,
                      email: this.email,
-                     id_users: localStorage.id_users
+                     id_users: localStorage.id_users,
+                     password: this.password,
                   });
                   console.log(response)
                   localStorage.setItem('email', response.data.data.email);

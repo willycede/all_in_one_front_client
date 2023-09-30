@@ -25,8 +25,11 @@
                                         :rules="passwordRules"
 									>
 									</v-text-field>
-									<v-btn class="accent mb-3 ma-0" largE @click="saveDetails">
+									<v-btn class="accent mb-3 ma-0 mr-4" largE @click="saveDetails">
 										Ingresar
+									</v-btn>
+                                    <v-btn class="white mb-3 ma-0" largE @click="openModalrecoverPassword">
+										Recuperar clave
 									</v-btn>
 									<p>No tienes una cuenta? <router-link to="/client/register" class="accent--text">Da click para registrarte</router-link></p>
 								</v-form>
@@ -36,6 +39,23 @@
 				</v-flex>
 			</v-layout>
 		</div>
+        <v-dialog v-model="open" max-width="550">
+            <v-card class="py-6 px-2">
+                <h4 class=" text-center mb-6">Ingresa tu email para recuperar tu clave</h4>
+                <v-form ref="formRecovery" v-model="validRecovery">
+                    <v-text-field
+                        type="email"
+                        placeholder="Email*"
+                        v-model="formRecovery.email"
+                        :rules="emailRules"
+                    />
+                </v-form>
+                
+                <v-card-actions class="layout justify-center">
+                    <v-btn color="accent mx-2" @click="recoverPassword">Recuperar clave</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
    </div>
 </template>
 <script>
@@ -43,10 +63,16 @@
 	export default{
 		data(){
 			return{
+                open: false,
                 valid: false,
+                validRecovery: false,
+                formRecovery: {
+                    email: '',
+                },
                 form: {
                     email: '',
                     password: '',
+                    
                 },
                 emailRules: [
 					v => !!v || 'El email es requerido',
@@ -59,6 +85,47 @@
 			}
 		},
         methods: {
+            recoverPassword(){
+                this.$refs.formRecovery.validate();
+                console.log(this.$refs.formRecovery.validate())
+				if(this.validRecovery){
+                    api.post('/api/users/resetPassword', this.formRecovery)
+                    .then(() => {
+                        this.$snotify.success('Clave recuperada con éxito, revise su correo porfavor',{
+                            closeOnClick: false,
+                            pauseOnHover: false,
+                            timeout: 2000,
+                            showProgressBar:false,
+                        });
+                    }).catch((err) => {
+                        let defaultErrorMessage = err?.response?.data?.error?.message ? err?.response?.data?.error?.message :  'Ocurrio un error inesperado'; 
+                        if (Object.keys(err?.response?.data?.error?.validationObject).length > 0) {
+                            this.$snotify.error(err.response.data.error.validationObject.email, {
+                                closeOnClick: false,
+                                pauseOnHover: false,
+                                timeout: 2000,
+                                showProgressBar:false,
+                            });
+                            this.$snotify.error(err.response.data.error.validationObject.password, {
+                                closeOnClick: false,
+                                pauseOnHover: false,
+                                timeout: 2000,
+                                showProgressBar:false,
+                            });
+                            return;
+                        }
+                         this.$snotify.error(defaultErrorMessage,{
+                            closeOnClick: false,
+                            pauseOnHover: false,
+                            timeout: 2000,
+                            showProgressBar:false,
+                        });
+                    });
+                }
+            },
+            openModalrecoverPassword(){
+                this.open = true;
+            },
             saveDetails(){
 				this.$refs.form.validate();
                 console.log(this.$refs.form.validate())
