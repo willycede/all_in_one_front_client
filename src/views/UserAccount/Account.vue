@@ -63,7 +63,15 @@ export default {
 						path:"/account/profile",
 						id:"profile"
 					},
-				],
+				]/*,
+				DataInvoice:[
+					{
+						title:"Datos Facturacion",
+						icon:"account_circle",
+						path:"/account/data_invoice",
+						id:"DataInvoice"
+					},
+				]*/,
 			},
 			selectedTab: 0,
 			nombre_usuario:localStorage.name_user + ' '+ localStorage.last_name_user,

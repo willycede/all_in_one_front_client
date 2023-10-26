@@ -1,11 +1,6 @@
 <template>
    <div class="profile-wrapper emb-card pa-4">
       <h4>Información del usuario</h4>
-      <div class="layout justify mt-0 mb-4 mx-0">
-         <div class="alert alert-info" role="alert">
-            <v-icon class="accent--text">info</v-icon> La Información expuesta en este formulario, son los datos que se utilizaran para la generacion de la factura una vez efectuado el pago, en el caso de que los datos no sean correctos realizar la actualizacion.
-         </div>
-      </div>
       <div class="pt-4">
          <div class="proflie-field mb-4" v-for="(info,key) in profileData" :key="key">
             <label>{{info.key}} :</label>
@@ -35,19 +30,19 @@ export default {
             this.profileData.push(
                {
                   key:"Nombres",
-                  value: user.name_user,
+                  value: "Nombres",
                },
                {
                   key:"Apellidos",
-                  value: user.last_name_user
+                  value: "Nombres"
                },
                {
                   key:"Email",
-                  value: user.email
+                  value: "Nombres"//user.email
                },
                {
                   key: "Cedula/Ruc",
-                  value: user.identification_number
+                  value: "Nombres"//user.identification_number
                },
                {
                   key: "Dirección",

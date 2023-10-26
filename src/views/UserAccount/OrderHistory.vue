@@ -1,15 +1,22 @@
 <template>
    <div class="order-history-wrap emb-card pa-4">
       <h4 class="mb-4">Historial</h4>
+      <div class="layout justify-end mt-0 mb-4 mx-0">
+         <div class="alert alert-info" role="alert">
+            En el caso de que despues de haber realizado su pago no se ha procesado de forma automatica su factura, por favor dar clic sobre el boton
+            <a><v-icon class="accent--text">published_with_changes</v-icon></a> Reprocesar
+         </div>
+      </div>
       <v-data-table :headers="headers" :items="tableData" hide-default-footer>
          <template v-for="header in headers.filter((header) => header.hasOwnProperty('formatter'))"
             v-slot:[`item.${header.value}`]="{ header, value }">
             {{ header.formatter(value) }}
          </template>
          <template v-slot:item.action="{ item }">
-            <div v-if="item.status != 3 ">
-               <a @click="greet(item)"><v-icon class="accent--text">payment</v-icon></a>
-               <a @click="deletHistory(item)"><v-icon class="accent--text">cancel</v-icon></a>
+            <div class="text-alient-center">
+               <a title="Link de Pago" v-if="item.status == 2  " @click="greet(item)"><v-icon class="accent--text">payment</v-icon></a>
+               <a title="Cancelar Orden" v-if="item.status == 2 " @click="deletHistory(item)"><v-icon class="accent--text">cancel</v-icon></a>
+               <a title="Procesar Factura" v-if="item.status === 3 &&  item.status_invoice === 0 " @click="deletHistory(item)"><v-icon class="accent--text">published_with_changes</v-icon></a>
             </div>
             
          </template>
@@ -38,9 +45,14 @@ export default {
                formatter: this.formatCurrency
             },
             {
-               text: 'Estado',
+               text: 'Estado Pedido',
                value: 'status',
                formatter: this.formatEstatus
+            },
+            {
+               text: 'Estado Factura',
+               value: 'status_invoice',
+               formatter: this.formatFacturado
             },
             {
                text: 'Opciones',
@@ -58,6 +70,7 @@ export default {
       const shopCart = await api.get(
          "/api/order_history/get_order_history/" + localStorage.id_users
       );
+      //console.log(shopCart.data.data);
       this.tableData = shopCart.data.data
 
 
@@ -81,8 +94,10 @@ export default {
       },
 
       formatEstatus(value) {
-         //console.log(value);
-         return (value === 2) ? "PENDIENTE" : ((value === 3) ? "CANCELADO" :  "PAGADO");
+         return (value === 2) ? "IN-PAGO" : ((value === 4) ? "CANCELADO" :  "PAGADO");
+      },
+      formatFacturado(value) {
+         return (value === 0) ? "-" : "FACTURADO";
       },
       async deletHistory(item) {
          //console.log(item);

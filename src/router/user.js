@@ -13,6 +13,7 @@ const Faq = () => import('Views/Faq');
 const Account = () => import('Views/UserAccount/Account.vue');
 const OrderHistory = () => import('Views/UserAccount/OrderHistory.vue');
 const Profile = () => import('Views/UserAccount/Profile.vue');
+const DataInvoice = () => import('Views/UserAccount/data_invoice.vue');
 const Address = () => import('Views/UserAccount/Address.vue');
 const Cards = () => import ('Views/UserAccount/Cards.vue');
 const EditProfile = () => import ('Views/UserAccount/EditProfile.vue');
@@ -23,6 +24,7 @@ const ContactUs = () => import('Views/Contact');
 const PrivacyPolicy = () => import('Views/PrivacyPolicy');
 const ForgotPassword = () => import('Views/Sessions/ForgotPassword');
 const ThankYou = () => import('Views/Sessions/ThankYou');
+const RedirectPayment = () => import('Views/RedirePay');
 
 //all_in_one
 const Register = () => import('Views/all_in_one/client/register/Register');
@@ -30,6 +32,8 @@ const Login = () => import('Views/all_in_one/client/login/Login');
 const MainPage = () => import('Views/all_in_one/client/mainPage/MainPage');
 const ProductDetail = () => import('Views/all_in_one/client/productDetail/ProductDetail');
 const ProductWithFilters = () => import('Views/all_in_one/client/products/ProductsWithFilters');
+const ValidatePayment = () => import('Views/all_in_one/client/payment/ValidatePayment');
+
 export default {
 	path: '/',
 	component: UserPanel,
@@ -76,6 +80,21 @@ export default {
 		{			
 			path: '/products/category/:generalCategoryId',
 			component: ProductWithFilters,
+		},{			
+			path: '/botonpagomail',
+			component: RedirectPayment,
+		},
+		{			
+			path: '/botonpagomail/:urlPago',
+			component: RedirectPayment,
+		},
+		{			
+			path: '/payment/ValidatePayment',
+			component: ValidatePayment,
+		},
+		{			
+			path: '/payment/ValidatePayment/:id/:clientTransactionId',
+			component: ValidatePayment,
 		},
 		{ 
 			path: '/checkout/payment',
@@ -120,6 +139,9 @@ export default {
 				},
 				{
 					path: '/account/profile',name:'Profile',component: Profile,
+				},
+				{
+					path: '/account/data_invoice',name:'DataInvoice',component: DataInvoice,
 				},
 				{
 					path: '/account/address',name:'Address',component: Address,

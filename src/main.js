@@ -16,6 +16,9 @@ import App from './App.vue'
 import { store } from './store/store'
 import AppConfig from 'Constants/AppConfig'
 
+// add this
+import './index.css'
+
 // localisation messages
 import messages from './lang'
 

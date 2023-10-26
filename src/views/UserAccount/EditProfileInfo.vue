@@ -7,6 +7,15 @@
                <v-flex xs12 sm12 md12 lg12 x12>
                   <v-layout row wrap>
                      <v-flex xs12 sm12 md12 lg12 xl12 py-1>
+                        <v-text-field label="Identificacion" :rules="idRules" v-model="identificacion"></v-text-field>
+                     </v-flex>
+                     <v-flex xs12 sm12 md12 lg12 xl12 py-1>
+                        <v-text-field label="Nombres/Razon Social" :rules="idRules" v-model="identificacion"></v-text-field>
+                     </v-flex>
+                     <v-flex xs12 sm12 md12 lg12 xl12 py-1>
+                        <v-text-field label="Apellidos/Razon Comercial" :rules="idRules" v-model="identificacion"></v-text-field>
+                     </v-flex>
+                     <v-flex xs12 sm12 md12 lg12 xl12 py-1>
                         <v-text-field label="Email" :rules="emailRules" v-model="email"></v-text-field>
                      </v-flex>
                       <v-flex xs12 sm12 md12 lg12 xl12 py-1>
@@ -43,6 +52,10 @@
       	return {
 				val: '',
          	valid: false,
+            idRules: [
+               v => !!v || 'El email es requerido',
+               v => /.+@.+/.test(v) || 'El email debe ser valido'
+            ],
 				emailRules: [
                v => !!v || 'El email es requerido',
                v => /.+@.+/.test(v) || 'El email debe ser valido'
@@ -54,6 +67,7 @@
                v => !!v || 'La contraseña es requerida',
                v => !(v?.length < 8) || 'La contraseña debe tener más de 8 caracteres',
             ],
+            identificacion:'',
             email: '',
             address: '',
             password:'',
@@ -78,7 +92,7 @@
                      id_users: localStorage.id_users,
                      password: this.password,
                   });
-                  console.log(response)
+                  //console.log(response)
                   localStorage.setItem('email', response.data.data.email);
                   this.$snotify.success('Información actualizada con exíto',{
                      closeOnClick: false,

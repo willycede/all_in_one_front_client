@@ -23,7 +23,10 @@
 		"babel-polyfill": "^6.26.0",
 		"chart.js": "^2.9.3",
 		"core-js": "^3.6.5",
+		"crypto-js": "^4.1.1",
 		"firebase": "^8.2.1",
+		"flowbite": "^1.8.1",
+		"flowbite-vue": "^0.0.17",
 		"instantsearch.css": "^7.4.4",
 		"jquery": "^3.5.1",
 		"moment": "^2.27.0",
@@ -55,6 +58,7 @@
 		"node-sass": "^6.0.0",
 		"sass": "^1.26.10",
 		"sass-loader": "^10.2.0",
+		"tailwindcss": "^3.3.4",
 		"vue-template-compiler": "^2.6.12"
 	}
 }
