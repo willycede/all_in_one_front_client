@@ -10,7 +10,7 @@ export default {
       primary: '#00006B',
       accent : '#0068FF',
 	},
-	apiUrl: process.env.VUE_APP_NODE_ENV == 'production' ? 'http://3.14.140.168:3500' :  'http://localhost:3500',
+	apiUrl: process.env.VUE_APP_NODE_ENV == 'production' ? process.env.VUE_APP_API :  'http://localhost:3500',
 	algoliaApiKey: '6be0576ff61c053d5f9a3225e2a90f76',
 
 	//configuracion correo
