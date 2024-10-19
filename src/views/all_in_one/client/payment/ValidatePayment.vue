@@ -173,6 +173,14 @@ export default {
 
             /* Procesamos la facturacion electronica */
 
+            const shopCartFelec = await api.get(
+                    "/api/shoppingcar/get_comprobante_electronico/" + localStorage.id_orden
+            );
+
+            let clave = shopCartFelec.data.claveAcceso;
+            let pathpdf = shopCartFelec.data.pathPdf;
+            let pathxml = shopCartFelec.data.pathXml;
+
             /*obtenemos datos de facturacion*/                        
             const response = await api.get(`/api/users/${localStorage.id_users}`);
             if (response && response.data && response.data.data) {
@@ -190,7 +198,7 @@ export default {
                     .replace("@nombre_cliente", user.name_user +' ' +user.last_name_user)
                     .replace("@valor", comprobante[0].shopping_car_total)
                     .replace("@documento", '001-001-' +("000000000" + localStorage.id_orden).slice(-9))
-                    .replace("@clave", '000000000000000000000000000000000000000000000000')
+                    .replace("@clave", clave)
                     .replace("@fecha", 
                         new Date().toLocaleDateString() +
                         " " +
@@ -215,12 +223,14 @@ export default {
             const data_send_mail = {
                 html: html,
                 email: localStorage.email,
+                pathPdf:pathpdf,
+                pathXml:pathxml
             };
 
             /* genera el envio de email con el comprobante electronico */
 
             api.post(
-            "/api/shoppingcar/sendmail",
+            "/api/shoppingcar/sendmail_factura",
             data_send_mail
             );
 

@@ -5,7 +5,7 @@ export default {
 	brand: 'Embryo',                                        		   // Brand Name
 	copyrightText: '© All Rights Reversed | Made With Love by All in one team',     // Copyright Text
 	//theme color
-	porcentajeIVa:0.12,
+	porcentajeIVa:0.15,
 	color: {
       primary: '#00006B',
       accent : '#0068FF',

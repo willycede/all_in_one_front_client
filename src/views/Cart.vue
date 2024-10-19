@@ -115,7 +115,7 @@ export default {
           service: 0,
           tip: 0,
           currency: "USD",
-          clientTransactionId: localStorage.id_orden+"@14563",
+          clientTransactionId: localStorage.id_orden+"@145636",
           reference: "PAGO ORDEN DE PAGO #" + localStorage.id_orden,
           oneTime: false,
           expireIn: 0,
@@ -130,6 +130,9 @@ export default {
             .replace("@totaldetalle", "$ " + totaldetalle);
         }
         /*fin recorrido*/
+
+        console.log(arr_pay);
+
         /*Ejecutamos api que genera link de pago payphone */
         const urlPayphone = await api.post(
           "/api/shoppingcar/payphone",
