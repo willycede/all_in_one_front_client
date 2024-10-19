@@ -273,9 +273,6 @@ export default {
                                                                                        <w:anchorlock/>
                                                                                        <center style="color:#FFFFFF;">
                                                                                           <![endif]-->
-                                                                                          <a href="http://localhost/comprobantes/DonwloadPDF" target="_blank" class="v-button" style="box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #000000; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 14px;">
-                                                                                          <span style="display:block;padding:10px 20px;line-height:120%;"><span style="font-family: Montserrat, sans-serif; font-size: 14px; line-height: 16.8px;"><strong>Descargar RIDE</strong></span></span>
-                                                                                          </a>
                                                                                           <!--[if mso]>
                                                                                        </center>
                                                                                     </v:roundrect>
