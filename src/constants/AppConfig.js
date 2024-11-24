@@ -5,13 +5,14 @@ export default {
 	brand: 'Embryo',                                        		   // Brand Name
 	copyrightText: '© All Rights Reversed | Made With Love by All in one team',     // Copyright Text
 	//theme color
-	porcentajeIVa:0.12,
+	porcentajeIVa:0.15,
 	color: {
       primary: '#00006B',
       accent : '#0068FF',
 	},
 	apiUrl: process.env.VUE_APP_NODE_ENV == 'production' ? process.env.VUE_APP_API :  'http://localhost:3500',
 	algoliaApiKey: '6be0576ff61c053d5f9a3225e2a90f76',
+	urlSite: process.env.VUE_APP_NODE_ENV == 'production' ? 'http://localhost:8080/' :  'http://localhost:8080/',
 
 	//configuracion correo
 	FROM_NAME:'',
