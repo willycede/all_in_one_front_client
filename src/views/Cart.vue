@@ -163,7 +163,7 @@ export default {
             const data_send_mail = {
               html: html,
               email: localStorage.email,
-              name: localStorage.name,
+              name: `${localStorage.name_user} ${localStorage.last_name_user}`,
             };
             await api.post(
               "/api/shoppingcar/sendmail",
