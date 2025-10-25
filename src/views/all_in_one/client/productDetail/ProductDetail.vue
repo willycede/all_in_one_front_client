@@ -58,6 +58,17 @@
 									</div> -->
 								<div class="select-group mb-4">
 									<v-layout wrap>
+										<v-flex v-if="selectedProduct.cities && selectedProduct.cities.length > 0" xs12 sm4 lg4 md4 lg3 xl3 pb-0>
+											<v-select
+												v-model="selectedCity"
+												:items="selectedProduct.cities"
+												item-text="name"
+												item-value="id_city"
+												placeholder="Seleccionar Ciudad"
+												label="Ciudad"
+											>
+											</v-select>
+										</v-flex>
 										<v-flex xs12 sm4 lg4 md4 lg3 xl3 pb-0>
 											<v-select
 												v-model="selectedProduct.quantity"
@@ -123,7 +134,8 @@ export default {
 	data () {
 		return{
 			id: "",
-			selectedImage: null
+			selectedImage: null,
+			selectedCity: null
 		}
 	},
 	methods: {
@@ -138,6 +150,17 @@ export default {
 		},
 		/* for adding product in car	**/
 		addProductToCart(item) {
+			// Validar si el producto requiere ciudad y no se ha seleccionado
+			if(item.cities && item.cities.length > 0 && !this.selectedCity) {
+				this.$snotify.error('Por favor selecciona una ciudad',{
+					closeOnClick: false,
+					pauseOnHover: false,
+					timeout: 2000,
+					showProgressBar:false,
+				});
+				return;
+			}
+
 			var img = (item.images)[0].url;
 			let price = parseFloat((item.price).replace('$',''));
 			let quantity = (typeof(item.quantity) !== 'undefined' && item.quantity !== null) ? item.quantity : 1;
@@ -160,7 +183,8 @@ export default {
 					details_subtotal:(quantity*price),
 					details_iva:(quantity*price)*AppConfig.porcentajeIVa,
 					details_total:(quantity*price)+(quantity*price)*AppConfig.porcentajeIVa,
-					status:1
+					status:1,
+					id_city: this.selectedCity
 				};
 
 				this.$snotify.success('Producto agregado al carrito',{
@@ -184,8 +208,6 @@ export default {
 				});
 
 			}
-
-			
 
 
 
