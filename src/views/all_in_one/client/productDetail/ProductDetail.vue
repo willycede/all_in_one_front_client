@@ -70,14 +70,23 @@
 											</v-select>
 										</v-flex>
 										<v-flex xs12 sm4 lg4 md4 lg3 xl3 pb-0>
-											<v-select
-												v-model="selectedProduct.quantity"
-												:items="[1,2,3,4,5]"
+											<v-text-field
+												v-model.number="productQuantity"
+												type="number"
+												label="Cantidad"
 												placeholder="Cantidad"
+												:min="1"
+												:rules="[v => v > 0 || 'La cantidad debe ser mayor a 0']"
 											>
-											</v-select>
+											</v-text-field>
 										</v-flex>
 									</v-layout>
+								</div>
+								<!-- Nota sobre documentos requeridos -->
+								<div v-if="selectedProduct.required_documents_array && selectedProduct.required_documents_array.length > 0" class="documents-note mb-4">
+									<v-alert type="info" dense outlined>
+										<strong>Nota:</strong> Este producto requiere documentos. Podrás subirlos en el carrito de compras antes de confirmar tu pedido.
+									</v-alert>
 								</div>
 								<div class="mb-6 btn-wrap">
 									<v-btn 
@@ -110,6 +119,7 @@
 import {mapActions, mapGetters} from "vuex";
 import {moneyMask} from "../../../../helpers/helpers"
 import AppConfig from "Constants/AppConfig";
+import api from 'Api';
 export default {
 	computed: {
 		...mapGetters(["selectedProduct"]),
@@ -131,11 +141,12 @@ export default {
 		 this.id = to.params.id;
     },
 },
-	data () {
+		data () {
 		return{
 			id: "",
 			selectedImage: null,
-			selectedCity: null
+			selectedCity: null,
+			productQuantity: 1
 		}
 	},
 	methods: {
@@ -161,12 +172,21 @@ export default {
 				return;
 			}
 
+			// Validar cantidad
+			if(!this.productQuantity || this.productQuantity < 1) {
+				this.$snotify.error('Por favor ingresa una cantidad válida',{
+					closeOnClick: false,
+					pauseOnHover: false,
+					timeout: 2000,
+					showProgressBar:false,
+				});
+				return;
+			}
+
 			var img = (item.images)[0].url;
 			let price = parseFloat((item.price).replace('$',''));
-			let quantity = (typeof(item.quantity) !== 'undefined' && item.quantity !== null) ? item.quantity : 1;
+			let quantity = this.productQuantity;
 
-
-			
 			if(typeof(localStorage.id_users) !== 'undefined' && localStorage.id_users !== null) {
 
 				let newProduct = {
@@ -184,7 +204,9 @@ export default {
 					details_iva:(quantity*price)*AppConfig.porcentajeIVa,
 					details_total:(quantity*price)+(quantity*price)*AppConfig.porcentajeIVa,
 					status:1,
-					id_city: this.selectedCity
+					id_city: this.selectedCity,
+					required_documents_array: item.required_documents_array || [],
+					uploaded_documents: {} // Se llenarán en el carrito
 				};
 
 				this.$snotify.success('Producto agregado al carrito',{

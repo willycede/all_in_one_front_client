@@ -18,6 +18,8 @@ export default {
     return {
       selectDeletedProduct: null,
       total: null,
+      uploadedDocuments: {}, // { id_details: { docType: file } }
+      uploadingDocuments: {}, // Track upload status
       headers: [
         {
           text: "Product",
@@ -49,7 +51,38 @@ export default {
     const shopCartDetails = await api.get(
       "/api/shoppingcar/get_shopDetails/" + cartsshop
     );
-    this.cart = shopCartDetails;
+    
+    // Parsear required_documents para cada item del carrito
+    if(shopCartDetails.data && shopCartDetails.data.data) {
+      const cartItems = shopCartDetails.data.data.map(item => {
+        // Parsear required_documents si existe
+        let requiredDocsArray = [];
+        if(item.required_documents && item.required_documents.trim() !== '') {
+          try {
+            // Si es un string separado por comas, convertirlo a array
+            if(typeof item.required_documents === 'string') {
+              requiredDocsArray = item.required_documents.split(',').map(doc => doc.trim());
+            } else if(Array.isArray(item.required_documents)) {
+              requiredDocsArray = item.required_documents;
+            }
+          } catch(e) {
+            console.error('Error parsing required_documents:', e);
+          }
+        }
+        
+        console.log('Item parseado:', item.name, 'Documentos requeridos:', requiredDocsArray);
+        
+        return {
+          ...item,
+          required_documents_array: requiredDocsArray
+        };
+      });
+      
+      console.log('Cart items con documentos parseados:', cartItems);
+      this.$store.dispatch('addSetToCart', cartItems);
+    } else {
+      this.cart = shopCartDetails;
+    }
   },
   computed: {
     ...mapGetters(["cart", "tax", "shipping"]),
@@ -98,6 +131,24 @@ export default {
       return parseFloat(num).toFixed(2);
     },
     registraConfirmaShop() {
+      // Validar que todos los productos con documentos requeridos tengan sus documentos subidos
+      const missingDocs = this.validateRequiredDocuments();
+      
+      if(missingDocs.length > 0) {
+        let message = 'Los siguientes productos requieren documentos:\n\n';
+        missingDocs.forEach(item => {
+          message += `• ${item.productName}: ${item.missingDocs.join(', ')}\n`;
+        });
+        
+        this.$snotify.error(message, {
+          closeOnClick: false,
+          pauseOnHover: false,
+          timeout: 5000,
+          showProgressBar: false,
+        });
+        return;
+      }
+      
       this.$refs.confirmationDialog.openDialog();
     },
     async onRegisterShop() {
@@ -233,12 +284,148 @@ export default {
 
       return CryptoJS.enc.Utf8.stringify(cipher).toString()
     },
+    /* Format document name for display */
+    formatDocumentName(docType) {
+      return docType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    },
+    /* Handle file upload */
+    async handleFileUpload(item, docType, file) {
+      if(!file) {
+        // Si se elimina el archivo
+        if(this.uploadedDocuments[item.id_details]) {
+          delete this.uploadedDocuments[item.id_details][docType];
+        }
+        return;
+      }
+
+      // Validar que el usuario esté autenticado
+      if(typeof(localStorage.id_users) === 'undefined' || localStorage.id_users === null) {
+        this.$snotify.error('Debe iniciar sesión para subir documentos',{
+          closeOnClick: false,
+          pauseOnHover: false,
+          timeout: 3000,
+          showProgressBar: false,
+        });
+        return;
+      }
+
+      try {
+        // Marcar como subiendo
+        if(!this.uploadingDocuments[item.id_details]) {
+          this.$set(this.uploadingDocuments, item.id_details, {});
+        }
+        this.$set(this.uploadingDocuments[item.id_details], docType, true);
+
+        // Crear FormData para enviar el archivo
+        const formData = new FormData();
+        formData.append('document', file);
+        formData.append('user_id', localStorage.id_users);
+        formData.append('cart_detail_id', item.id_details);
+        formData.append('product_id', item.id_product);
+        formData.append('document_type', docType);
+        formData.append('product_name', item.name);
+        
+        console.log('Enviando documento:', {
+          user_id: localStorage.id_users,
+          cart_detail_id: item.id_details,
+          product_id: item.id_product,
+          document_type: docType,
+          product_name: item.name
+        });
+
+        // Mostrar mensaje de carga
+        this.$snotify.info('Subiendo documento...',{
+          closeOnClick: false,
+          pauseOnHover: false,
+          timeout: 0,
+          showProgressBar: false,
+        });
+
+        // Subir archivo al servidor
+        const response = await api.post('/api/product_documents/upload-file', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        if(response.data && response.data?.data?.success) {
+          // Guardar el archivo subido
+          if(!this.uploadedDocuments[item.id_details]) {
+            this.$set(this.uploadedDocuments, item.id_details, {});
+          }
+          this.$set(this.uploadedDocuments[item.id_details], docType, {
+            file: file,
+            url: response.data.fileUrl
+          });
+
+          this.$snotify.clear();
+          this.$snotify.success('Documento subido correctamente',{
+            closeOnClick: false,
+            pauseOnHover: false,
+            timeout: 2000,
+            showProgressBar: false,
+          });
+        } else {
+          this.$snotify.clear();
+          this.$snotify.error('Error al subir el documento',{
+            closeOnClick: false,
+            pauseOnHover: false,
+            timeout: 3000,
+            showProgressBar: false,
+          });
+        }
+      } catch(error) {
+        this.$snotify.clear();
+        const errorMessage = error.response && error.response.data && error.response.data.message ? error.response.data.message : error.message;
+        this.$snotify.error('Error al subir el documento: ' + errorMessage,{
+          closeOnClick: false,
+          pauseOnHover: false,
+          timeout: 3000,
+          showProgressBar: false,
+        });
+        console.error('Error uploading document:', error);
+      } finally {
+        // Marcar como no subiendo
+        if(this.uploadingDocuments[item.id_details]) {
+          this.$set(this.uploadingDocuments[item.id_details], docType, false);
+        }
+      }
+    },
+    /* Validate required documents */
+    validateRequiredDocuments() {
+      const missingDocs = [];
+      
+      for(const item of this.cart) {
+        if(item.required_documents_array && item.required_documents_array.length > 0) {
+          const missing = [];
+          
+          for(const docType of item.required_documents_array) {
+            const uploaded = this.uploadedDocuments[item.id_details] && this.uploadedDocuments[item.id_details][docType];
+            if(!uploaded) {
+              missing.push(this.formatDocumentName(docType));
+            }
+          }
+          
+          if(missing.length > 0) {
+            missingDocs.push({
+              productName: item.name,
+              missingDocs: missing
+            });
+          }
+        }
+      }
+      
+      return missingDocs;
+    },
+    /* Check if document is uploaded */
+    isDocumentUploaded(item, docType) {
+      return !!(this.uploadedDocuments[item.id_details] && this.uploadedDocuments[item.id_details][docType]);
+    },
   },
 };
 
 </script>
 <template>
-
 
   <div class="emb-cart-wrap emb-card">
     <div class="page-title-bar-car">
@@ -350,6 +537,39 @@ export default {
                   >
                     <i class="material-icons font-weight-bold">close </i>
                   </a>
+                </v-col>
+              </v-row>
+              
+              <!-- Document Upload Section -->
+              <v-row v-if="item.required_documents_array && item.required_documents_array.length > 0" class="mt-2">
+                <v-col cols="12">
+                  <v-alert type="warning" dense outlined class="mb-2">
+                    <strong>Documentos Requeridos:</strong> Este producto requiere que subas los siguientes documentos antes de confirmar la compra.
+                  </v-alert>
+                  <v-card outlined class="pa-3">
+                    <v-row v-for="(docType, docIndex) in item.required_documents_array" :key="docIndex" class="mb-2">
+                      <v-col cols="12" sm="4" class="d-flex align-center">
+                        <span class="font-weight-medium text-capitalize">{{ formatDocumentName(docType) }}</span>
+                        <span class="error--text ml-1">*</span>
+                        <v-icon v-if="isDocumentUploaded(item, docType)" color="success" small class="ml-2">mdi-check-circle</v-icon>
+                      </v-col>
+                      <v-col cols="12" sm="8">
+                        <v-file-input
+                          :value="uploadedDocuments[item.id_details] && uploadedDocuments[item.id_details][docType] ? uploadedDocuments[item.id_details][docType].file : null"
+                          @change="handleFileUpload(item, docType, $event)"
+                          :label="'Subir ' + formatDocumentName(docType)"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          prepend-icon="mdi-paperclip"
+                          :loading="uploadingDocuments[item.id_details] && uploadingDocuments[item.id_details][docType]"
+                          :disabled="uploadingDocuments[item.id_details] && uploadingDocuments[item.id_details][docType]"
+                          small-chips
+                          show-size
+                          dense
+                        >
+                        </v-file-input>
+                      </v-col>
+                    </v-row>
+                  </v-card>
                 </v-col>
               </v-row>
             </div>
