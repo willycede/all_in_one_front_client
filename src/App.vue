@@ -1,15 +1,18 @@
 <template>
-	<v-app>		
+	<v-app>
 		<router-view></router-view>
 	    <div class="rtl-layout" @click="toggleRTLLayout">
 	      <a class="text-xl" href="javascript:void(0);">RTL</a>
-	    </div>		
+	    </div>
+	    <cookie-banner />
 	</v-app>
 </template>
 
 <script>
 import { mapGetters } from "vuex";
+import CookieBanner from "Components/Global/CookieBanner.vue";
 export default {
+	components: { CookieBanner },
 	computed: {
 		...mapGetters(["rtlLayout"]),
 		mobileMenu: {

@@ -28,7 +28,7 @@
                                         >
                                         </v-text-field>
                                     </v-flex>
-									
+
                                     <v-text-field
 										type="text"
 										placeholder="Cedula*"
@@ -57,7 +57,42 @@
 										:rules="confirmationPasswordRules"
 									>
 									</v-text-field>
-									<v-btn class="accent mx-0 mb-4" large  @click.stop.prevent="saveDetails">
+
+									<div class="mb-4">
+									<div v-if="loadingDocuments" class="text-caption grey--text">
+										Cargando documentos legales...
+									</div>
+									<div v-else-if="documentsError" class="text-caption error--text">
+										No se pudieron cargar los documentos legales. Refresca la página o contacta soporte.
+									</div>
+									<div v-else-if="!legalDocuments.length" class="text-caption error--text">
+										No hay documentos legales configurados. El registro está bloqueado hasta que se carguen.
+									</div>
+										<v-checkbox
+											v-for="doc in legalDocuments"
+											:key="doc.document_key + '-' + doc.version"
+											v-model="acceptedConsents"
+											:value="doc.document_key"
+											:rules="doc.is_required ? consentRules : []"
+											hide-details
+											class="mt-0"
+										>
+											<template v-slot:label>
+												<span>
+													He leído y acepto la
+													<a
+														:href="buildPdfUrl(doc.file_path)"
+														target="_blank"
+														rel="noopener"
+														@click.stop
+													>{{ doc.title }}</a>
+													<span v-if="doc.is_required" class="error--text">*</span>
+												</span>
+											</template>
+										</v-checkbox>
+									</div>
+
+									<v-btn class="accent mx-0 mb-4" large :disabled="!canSubmit" @click.stop.prevent="saveDetails">
 										Registrarse
 									</v-btn>
 									<p>Posees una cuenta? entonces<router-link to="/client/login" class="accent--text"> Inicia Sesión</router-link></p>
@@ -70,9 +105,10 @@
 		</div>
    </div>
 </template>
-	
+
 <script>
     import api from 'Api';
+    import AppConfig from 'Constants/AppConfig';
 	export default{
    	data () {
       	return {
@@ -87,6 +123,10 @@
             validationObject: {
                 identification_number: '',
             },
+            legalDocuments: [],
+            acceptedConsents: [],
+            loadingDocuments: true,
+            documentsError: false,
 			emailRules: [
 					v => !!v || 'El email es requerido',
 					v => /.+@.+/.test(v) || 'El email ingresado es incorrecto'
@@ -99,20 +139,73 @@
                 v => !!v || 'La contraseña es requerida',
                 v =>  this.formData.password === v  || 'La confirmación de contraseña debe coincidir con la previamente ingresada',
             ],
+            consentRules: [
+                v => !!v || 'Debes aceptar este documento para continuar',
+            ],
           	inputRules: {
                basictextRules: [v => !!v || `El campo es requerido`]
             },
             identificationNumberRul:  [
                 v => !!v || 'El número de identificación es requerida',
                 v =>  (v?.length ===10 || v?.length ===13)  || 'El número de identificación debe tener 10 caracteres o 13',
-            ]    
+            ]
          }
       },
+      mounted() {
+          this.loadLegalDocuments();
+      },
+      computed: {
+          canSubmit() {
+              if (this.loadingDocuments || this.documentsError) return false;
+              if (!this.legalDocuments.length) return false;
+              const requiredKeys = this.legalDocuments
+                  .filter((d) => d.is_required)
+                  .map((d) => d.document_key);
+              return requiredKeys.every((k) => this.acceptedConsents.includes(k));
+          },
+      },
       methods: {
+         buildPdfUrl(filePath) {
+             const base = AppConfig.apiUrl.replace(/\/$/, '');
+             const path = filePath.startsWith('/') ? filePath : `/${filePath}`;
+             return `${base}${path}`;
+         },
+         loadLegalDocuments() {
+             this.loadingDocuments = true;
+             this.documentsError = false;
+             api.get('/api/legal_documents/active')
+                 .then((res) => {
+                     this.legalDocuments = res?.data?.data || [];
+                 })
+                 .catch((err) => {
+                     console.log('loadLegalDocuments error', err);
+                     this.documentsError = true;
+                 })
+                 .finally(() => {
+                     this.loadingDocuments = false;
+                 });
+         },
          saveDetails(){
 				this.$refs.form.validate();
+                const requiredKeys = this.legalDocuments
+                    .filter((d) => d.is_required)
+                    .map((d) => d.document_key);
+                const missing = requiredKeys.filter((k) => !this.acceptedConsents.includes(k));
+                if (missing.length > 0) {
+                    this.$snotify.error('Debes aceptar la política y el consentimiento de tratamiento de datos para continuar', {
+                        closeOnClick: false,
+                        pauseOnHover: false,
+                        timeout: 2500,
+                        showProgressBar: false,
+                    });
+                    return;
+                }
 				if(this.valid){
-					api.post('/api/users/register', this.formData)
+                    const consents = this.legalDocuments
+                        .filter((d) => this.acceptedConsents.includes(d.document_key))
+                        .map((d) => ({ document_key: d.document_key, version: d.version }));
+                    const payload = { ...this.formData, consents };
+					api.post('/api/users/register', payload)
                     .then(() => {
                         this.$snotify.success('Registro éxitoso',{
                             closeOnClick: false,
@@ -125,7 +218,7 @@
                         }, 300);
                     }).catch((err) => {
                           console.log("errr", err)
-                        let defaultErrorMessage = err?.response?.data?.error?.message ? err?.response?.data?.error?.message :  'Ocurrio un error inesperado'; 
+                        let defaultErrorMessage = err?.response?.data?.error?.message ? err?.response?.data?.error?.message :  'Ocurrio un error inesperado';
                         if (Object.keys(err?.response?.data?.error?.validationObject).length > 0) {
                             this.$snotify.error(err.response.data.error.validationObject.identification_number, {
                                 closeOnClick: false,
@@ -142,7 +235,7 @@
                             showProgressBar:false,
                         });
                     });
-                }	
+                }
 			}
 		}
 	}

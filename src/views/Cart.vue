@@ -1,4 +1,4 @@
-<script setup>
+<script>
 import { mapGetters } from "vuex";
 import CryptoJS from 'crypto-js';
 //import emailjs from "@emailjs/browser";
