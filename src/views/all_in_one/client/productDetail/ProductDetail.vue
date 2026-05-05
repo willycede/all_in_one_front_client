@@ -119,7 +119,6 @@
 import {mapActions, mapGetters} from "vuex";
 import {moneyMask} from "../../../../helpers/helpers"
 import AppConfig from "Constants/AppConfig";
-import api from 'Api';
 export default {
 	computed: {
 		...mapGetters(["selectedProduct"]),
