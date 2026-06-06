@@ -36,9 +36,14 @@ import './lib/EmbryoCss'
 // Alliging Position for the toaster
 const options = {
 	toast: {
-		position: SnotifyPosition.rightTop
-	}
-}
+		position: SnotifyPosition.rightTop,
+		timeout: 4500,
+		showProgressBar: false,
+		closeOnClick: true,
+		pauseOnHover: true,
+		bodyMaxLength: 220,
+	},
+};
 
 //plugins
 Vue.use(VueMoment)
@@ -53,20 +58,33 @@ Vue.use(VueGoogleMaps, {
 	}
 });
 Vue.use(GlobalComponents)
+
+Nprogress.configure({ showSpinner: false, trickleSpeed: 180, minimum: 0.15 });
+
+function isSamePathQueryNavigation(to, from) {
+	return to.path === from.path;
+}
+
 // router navigation guards
 router.beforeEach((to, from, next) => {
-	Nprogress.start();
+	if (!isSamePathQueryNavigation(to, from)) {
+		Nprogress.start();
+	}
 	next();
 })
 
-router.afterEach(() => {
-	Nprogress.done();
-	setTimeout(() => {
-		const contentWrapper = document.querySelector("html");
-		if (contentWrapper !== null) {
-			contentWrapper.scrollTop = 0;
-		}
-	}, 200);
+router.afterEach((to, from) => {
+	if (!isSamePathQueryNavigation(to, from)) {
+		Nprogress.done();
+		setTimeout(() => {
+			const contentWrapper = document.querySelector('html');
+			if (contentWrapper !== null) {
+				contentWrapper.scrollTop = 0;
+			}
+		}, 200);
+	} else {
+		Nprogress.done();
+	}
 })
 
 // creating a instance of vue localisation module

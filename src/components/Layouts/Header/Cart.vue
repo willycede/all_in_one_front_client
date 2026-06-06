@@ -1,132 +1,191 @@
 <template>
-	<div class="mr-3">
-		<v-menu transition="scale-transition" class="cart" min-width="300" max-width="300" offset-y light>
+	<div>
+		<v-menu
+			transition="scale-transition"
+			class="cart"
+			content-class="aio-dropdown aio-cart-menu"
+			min-width="360"
+			max-width="380"
+			offset-y
+			nudge-bottom="10"
+			light
+		>
 			<template v-slot:activator="{ on }">
-				<v-btn class="cart-btn" fab dark small color="accent" v-on="on">
-					<v-badge v-if="cart.length > 0" right large color="accent">
-						<template >
-							<span slot="badge">{{cart.length}}</span>
-						</template>
-						<v-icon dark>shopping_cart</v-icon>
-					</v-badge>
-
-					<v-icon dark v-if="cart.length == 0" >shopping_cart</v-icon>
-
-				</v-btn>
+				<button type="button" class="onsus-action-btn" v-on="on">
+					<span class="onsus-action-btn__icon">
+						<v-icon>shopping_cart</v-icon>
+						<span v-if="cart.length > 0" class="onsus-action-btn__badge">{{ cart.length }}</span>
+					</span>
+					<span class="onsus-action-btn__label">Carrito</span>
+				</button>
 			</template>
-			<div v-if="cart && cart.length > 0" class="cart-menu-list white">
-				<emb-perfect-scrollbar class="scroll-area" style="max-height:280px">
-					<v-list class="cart-list-items py-0" v-for="(cart, index) in cart" :key="index">
-						<v-layout row wrap align-center cart-item ma-0>
-							<v-flex sm12 md12 lg12 xl12 pa-0>
-								<v-layout row wrap align-center class="ma-0">
-									<v-flex xs3 sm3 md3 lg3 xl3 pa-0>
-										<img :src="cart.url" width="60" height="70">
-									</v-flex>
-									<v-flex xs9 sm9 md9 lg9 xl9 pa-0>
-										<div class="pl-1">
-											<h6 class="word-wrap-break">{{cart.name}}</h6>
-											<span>
-												<emb-currency-sign></emb-currency-sign>{{cart.details_price * cart.details_quantity}}
-											</span>
-										</div>
-									</v-flex>
-									<v-flex sm4 md4 lg4 xl4 text-center pa-0 cart-action>
-										<v-btn class="primary d-inline-block" icon @click.stop="dialog = true"
-											@click="deleteProductFromCart(cart)">
-											<v-icon>remove_shopping_cart</v-icon>
-										</v-btn>
-										<v-btn class="primary d-inline-block ml-2 d-inline-flex align-items-center" icon
-											to="/cart">
-											<v-icon>edit</v-icon>
-										</v-btn>
-									</v-flex>
-								</v-layout>
-							</v-flex>
-						</v-layout>
-					</v-list>
-				</emb-perfect-scrollbar>
-				<emb-delete-confirmation ref="deleteConfirmationDialog"
-					message="¿Desea Eliminar El Producto?" @onConfirm="onDeleteProductFromCart">
-				</emb-delete-confirmation>
-				<v-layout align-center pa-3>
-					<v-btn class="accent white--text" block to="/cart">Carrito</v-btn>
-				</v-layout>
+
+			<div v-if="!cart.length" class="aio-cart-dropdown aio-cart-dropdown--empty">
+				<div class="aio-cart-dropdown__empty-icon">
+					<v-icon size="32">shopping_bag</v-icon>
+				</div>
+				<h3 class="aio-cart-dropdown__empty-title">Tu carrito está vacío</h3>
+				<p class="aio-cart-dropdown__empty-text">
+					Explora el catálogo y agrega productos para verlos aquí.
+				</p>
+				<router-link to="/products" class="aio-cart-dropdown__empty-btn">
+					<v-icon size="18">storefront</v-icon>
+					Explorar productos
+				</router-link>
 			</div>
-			<div v-else class="text-center white pa-6">
-				<v-icon size="31" class="accent--text">
-					shopping_cart
-				</v-icon>
-				<h5>No Tienes Productos Agregados</h5>
+
+			<div v-else class="aio-cart-dropdown">
+				<div class="aio-cart-dropdown__header">
+					<div>
+						<span class="aio-cart-dropdown__eyebrow">Tu carrito</span>
+						<h3 class="aio-cart-dropdown__title">
+							{{ cart.length }}
+							{{ cart.length === 1 ? 'producto' : 'productos' }}
+						</h3>
+					</div>
+					<span class="aio-cart-dropdown__header-total">{{ formattedTotal }}</span>
+				</div>
+
+				<emb-perfect-scrollbar class="aio-cart-dropdown__scroll">
+					<ul class="aio-cart-dropdown__list">
+						<li
+							v-for="(item, index) in cart"
+							:key="item.id || index"
+							class="aio-cart-dropdown__item"
+						>
+							<div class="aio-cart-dropdown__thumb">
+								<img
+									:src="item.url"
+									:alt="item.name"
+									@error="onImageError($event)"
+								>
+							</div>
+							<div class="aio-cart-dropdown__body">
+								<p class="aio-cart-dropdown__name">{{ item.name }}</p>
+								<p class="aio-cart-dropdown__meta">
+									<span v-if="item.details_quantity > 1">{{ item.details_quantity }} × </span>
+									<emb-currency-sign></emb-currency-sign>{{ formatPrice(item.details_price) }}
+								</p>
+							</div>
+							<div class="aio-cart-dropdown__side">
+								<span class="aio-cart-dropdown__line-total">
+									<emb-currency-sign></emb-currency-sign>{{ lineTotal(item) }}
+								</span>
+								<button
+									type="button"
+									class="aio-cart-dropdown__remove"
+									title="Quitar del carrito"
+									@click="deleteProductFromCart(item)"
+								>
+									<v-icon size="18">close</v-icon>
+								</button>
+							</div>
+						</li>
+					</ul>
+				</emb-perfect-scrollbar>
+
+				<div class="aio-cart-dropdown__footer">
+					<div class="aio-cart-dropdown__subtotal">
+						<span>Subtotal</span>
+						<strong>{{ formattedTotal }}</strong>
+					</div>
+					<router-link to="/cart" class="aio-cart-dropdown__checkout-btn">
+						Ver carrito
+						<v-icon size="18">arrow_forward</v-icon>
+					</router-link>
+				</div>
+
+				<emb-delete-confirmation
+					ref="deleteConfirmationDialog"
+					message="¿Desea eliminar el producto?"
+					@onConfirm="onDeleteProductFromCart"
+				></emb-delete-confirmation>
 			</div>
 		</v-menu>
 	</div>
 </template>
 
 <script>
-	import { mapGetters } from 'vuex';
-	import VuePerfectScrollbar from 'vue-perfect-scrollbar';
-	import api from 'Api';
+import { mapGetters } from 'vuex';
+import VuePerfectScrollbar from 'vue-perfect-scrollbar';
+import api from 'Api';
 
-	export default {
-		components: {
-			embPerfectScrollbar: VuePerfectScrollbar,
+export default {
+	components: {
+		embPerfectScrollbar: VuePerfectScrollbar,
+	},
+	data() {
+		return {
+			selectDeletedProduct: null,
+		};
+	},
+	computed: {
+		...mapGetters(['cart']),
+		cartTotal() {
+			return this.cart.reduce((sum, item) => {
+				const qty = item.details_quantity || 1;
+				const price = parseFloat(item.details_price) || 0;
+				return sum + price * qty;
+			}, 0);
 		},
-		data() {
-			return {
-				selectDeletedProduct: null,
-				settings: {
-					maxScrollbarLength: 160
-				}
-			};
+		formattedTotal() {
+			return `$ ${this.cartTotal.toFixed(2)}`;
 		},
-		async mounted() {
+	},
+	async mounted() {
+		if (!localStorage.id_users) return;
 
+		try {
+			const shopCart = await api.get(`/api/shoppingcar/get_shop/${localStorage.id_users}`);
+			const carts = shopCart?.data?.data;
+			if (!carts?.length) return;
 
-			const shopCart = await api.get(
-			"/api/shoppingcar/get_shop/" + localStorage.id_users
+			const shopCartDetails = await api.get(
+				`/api/shoppingcar/get_shopDetails/${carts[0].id_shopping_car}`
 			);
-
-			let carts = shopCart?.data?.data;
-
-			const shopCartDetails = await api.get('/api/shoppingcar/get_shopDetails/'+carts[0].id_shopping_car);
-			let cartDetail = shopCartDetails?.data?.data;
-
-			this.$store.dispatch("addSetToCart", cartDetail);
-
-		},
-		computed: {
-			...mapGetters(["cart", "selectedCurrency", "currencies"]),
-			getTotalPrice() {
-				let totalPrice = 0;
-				if (this.cart.length > 0) {
-					for (const item of this.cart) {
-						totalPrice += item.total;
-					}
-					return totalPrice.toFixed(2);
-				}
-				else {
-					return totalPrice;
-				}
+			const cartDetail = shopCartDetails?.data?.data;
+			if (cartDetail) {
+				this.$store.dispatch('addSetToCart', cartDetail);
 			}
-		},
-		methods: {
-			deleteProductFromCart(product) {
-				this.$refs.deleteConfirmationDialog.openDialog();
-				this.selectDeletedProduct = product;
-			},
-			onDeleteProductFromCart() {
-				this.$refs.deleteConfirmationDialog.close();
-				this.$snotify.success('Product Removing from cart', {
-					closeOnClick: false,
-					pauseOnHover: false,
-					timeout: 1000,
-				});
-				this.$store.dispatch(
-					"onDeleteProductFromCart",
-					this.selectDeletedProduct
-				);
-			}
+		} catch (error) {
+			// Sin carrito activo o sesión inválida
 		}
-	}
+	},
+	methods: {
+		formatPrice(value) {
+			return parseFloat(value || 0).toFixed(2);
+		},
+		lineTotal(item) {
+			const qty = item.details_quantity || 1;
+			const price = parseFloat(item.details_price) || 0;
+			return (price * qty).toFixed(2);
+		},
+		onImageError(event) {
+			event.target.classList.add('aio-cart-dropdown__thumb-img--error');
+		},
+		deleteProductFromCart(product) {
+			this.selectDeletedProduct = product;
+			this.$refs.deleteConfirmationDialog.openDialog();
+		},
+		onDeleteProductFromCart() {
+			this.$refs.deleteConfirmationDialog.close();
+			const product = this.selectDeletedProduct;
+			this.$store.dispatch('onDeleteProductFromCart', product)
+				.then(() => {
+					this.$snotify.success('Producto eliminado del carrito', {
+						closeOnClick: false,
+						pauseOnHover: false,
+						timeout: 1500,
+					});
+				})
+				.catch(() => {
+					this.$snotify.error('No se pudo eliminar el producto. Intenta de nuevo.', {
+						closeOnClick: false,
+						pauseOnHover: false,
+						timeout: 2500,
+					});
+				});
+		},
+	},
+};
 </script>

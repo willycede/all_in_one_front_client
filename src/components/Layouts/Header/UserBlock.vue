@@ -1,24 +1,109 @@
 <template>
-	<div>
-		<v-menu transition="scale-transition" offset-overflow nudge-bottom="30" nudge-right="20" min-width="200"
-			max-width="200" class="userblock-dropdown" light>
-			<template v-slot:activator="{ on }">
-				<v-btn fab small v-on="on">
-					<img src="/static/images/setting-img.png" width="40" height="40" class="v-btn--round">
-				</v-btn>
+	<div class="aio-user-block">
+		<v-menu
+			v-if="isLoggedIn"
+			offset-y
+			nudge-bottom="10"
+			transition="slide-y-transition"
+			content-class="aio-dropdown aio-user-menu"
+			min-width="260"
+			max-width="260"
+		>
+			<template v-slot:activator="{ on, attrs }">
+				<button type="button" class="onsus-action-btn" v-bind="attrs" v-on="on">
+					<span class="onsus-action-btn__icon">
+						<v-icon>person_outline</v-icon>
+					</span>
+					<span class="onsus-action-btn__label">Cuenta</span>
+				</button>
 			</template>
-			<v-list class="user-dropdown-list">
-				<v-list-item :href="userLink.path" v-for="(userLink, key) in data" :key="key">
-					<v-icon class="mr-2">{{userLink.icon}}</v-icon>
-					<span>{{userLink.title}}</span>
-				</v-list-item>
-			</v-list>
+
+			<div class="aio-user-menu__panel">
+				<div class="aio-user-menu__header">
+					<span class="aio-user-menu__avatar">
+						<v-icon size="22">person</v-icon>
+					</span>
+					<div>
+						<p class="aio-user-menu__title">Mi cuenta</p>
+						<p class="aio-user-menu__subtitle">Hola, {{ userDisplayName }}</p>
+					</div>
+				</div>
+
+				<nav class="aio-user-menu__nav">
+					<router-link
+						v-for="(userLink, key) in accountLinks"
+						:key="key"
+						:to="userLink.path"
+						class="aio-user-menu__item"
+					>
+						<span class="aio-user-menu__item-icon">
+							<v-icon size="18">{{ userLink.icon }}</v-icon>
+						</span>
+						<span class="aio-user-menu__item-text">{{ userLink.title }}</span>
+						<v-icon size="16" class="aio-user-menu__item-arrow">chevron_right</v-icon>
+					</router-link>
+
+					<button type="button" class="aio-user-menu__item aio-user-menu__item--danger" @click="onLogout">
+						<span class="aio-user-menu__item-icon aio-user-menu__item-icon--danger">
+							<v-icon size="18">power_settings_new</v-icon>
+						</span>
+						<span class="aio-user-menu__item-text">Salir</span>
+						<v-icon size="16" class="aio-user-menu__item-arrow">chevron_right</v-icon>
+					</button>
+				</nav>
+			</div>
 		</v-menu>
+
+		<router-link v-else to="/client/login" class="onsus-action-btn aio-user-block__login">
+			<span class="onsus-action-btn__icon">
+				<v-icon>login</v-icon>
+			</span>
+			<span class="onsus-action-btn__label">Iniciar sesión</span>
+		</router-link>
 	</div>
 </template>
 
 <script>
-	export default {
-		props: ['data'],
-	}
+import { isUserLoggedIn, getUserDisplayName, clearUserSession } from 'Helpers/auth';
+
+export default {
+	props: ['data'],
+	data() {
+		return {
+			isLoggedIn: false,
+			userDisplayName: '',
+		};
+	},
+	computed: {
+		accountLinks() {
+			return (this.data || []).filter((link) => link.icon !== 'power_settings_new');
+		},
+	},
+	watch: {
+		$route() {
+			this.refreshAuthState();
+		},
+	},
+	created() {
+		this.refreshAuthState();
+	},
+	methods: {
+		refreshAuthState() {
+			this.isLoggedIn = isUserLoggedIn();
+			this.userDisplayName = this.isLoggedIn ? getUserDisplayName() : '';
+		},
+		onLogout() {
+			clearUserSession();
+			this.$store.dispatch('clearWishlist');
+			this.refreshAuthState();
+			this.$router.push({ path: '/client/login' });
+		},
+	},
+};
 </script>
+
+<style scoped>
+.aio-user-block__login {
+	text-decoration: none;
+}
+</style>

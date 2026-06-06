@@ -180,35 +180,25 @@ export default {
 		},
 		// this method is use to add a product in wishlist
 		addItemToWishlist(item) {
-			if(this.ifItemExistInWishlist(item)) {
-				this.$snotify.error('Product already exist in the wishlist',{
-					showProgressBar:false,
-				});
-			} 
-			else {
-				this.$snotify.success('Product adding to the wishlist',{
-					closeOnClick: false,
-					pauseOnHover: false,
-					timeout: 1000,
-					showProgressBar:false,
-				});
-				setTimeout(() => {
-					this.$store.dispatch("addItemToWishlist", item);
-				}, 2000);
+			if (this.ifItemExistInWishlist(item)) {
+				this.$snotify.error('El producto ya está en favoritos', { showProgressBar: false });
+				return;
 			}
+			this.$store.dispatch('addItemToWishlist', item)
+				.then(() => {
+					this.$snotify.success('Agregado a favoritos', { timeout: 1500, showProgressBar: false });
+				})
+				.catch((error) => {
+					const message = error?.response?.data?.error?.message || 'No se pudo agregar a favoritos';
+					this.$snotify.error(message, { timeout: 2500, showProgressBar: false });
+				});
 		},
-		/**
-		 * This Function Is use to check weather the product exist in the wishlist
-		 * Return boolean
-		*/
 		ifItemExistInWishlist(result) {
-			let exists = false;
-			for (let item of this.wishlist) {
-				if (item.id == result.objectID) {
-					exists = true;
-				}
-			}
-			return exists;
+			return this.wishlist.some((item) => {
+				const itemId = item.id_product || item.objectID || item.id;
+				const resultId = result.id_products || result.objectID || result.id;
+				return String(itemId) === String(resultId);
+			});
 		}, 
 	}
 }

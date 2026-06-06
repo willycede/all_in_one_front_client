@@ -139,15 +139,21 @@
 			*/
 			onDeleteProductFromCart() {
 				this.$refs.deleteConfirmationDialog.close();
-				this.$snotify.error('Product Removing from cart',{
-					closeOnClick: false,
-					pauseOnHover: false,
-					timeout: 1000,
-				});
-				this.$store.dispatch(
-				"onDeleteProductFromCart",
-				this.selectDeletedProduct
-				);
+				this.$store.dispatch('onDeleteProductFromCart', this.selectDeletedProduct)
+					.then(() => {
+						this.$snotify.success('Producto eliminado del carrito', {
+							closeOnClick: false,
+							pauseOnHover: false,
+							timeout: 1500,
+						});
+					})
+					.catch(() => {
+						this.$snotify.error('No se pudo eliminar el producto. Intenta de nuevo.', {
+							closeOnClick: false,
+							pauseOnHover: false,
+							timeout: 2500,
+						});
+					});
 			}
 		}
    }

@@ -36,7 +36,7 @@ html body {
 	font-size: $font-size-base;
 	line-height: 1.5;
 	font-family: $base-font-family;
-	background: $body-bg;
+	background: linear-gradient(180deg, #f8f7fc 0%, #f3f0fa 100%);
 	font-feature-settings: "kern", "liga", "clig", "calt";
 	overflow-x: hidden;
 }

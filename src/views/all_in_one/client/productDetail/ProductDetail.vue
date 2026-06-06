@@ -1,284 +1,576 @@
 <template>
-	<div class="emb-product-detail">
-		<template v-if="selectedProduct != null">
-			<emb-page-title :heading="selectedProduct.name"></emb-page-title>
-			<div class="emb-productDetail-content white">
-				<div class="product-detail section-gap">
-					<v-container grid-list-xl py-0>
-						<v-layout row wrap product-detail-row>
-							<v-flex xs12 sm12 md6 lg6 xl6 text-center>
-								<v-layout row wrap>
-									<v-flex xs2 sm2 md2 lg2 xl2 product-gallery>
-										<div 
-											class="detail-image-gallery d-inline-block mb-6 mx-2"  
-											v-for="(productItemImg,product_images_id) in selectedProduct.images" 
-											:key="product_images_id"
-											@mouseover="togglePreviewImage(productItemImg.url)"
-										>
-											<a href="javascript:void(0)">
-												<img :src="productItemImg.url" width="71" height="91" alt="product image">
-											</a>
-										</div>
-									</v-flex>
-									<v-flex xs10 lg10 sm10 md10 xl10 product-detail-img>
-										<div class="product-detail-thumb">
-											<div class="image-wrapper emb-card">
-												<a href="javascript:void(0)">
-													<img class="detailImg" :src="selectedImage"  width="auto" height="auto" alt="product detail image">
-												</a>
-											</div>
-										</div>
-									</v-flex>
-								</v-layout>
-							</v-flex>
-							<v-flex xs12 sm12 md6 lg6 xl5>
-								<h3>{{selectedProduct.name}}</h3>
-								<emb-review-popup ref="productReviewPopup"></emb-review-popup>
-								<h4 class="accent--text">{{selectedProduct.price}}</h4>
-								<ul class="product-availablity list-unstyled pl-0 mb-4 mt-4">
-									<li>
-										<template v-if="selectedProduct.status === true">
-											<span class="font-weight-medium">Existencia</span> : <span class="font-weight-regular">En Stock</span>
-										</template>
-										<template v-else>
-											<span class="font-weight-medium">Existencia</span> : <span class="font-weight-regular">Fuera De Stock</span>
-										</template>
-									</li>
-									<li>
-										<span class="font-weight-medium">Código Producto</span> : <span class="font-weight-regular">{{selectedProduct.external_product_id}}</span>
-									</li>
-								</ul>
-								<p>{{selectedProduct.descpription}}</p>
-									<!-- <div class="bullet-points mb-4">
-										<ul class="features pl-13">
-											<li v-for="(Features,key) in selectedProduct.features" 	:key="key">
-												{{Features}}
-											</li>
-										</ul>
-									</div> -->
-								<div class="select-group mb-4">
-									<v-layout wrap>
-										<v-flex v-if="selectedProduct.cities && selectedProduct.cities.length > 0" xs12 sm4 lg4 md4 lg3 xl3 pb-0>
-											<v-select
-												v-model="selectedCity"
-												:items="selectedProduct.cities"
-												item-text="name"
-												item-value="id_city"
-												placeholder="Seleccionar Ciudad"
-												label="Ciudad"
-											>
-											</v-select>
-										</v-flex>
-										<v-flex xs12 sm4 lg4 md4 lg3 xl3 pb-0>
-											<v-text-field
-												v-model.number="productQuantity"
-												type="number"
-												label="Cantidad"
-												placeholder="Cantidad"
-												:min="1"
-												:rules="[v => v > 0 || 'La cantidad debe ser mayor a 0']"
-											>
-											</v-text-field>
-										</v-flex>
-									</v-layout>
-								</div>
-								<!-- Nota sobre documentos requeridos -->
-								<div v-if="selectedProduct.required_documents_array && selectedProduct.required_documents_array.length > 0" class="documents-note mb-4">
-									<v-alert type="info" dense outlined>
-										<strong>Nota:</strong> Este producto requiere documentos. Podrás subirlos en el carrito de compras antes de confirmar tu pedido.
-									</v-alert>
-								</div>
-								<div class="mb-6 btn-wrap">
-									<v-btn 
-										v-if="ifItemExistInCart(selectedProduct)"
-										class="accent cpx-0"
-										large
-										to="/cart"
-									>
-										Ver en el carrito
-									</v-btn>
-									<v-btn 
-										v-else
-										class="accent d-inline-block cpx-0"
-										large 
-										@click="addProductToCart(selectedProduct)"
-									>
-										Agregar al carrito
-									</v-btn>
-								</div>
-							</v-flex>
-						</v-layout>
-					</v-container>
+	<div class="aio-product-detail emb-product-detail">
+		<!-- Skeleton de carga -->
+		<div v-if="isPageLoading" class="aio-product-detail__loading">
+			<v-container>
+				<div class="aio-product-detail__skeleton-breadcrumb"></div>
+				<div class="aio-product-detail__skeleton-layout">
+					<div class="aio-product-detail__skeleton-gallery">
+						<div class="aio-product-detail__skeleton-main"></div>
+					</div>
+					<div class="aio-product-detail__skeleton-info">
+						<div class="aio-product-detail__skeleton-line aio-product-detail__skeleton-line--lg"></div>
+						<div class="aio-product-detail__skeleton-line aio-product-detail__skeleton-line--md"></div>
+						<div class="aio-product-detail__skeleton-line aio-product-detail__skeleton-line--sm"></div>
+						<div class="aio-product-detail__skeleton-line aio-product-detail__skeleton-line--block"></div>
+					</div>
 				</div>
+			</v-container>
+		</div>
+
+		<template v-else-if="selectedProduct">
+			<div class="aio-product-detail__hero">
+				<v-container>
+					<nav class="aio-product-detail__breadcrumb" aria-label="Breadcrumb">
+						<router-link to="/mainPage">Inicio</router-link>
+						<v-icon size="14">chevron_right</v-icon>
+						<router-link to="/products">Catálogo</router-link>
+						<v-icon size="14">chevron_right</v-icon>
+						<span>{{ selectedProduct.name }}</span>
+					</nav>
+					<h1 class="aio-product-detail__hero-title">{{ selectedProduct.name }}</h1>
+				</v-container>
+			</div>
+
+			<div class="aio-product-detail__body">
+				<v-container>
+					<div class="aio-product-detail__layout">
+						<!-- Galería -->
+						<div class="aio-product-detail__gallery">
+							<div v-if="productImages.length > 1" class="aio-product-detail__thumbs-col">
+								<span class="aio-product-detail__thumbs-label">
+									{{ productImages.length }} fotos
+								</span>
+								<div ref="thumbsScroll" class="aio-product-detail__thumbs">
+									<button
+										v-for="(img, index) in productImages"
+										:key="img.product_images_id || index"
+										type="button"
+										class="aio-product-detail__thumb"
+										:class="{ 'aio-product-detail__thumb--active': selectedImageIndex === index }"
+										:aria-label="`Ver imagen ${index + 1} de ${productImages.length}`"
+										:aria-current="selectedImageIndex === index ? 'true' : 'false'"
+										@click="selectImage(index)"
+									>
+										<div
+											class="aio-product-detail__thumb-inner"
+											:class="{ 'aio-product-detail__thumb-inner--loaded': thumbLoaded[index] }"
+										>
+											<div v-if="!thumbLoaded[index]" class="aio-product-detail__thumb-placeholder"></div>
+											<img
+												v-if="!thumbErrors[index]"
+												:src="img.url"
+												:alt="`${selectedProduct.name} ${index + 1}`"
+												loading="lazy"
+												@load="onThumbLoad(index)"
+												@error="onThumbError(index)"
+											>
+											<v-icon v-else size="20" color="#9ca3af">broken_image</v-icon>
+										</div>
+										<span class="aio-product-detail__thumb-index">{{ index + 1 }}</span>
+									</button>
+								</div>
+							</div>
+
+							<div class="aio-product-detail__main">
+								<div
+									class="aio-product-detail__main-frame"
+									:class="{
+										'aio-product-detail__main-frame--loaded': mainImageLoaded,
+										'aio-product-detail__main-frame--error': mainImageError,
+										'aio-product-detail__main-frame--zoomable': mainImageLoaded && !mainImageError,
+									}"
+									@click="onMainFrameClick"
+								>
+									<div v-if="!mainImageLoaded && !mainImageError" class="aio-product-detail__main-skeleton">
+										<v-progress-circular indeterminate color="#A96DFA" size="36" width="3"></v-progress-circular>
+									</div>
+
+									<div v-if="mainImageError" class="aio-product-detail__main-fallback">
+										<v-icon size="48" color="#A96DFA">image_not_supported</v-icon>
+										<span>Imagen no disponible</span>
+									</div>
+
+									<img
+										v-show="mainImageLoaded && !mainImageError"
+										ref="mainImg"
+										:src="selectedImage"
+										:alt="selectedProduct.name"
+										class="aio-product-detail__main-img detailImg"
+										draggable="false"
+										@load="onMainImageLoad"
+										@error="onMainImageError"
+									>
+
+									<button
+										v-if="mainImageLoaded && !mainImageError"
+										type="button"
+										class="aio-product-detail__zoom-btn"
+										aria-label="Ampliar imagen"
+										@click.stop="openLightbox(selectedImageIndex)"
+									>
+										<v-icon size="20" color="white">zoom_in</v-icon>
+									</button>
+
+									<span
+										v-if="mainImageLoaded && !mainImageError && productImages.length > 1"
+										class="aio-product-detail__image-counter"
+									>
+										{{ selectedImageIndex + 1 }} / {{ productImages.length }}
+									</span>
+								</div>
+
+								<p v-if="mainImageLoaded && !mainImageError" class="aio-product-detail__zoom-hint">
+									<v-icon size="16">zoom_in</v-icon>
+									Clic en la imagen o en la lupa para ampliar
+								</p>
+							</div>
+						</div>
+
+						<!-- Información -->
+						<div class="aio-product-detail__info">
+							<div class="aio-product-detail__price-row">
+								<span class="aio-product-detail__price">{{ formattedPrice }}</span>
+								<span
+									class="aio-product-detail__stock"
+									:class="selectedProduct.status ? 'aio-product-detail__stock--in' : 'aio-product-detail__stock--out'"
+								>
+									{{ selectedProduct.status ? 'En stock' : 'Fuera de stock' }}
+								</span>
+							</div>
+
+							<ul class="aio-product-detail__meta">
+								<li>
+									<span>Código</span>
+									<strong>{{ selectedProduct.external_product_id || '—' }}</strong>
+								</li>
+							</ul>
+
+							<p v-if="selectedProduct.descpription" class="aio-product-detail__desc">
+								{{ selectedProduct.descpription }}
+							</p>
+
+							<div v-if="hasRequiredDocuments" class="aio-product-detail__alert">
+								<v-icon size="18">info</v-icon>
+								<p>
+									<strong>Documentos requeridos.</strong>
+									Podrás subirlos en el carrito antes de confirmar tu pedido.
+								</p>
+							</div>
+
+							<div class="aio-product-detail__form">
+								<div v-if="selectedProduct.cities && selectedProduct.cities.length > 0" class="aio-product-detail__field">
+									<label>Ciudad</label>
+									<v-select
+										v-model="selectedCity"
+										:items="selectedProduct.cities"
+										item-text="name"
+										item-value="id_city"
+										placeholder="Seleccionar ciudad"
+										outlined
+										dense
+										hide-details
+										class="aio-product-detail__select"
+									></v-select>
+								</div>
+
+								<div class="aio-product-detail__field aio-product-detail__field--qty">
+									<label>Cantidad</label>
+									<div class="aio-product-detail__qty">
+										<button type="button" aria-label="Disminuir" @click="decreaseQty">−</button>
+										<input
+											v-model.number="productQuantity"
+											type="number"
+											min="1"
+											aria-label="Cantidad"
+										>
+										<button type="button" aria-label="Aumentar" @click="increaseQty">+</button>
+									</div>
+								</div>
+							</div>
+
+							<div class="aio-product-detail__actions">
+								<button
+									v-if="ifItemExistInCart(selectedProduct)"
+									type="button"
+									class="aio-product-detail__btn aio-product-detail__btn--secondary"
+									@click="$router.push('/cart')"
+								>
+									<v-icon size="20">shopping_bag</v-icon>
+									Ver en el carrito
+								</button>
+								<button
+									v-else
+									type="button"
+									class="aio-product-detail__btn aio-product-detail__btn--primary"
+									@click="addProductToCart(selectedProduct)"
+								>
+									<v-icon size="20" color="white">add_shopping_cart</v-icon>
+									Agregar al carrito
+								</button>
+							</div>
+						</div>
+					</div>
+				</v-container>
 			</div>
 		</template>
+
+		<div v-else class="aio-product-detail__empty">
+			<v-icon size="48" color="#A96DFA">inventory_2</v-icon>
+			<h2>Producto no encontrado</h2>
+			<router-link to="/products" class="aio-product-detail__btn aio-product-detail__btn--primary">
+				Volver al catálogo
+			</router-link>
+		</div>
+
+		<!-- Lightbox ampliado -->
+		<v-dialog
+			v-model="lightboxOpen"
+			max-width="1100"
+			content-class="aio-product-lightbox"
+			@click:outside="closeLightbox"
+		>
+			<div class="aio-product-lightbox__panel" role="dialog" aria-modal="true" :aria-label="`Imagen ampliada: ${selectedProduct?.name || ''}`">
+				<button type="button" class="aio-product-lightbox__close" aria-label="Cerrar" @click="closeLightbox">
+					<v-icon color="white">close</v-icon>
+				</button>
+
+				<button
+					v-if="productImages.length > 1"
+					type="button"
+					class="aio-product-lightbox__nav aio-product-lightbox__nav--prev"
+					aria-label="Imagen anterior"
+					@click="lightboxPrev"
+				>
+					<v-icon color="white">chevron_left</v-icon>
+				</button>
+
+				<div class="aio-product-lightbox__stage">
+					<div v-if="lightboxLoading" class="aio-product-lightbox__loading">
+						<v-progress-circular indeterminate color="#A96DFA" size="44" width="3"></v-progress-circular>
+					</div>
+					<img
+						v-show="!lightboxLoading && !lightboxError"
+						ref="lightboxImg"
+						:src="lightboxImage"
+						:alt="selectedProduct?.name"
+						class="aio-product-lightbox__img"
+						@load="onLightboxImageLoad"
+						@error="onLightboxImageError"
+					>
+					<div v-if="lightboxError" class="aio-product-lightbox__error">
+						<v-icon size="40" color="#A96DFA">broken_image</v-icon>
+						<span>No se pudo cargar la imagen</span>
+					</div>
+				</div>
+
+				<button
+					v-if="productImages.length > 1"
+					type="button"
+					class="aio-product-lightbox__nav aio-product-lightbox__nav--next"
+					aria-label="Imagen siguiente"
+					@click="lightboxNext"
+				>
+					<v-icon color="white">chevron_right</v-icon>
+				</button>
+
+				<div v-if="productImages.length > 1" class="aio-product-lightbox__footer">
+					<span class="aio-product-lightbox__counter">
+						{{ lightboxIndex + 1 }} / {{ productImages.length }}
+					</span>
+					<div class="aio-product-lightbox__thumbs">
+						<button
+							v-for="(img, index) in productImages"
+							:key="'lb-' + (img.product_images_id || index)"
+							type="button"
+							class="aio-product-lightbox__thumb"
+							:class="{ 'aio-product-lightbox__thumb--active': lightboxIndex === index }"
+							:aria-label="`Ver imagen ${index + 1}`"
+							@click="openLightbox(index)"
+						>
+							<img :src="img.url" :alt="`Miniatura ${index + 1}`" loading="lazy">
+						</button>
+					</div>
+				</div>
+			</div>
+		</v-dialog>
 	</div>
 </template>
 
 <script>
-import {mapActions, mapGetters} from "vuex";
-import {moneyMask} from "../../../../helpers/helpers"
-import AppConfig from "Constants/AppConfig";
+import { mapGetters } from 'vuex';
+import { moneyMask } from '../../../../helpers/helpers';
+import AppConfig from 'Constants/AppConfig';
+import { isProductInCart } from 'Helpers/cart';
+
 export default {
-	computed: {
-		...mapGetters(["selectedProduct"]),
+	data() {
+		return {
+			isPageLoading: true,
+			selectedImage: '',
+			selectedImageIndex: 0,
+			mainImageLoaded: false,
+			mainImageError: false,
+			thumbLoaded: {},
+			thumbErrors: {},
+			selectedCity: null,
+			productQuantity: 1,
+			formattedPrice: '',
+			lightboxOpen: false,
+			lightboxIndex: 0,
+			lightboxImage: '',
+			lightboxLoading: true,
+			lightboxError: false,
+		};
 	},
-	async mounted() {
-		this.id = this.$route.params.id;
-		await this.getProductsByCategoryIdAndFilters(this.id);
-		await this.$store.dispatch("getProductsBId", this.id);
-		setTimeout(() => {
-			console.log(this.selectedProduct, "en el  set time ouyt")
-			this.selectedImage = this.selectedProduct?.images[0].url;
-			this.selectedProduct.price = moneyMask(this.selectedProduct.price);
-		}, 1000);
-	
+	computed: {
+		...mapGetters(['selectedProduct', 'cart']),
+		productImages() {
+			return this.selectedProduct?.images || [];
+		},
+		hasRequiredDocuments() {
+			const docs = this.selectedProduct?.required_documents_array;
+			if (Array.isArray(docs) && docs.length > 0) return true;
+			const raw = this.selectedProduct?.required_documents;
+			return raw && String(raw).trim() !== '';
+		},
+		requiredDocumentsArray() {
+			if (this.selectedProduct?.required_documents_array?.length) {
+				return this.selectedProduct.required_documents_array;
+			}
+			const raw = this.selectedProduct?.required_documents;
+			if (!raw || String(raw).trim() === '') return [];
+			try {
+				return JSON.parse(raw);
+			} catch (e) {
+				return [];
+			}
+		},
 	},
 	watch: {
-    "$route"(to) {
-		 this.title = to.params.title;
-		 this.id = to.params.id;
-    },
-},
-		data () {
-		return{
-			id: "",
-			selectedImage: null,
-			selectedCity: null,
-			productQuantity: 1
-		}
+		'$route.params.id': {
+			handler() {
+				this.loadProduct();
+			},
+		},
+	},
+	mounted() {
+		this.loadProduct();
+		window.addEventListener('keydown', this.handleKeydown);
+	},
+	beforeDestroy() {
+		window.removeEventListener('keydown', this.handleKeydown);
 	},
 	methods: {
-		...mapActions(['getProductsByCategoryIdAndFilters']),
-		/* for opening the popup **/
-		showReviewPopup() {
-			this.$refs.productReviewPopup.open();
+		async loadProduct() {
+			this.isPageLoading = true;
+			this.mainImageLoaded = false;
+			this.mainImageError = false;
+			this.thumbLoaded = {};
+			this.thumbErrors = {};
+			this.selectedImageIndex = 0;
+			this.selectedCity = null;
+			this.productQuantity = 1;
+
+			const id = this.$route.params.id;
+			await this.$store.dispatch('getProductsBId', id);
+
+			if (this.selectedProduct?.images?.length) {
+				this.formattedPrice = moneyMask(this.selectedProduct.price);
+				this.selectImage(0, false);
+			} else {
+				this.selectedImage = '';
+				this.formattedPrice = this.selectedProduct
+					? moneyMask(this.selectedProduct.price)
+					: '';
+			}
+
+			this.isPageLoading = false;
+			this.$nextTick(() => this.checkMainImageCached());
 		},
-		/* for toggling image **/
-		togglePreviewImage(image) {
-			this.selectedImage = image;
+		checkMainImageCached() {
+			const img = this.$refs.mainImg;
+			if (img && img.complete && img.naturalWidth > 0) {
+				this.onMainImageLoad();
+			}
 		},
-		/* for adding product in car	**/
+		selectImage(index, resetLoad = true) {
+			this.selectedImageIndex = index;
+			const img = this.productImages[index];
+			if (!img) return;
+
+			if (resetLoad) {
+				this.mainImageLoaded = false;
+				this.mainImageError = false;
+			}
+			this.selectedImage = img.url;
+			this.$nextTick(() => {
+				this.checkMainImageCached();
+				this.scrollThumbIntoView(index);
+			});
+		},
+		scrollThumbIntoView(index) {
+			const container = this.$refs.thumbsScroll;
+			if (!container) return;
+			const thumb = container.children[index];
+			if (thumb) {
+				thumb.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+			}
+		},
+		onMainFrameClick() {
+			if (this.mainImageLoaded && !this.mainImageError) {
+				this.openLightbox(this.selectedImageIndex);
+			}
+		},
+		openLightbox(index) {
+			const img = this.productImages[index];
+			if (!img) return;
+
+			this.lightboxIndex = index;
+			this.lightboxImage = img.url;
+			this.lightboxLoading = true;
+			this.lightboxError = false;
+			this.lightboxOpen = true;
+			this.selectImage(index);
+
+			this.$nextTick(() => {
+				const lbImg = this.$refs.lightboxImg;
+				if (lbImg && lbImg.complete && lbImg.naturalWidth > 0) {
+					this.onLightboxImageLoad();
+				}
+			});
+		},
+		closeLightbox() {
+			this.lightboxOpen = false;
+		},
+		lightboxPrev() {
+			if (this.productImages.length <= 1) return;
+			const next = (this.lightboxIndex - 1 + this.productImages.length) % this.productImages.length;
+			this.openLightbox(next);
+		},
+		lightboxNext() {
+			if (this.productImages.length <= 1) return;
+			const next = (this.lightboxIndex + 1) % this.productImages.length;
+			this.openLightbox(next);
+		},
+		onLightboxImageLoad() {
+			this.lightboxLoading = false;
+			this.lightboxError = false;
+		},
+		onLightboxImageError() {
+			this.lightboxLoading = false;
+			this.lightboxError = true;
+		},
+		handleKeydown(event) {
+			if (!this.lightboxOpen) return;
+			if (event.key === 'Escape') {
+				this.closeLightbox();
+			} else if (event.key === 'ArrowLeft') {
+				this.lightboxPrev();
+			} else if (event.key === 'ArrowRight') {
+				this.lightboxNext();
+			}
+		},
+		onMainImageLoad() {
+			this.mainImageLoaded = true;
+			this.mainImageError = false;
+		},
+		onMainImageError() {
+			this.mainImageLoaded = true;
+			this.mainImageError = true;
+		},
+		onThumbLoad(index) {
+			this.$set(this.thumbLoaded, index, true);
+		},
+		onThumbError(index) {
+			this.$set(this.thumbErrors, index, true);
+			this.$set(this.thumbLoaded, index, true);
+		},
+		decreaseQty() {
+			if (this.productQuantity > 1) {
+				this.productQuantity -= 1;
+			}
+		},
+		increaseQty() {
+			this.productQuantity += 1;
+		},
+		parsePrice(value) {
+			return parseFloat(String(value).replace(/[$,]/g, '')) || 0;
+		},
 		addProductToCart(item) {
-			// Validar si el producto requiere ciudad y no se ha seleccionado
-			if(item.cities && item.cities.length > 0 && !this.selectedCity) {
-				this.$snotify.error('Por favor selecciona una ciudad',{
+			if (item.cities && item.cities.length > 0 && !this.selectedCity) {
+				this.$snotify.error('Por favor selecciona una ciudad', {
 					closeOnClick: false,
 					pauseOnHover: false,
 					timeout: 2000,
-					showProgressBar:false,
+					showProgressBar: false,
 				});
 				return;
 			}
 
-			// Validar cantidad
-			if(!this.productQuantity || this.productQuantity < 1) {
-				this.$snotify.error('Por favor ingresa una cantidad válida',{
+			if (!this.productQuantity || this.productQuantity < 1) {
+				this.$snotify.error('Por favor ingresa una cantidad válida', {
 					closeOnClick: false,
 					pauseOnHover: false,
 					timeout: 2000,
-					showProgressBar:false,
+					showProgressBar: false,
 				});
 				return;
 			}
 
-			var img = (item.images)[0].url;
-			let price = parseFloat((item.price).replace('$',''));
-			let quantity = this.productQuantity;
+			const img = item.images[0].url;
+			const price = this.parsePrice(item.price);
+			const quantity = this.productQuantity;
 
-			if(typeof(localStorage.id_users) !== 'undefined' && localStorage.id_users !== null) {
-
-				let newProduct = {
-					load_init:false,
-					id_user:localStorage.id_users,
-					url:img,
-					id_details:0,
-					name:item.name,
-					id_shopping_car:0,
-					id_product:item.id_products,
-					details_quantity:quantity,
-					details_price:price,
-					details_discount:0.00,
-					details_subtotal:(quantity*price),
-					details_iva:(quantity*price)*AppConfig.porcentajeIVa,
-					details_total:(quantity*price)+(quantity*price)*AppConfig.porcentajeIVa,
-					status:1,
+			if (typeof localStorage.id_users !== 'undefined' && localStorage.id_users !== null) {
+				const newProduct = {
+					load_init: false,
+					id_user: localStorage.id_users,
+					url: img,
+					id_details: 0,
+					name: item.name,
+					id_shopping_car: 0,
+					id_product: item.id_products,
+					details_quantity: quantity,
+					details_price: price,
+					details_discount: 0.00,
+					details_subtotal: quantity * price,
+					details_iva: (quantity * price) * AppConfig.porcentajeIVa,
+					details_total: (quantity * price) + (quantity * price) * AppConfig.porcentajeIVa,
+					status: 1,
 					id_city: this.selectedCity,
-					required_documents_array: item.required_documents_array || [],
-					uploaded_documents: {} // Se llenarán en el carrito
+					required_documents_array: this.requiredDocumentsArray,
+					uploaded_documents: {},
 				};
 
-				this.$snotify.success('Producto agregado al carrito',{
+				this.$snotify.success('Producto agregado al carrito', {
 					closeOnClick: false,
 					pauseOnHover: false,
 					timeout: 1000,
-					showProgressBar:false,
+					showProgressBar: false,
 				});
-				
+
 				setTimeout(() => {
-					this.$store.dispatch("addProductToCart", newProduct);
+					this.$store.dispatch('addProductToCart', newProduct);
 				}, 500);
-
-			}else{
-
-				this.$snotify.success('Se requiere inicio de sesion para poder agregar productos al carrito.',{
+			} else {
+				this.$snotify.success('Se requiere inicio de sesión para poder agregar productos al carrito.', {
 					closeOnClick: false,
 					pauseOnHover: false,
 					timeout: 4000,
-					showProgressBar:false,
+					showProgressBar: false,
 				});
-
 			}
-
-
-
 		},
-		/* check weather the product exist in cart
-			* retun the boolean 
-		*/ 
 		ifItemExistInCart(result) {
-			console.log(result)
-			// let exists = false;
-			// for (let item of this.cart) {
-			// 	if (item.id == result.objectID) {
-			// 		exists = true;
-			// 	}
-			// }
-			// return exists;
+			return isProductInCart(this.cart, result);
 		},
-		/* to add a product in wishlist */
-		addItemToWishlist(product) {
-			console.log(product)
-			// if(this.ifItemExistInWishlist(product)) {
-			// 	this.$snotify.error('Product already exist in the wishlist',{
-			// 		showProgressBar:false,
-			// 	});
-			// } 
-			// else {
-			// 	this.$snotify.success('Product adding to the wishlist',{
-			// 		closeOnClick: false,
-			// 		pauseOnHover: false,
-			// 		timeout: 1000,
-			// 		showProgressBar:false,
-			// 	});
-			// 	setTimeout(() => {
-			// 		this.$store.dispatch("addItemToWishlist", product);
-			// 	}, 2000);
-			// }
-		},
-		/* check weather the product exist in the wishlist
-		 * Return boolean
-		*/
-		ifItemExistInWishlist(result) {
-			console.log(result)
-			// let exists = false;
-			// for (let item of this.wishlist) {
-			// 	if (item.id == result.objectID) {
-			// 		exists = true;
-			// 	}
-			// }
-			// return exists;
-		},
-	}
-}
+	},
+};
 </script>
+
+<style scoped>
+.aio-product-detail__select >>> .v-input__slot {
+	border-radius: 12px !important;
+}
+</style>

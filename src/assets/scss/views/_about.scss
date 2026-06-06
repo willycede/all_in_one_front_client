@@ -177,6 +177,15 @@
 		}
 	}
 }
+.admin-panel .site-logo .admin-panel__logo {
+	display: block;
+	margin: 0 auto;
+	width: auto;
+	height: 38px;
+	max-width: 168px;
+	object-fit: contain;
+}
+
 .admin-panel-toolbar.v-toolbar{
 	box-shadow: -2px -42px 34px 21px $primary;
 	z-index: 10;

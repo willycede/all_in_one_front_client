@@ -4,6 +4,7 @@ import { wishlist, cart } from "./data";
 import router from "../../../router";
 import moment from 'moment';
 import api from 'Api';
+import { mapFavoriteFromApi, getProductIdFromPayload } from 'Helpers/favorites';
 
 
 
@@ -62,16 +63,53 @@ const actions = {
       },
 
       onDeleteProductFromCart(context, payload) {
-            context.commit("onDeleteProductFromCart", payload);
+            return api.post('/api/shoppingcar/delete_shoppDetails', {
+                  id_details: payload.id_details || payload.id,
+                  id_shopping_car: payload.id_shopping_car || localStorage.getItem('id_orden'),
+                  id_user: localStorage.getItem('id_users'),
+            }).then((response) => {
+                  context.commit('onDeleteProductFromCart', payload);
+                  return response;
+            });
       },
       changeQuantityHandler(context, payload) {
             context.commit('onChangeQuantityHandler', payload);
       },
+      fetchWishlist(context) {
+            const id_user = localStorage.getItem('id_users');
+            if (!id_user) {
+                  context.commit('setWishlist', []);
+                  return Promise.resolve([]);
+            }
+            return api.get(`/api/favorites/${id_user}`).then((response) => {
+                  const data = (response && response.data && response.data.data) || [];
+                  const items = data.map(mapFavoriteFromApi);
+                  context.commit('setWishlist', items);
+                  return items;
+            });
+      },
       addItemToWishlist(context, payload) {
-            context.commit('onAddItemToWishlist', payload);
+            const id_user = localStorage.getItem('id_users');
+            const id_product = getProductIdFromPayload(payload);
+            if (!id_user) {
+                  return Promise.reject(new Error('LOGIN_REQUIRED'));
+            }
+            return api.post('/api/favorites/add', { id_user, id_product }).then((response) => {
+                  context.commit('addWishlistItem', mapFavoriteFromApi(response.data.data));
+            });
       },
       onDeleteProductFromWishlist(context, payload) {
-            context.commit("onDeleteProductFromWishlist", payload);
+            const id_user = localStorage.getItem('id_users');
+            return api.post('/api/favorites/remove', {
+                  id_user,
+                  id_product: payload.id_product || payload.objectID || payload.id,
+                  id_favorite: payload.id_favorite,
+            }).then(() => {
+                  context.commit('onDeleteProductFromWishlist', payload);
+            });
+      },
+      clearWishlist(context) {
+            context.commit('setWishlist', []);
       },
       onPrintFinalReceipt(context, payload) {
             context.commit("onPrintFinalReceipt", payload);
@@ -102,6 +140,7 @@ const mutations = {
                   newProduct = {
 
                         id: payload.id_details,
+                        id_product: payload.id_product,
                         url: payload.url,
                         name: payload.name,
                         details_price: payload.details_price,
@@ -143,6 +182,7 @@ const mutations = {
                                     newProduct = {
       
                                           id: payload.id_details,
+                                          id_product: payload.id_product,
                                           url: payload.url,
                                           name: payload.name,
                                           details_price: payload.details_price,
@@ -193,6 +233,7 @@ const mutations = {
                                           newProduct = {
             
                                                 id: payload.id_details,
+                                                id_product: payload.id_product,
                                                 url: payload.url,
                                                 name: payload.name,
                                                 details_price: payload.details_price,
@@ -261,30 +302,41 @@ const mutations = {
        * method for deleting product to cart
       */
       onDeleteProductFromCart(state, payload) {
-            let index = state.cart.indexOf(payload);
-            state.cart.splice(index, 1);
+            const detailId = payload.id_details || payload.id;
+            const index = state.cart.findIndex((item) => (item.id_details || item.id) === detailId);
+            if (index > -1) {
+                  state.cart.splice(index, 1);
+            }
       },
 
       /**
        * method for adding item to wishlist
       */
-      onAddItemToWishlist(state, payload) {
-            let newItem = {
-                  id: payload.objectID,
-                  image: payload.image,
-                  name: payload.name,
-                  price: payload.price,
-                  quantity: 1,
-                  total: payload.price
+      setWishlist(state, items) {
+            state.wishlist = items;
+      },
+      addWishlistItem(state, item) {
+            const exists = state.wishlist.some(
+                  (wishlistItem) => String(wishlistItem.id_product || wishlistItem.id) === String(item.id_product)
+            );
+            if (!exists) {
+                  state.wishlist.push(item);
             }
-            state.wishlist.push(newItem);
       },
       /**
        * method for deleting item from wishlist
       */
       onDeleteProductFromWishlist(state, payload) {
-            let index = state.wishlist.indexOf(payload);
-            state.wishlist.splice(index, 1);
+            const productId = payload.id_product || payload.objectID || payload.id;
+            const index = state.wishlist.findIndex((item) => {
+                  if (payload.id_favorite && item.id_favorite === payload.id_favorite) {
+                        return true;
+                  }
+                  return String(item.id_product || item.id) === String(productId);
+            });
+            if (index > -1) {
+                  state.wishlist.splice(index, 1);
+            }
       },
 
       /**

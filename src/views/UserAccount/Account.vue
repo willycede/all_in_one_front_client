@@ -1,88 +1,84 @@
 <template>
-	<div class="account-wrap">
-		<div class="inner-container">
-			<div class="bg-white final-receipt-page section-gap">
-				<div class="account-info">
-					<div class="container grid-list-xl">
-						<div class="layout justify-start mt-0 mb-4 mx-0">
-							<div class="px-4">
-								<h4>Hola, {{nombre_usuario}}</h4>
-							</div>
-						</div>
-						<v-layout row wrap fill-height profile-list>
-							<v-flex xs12 sm12 md4 lg3 xl2 user-nav-list px-0>
-								<div class="emb-card account-block fill-height py-4">
-								<template v-for="(option,key,index) in settings" >
-									<v-list
-										v-for="cateogary in settings[key]"
-										:key="cateogary.name" class="py-0 text-center">
-										<v-list-item @click="onTabChange(index)" :to="cateogary.path">
-											<v-list-item-action class="ma-0">
-												<v-icon>{{cateogary.icon}}</v-icon>
-											</v-list-item-action>
-											<v-list-item-content class="py-0 text-left">
-												<v-list-item-title>
-													<span>{{cateogary.title}}</span>
-												</v-list-item-title>
-											</v-list-item-content>
-										</v-list-item>
-									</v-list>
-								</template>
-								</div>
-							</v-flex>
-							<v-flex xs12 sm12 md8 lg9 xl9 user-content-wrapper>
-								<div v-for="(option,key,index) in settings" :key="key" >
-										<router-view v-if="index == selectedTab"></router-view>
-								</div>
-							</v-flex>
-						</v-layout>
+	<div class="aio-account account-wrap">
+		<div class="aio-account__hero">
+			<v-container>
+				<div class="aio-account__hero-inner">
+					<div class="aio-account__avatar" aria-hidden="true">
+						{{ userInitials }}
+					</div>
+					<div>
+						<span class="aio-account__eyebrow">Mi cuenta</span>
+						<h1 class="aio-account__title">Hola, {{ userDisplayName }}</h1>
+						<p class="aio-account__email">{{ userEmail }}</p>
 					</div>
 				</div>
-			</div>
+			</v-container>
+		</div>
+
+		<div class="aio-account__body section-gap">
+			<v-container grid-list-xl py-0>
+				<v-layout row wrap>
+					<v-flex xs12 sm12 md4 lg3 xl3>
+						<nav class="aio-account__nav" aria-label="Menú de cuenta">
+							<router-link
+								v-for="item in navItems"
+								:key="item.path"
+								:to="item.path"
+								class="aio-account__nav-item"
+								active-class="aio-account__nav-item--active"
+							>
+								<span class="aio-account__nav-icon">
+									<v-icon size="20">{{ item.icon }}</v-icon>
+								</span>
+								<span class="aio-account__nav-text">{{ item.title }}</span>
+								<v-icon size="16" class="aio-account__nav-arrow">chevron_right</v-icon>
+							</router-link>
+						</nav>
+					</v-flex>
+
+					<v-flex xs12 sm12 md8 lg9 xl9>
+						<router-view></router-view>
+					</v-flex>
+				</v-layout>
+			</v-container>
 		</div>
 	</div>
 </template>
 
 <script>
+import { getUserDisplayName } from 'Helpers/auth';
+
 export default {
-	data(){
-		return{
-			settings:{
-				orderHistory:[
-					{
-						title:"Historial ",
-						icon:"history",
-						path:"/account/order-history",
-						id:"orderHistory"
-					},
-				],
-				profile:[
-					{
-						title:"Perfil",
-						icon:"account_circle",
-						path:"/account/profile",
-						id:"profile"
-					},
-				]/*,
-				DataInvoice:[
-					{
-						title:"Datos Facturacion",
-						icon:"account_circle",
-						path:"/account/data_invoice",
-						id:"DataInvoice"
-					},
-				]*/,
-			},
-			selectedTab: 0,
-			nombre_usuario:localStorage.name_user + ' '+ localStorage.last_name_user,
-		}
+	data() {
+		return {
+			navItems: [
+				{
+					title: 'Perfil',
+					icon: 'person_outline',
+					path: '/account/profile',
+				},
+				{
+					title: 'Historial de pedidos',
+					icon: 'history',
+					path: '/account/order-history',
+				},
+			],
+		};
 	},
-	mounted() {
-	},
-	methods:{
-		onTabChange(key) {
-			this.selectedTab = key;
+	computed: {
+		userDisplayName() {
+			return getUserDisplayName();
 		},
-	}
-}
+		userEmail() {
+			return localStorage.getItem('email') || '';
+		},
+		userInitials() {
+			const name = this.userDisplayName.trim();
+			if (!name) return 'U';
+			const parts = name.split(/\s+/).filter(Boolean);
+			if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+			return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+		},
+	},
+};
 </script>

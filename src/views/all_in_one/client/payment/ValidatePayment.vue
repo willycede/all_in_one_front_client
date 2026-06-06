@@ -1,247 +1,198 @@
 <template>
-	<div class="cart-content section-gap">
-        <v-container grid-list-xl py-0>
-            <div class="text-center">
-                <div v-if="cobro"  class="text-center">
-                    <div class="mb-6">
-                    <img
-                        alt="cart-empty"
-                        height="400"
-                        src="/static/images/valida_pago.gif"
-                        width="400"
-                    />
-                    </div>
-                    <h4>Verificando Pago</h4>
-                    <p class="primary--text">Una vez verificado el pago se redirecionara de forma automatica, por favor espere.</p
-                    >
-                </div>
-                <div v-if="pago_exitoso"  class="text-center">
-                    <div class="mb-6">
-                    <img
-                        alt="cart-empty"
-                        height="320"
-                        src="/static/images/pago_exitoso.png"
-                        width="320"
-                    />
-                    </div>
-                    <h4>Pago confirmado</h4>
-                    <p class="primary--text">El pago fue confirmado, generando factura, por favor espere.....</p
-                    >
-                </div>
-            </div>
-        </v-container>
+	<div class="aio-payment-validate">
+		<div class="aio-payment-validate__bg" aria-hidden="true">
+			<div class="aio-payment-validate__glow aio-payment-validate__glow--1"></div>
+			<div class="aio-payment-validate__glow aio-payment-validate__glow--2"></div>
+		</div>
+
+		<v-container class="aio-payment-validate__container">
+			<div class="aio-payment-validate__card">
+				<div v-if="cobro" class="aio-payment-validate__state">
+					<div class="aio-payment-validate__visual">
+						<div class="aio-payment-validate__loader" aria-hidden="true">
+							<span class="aio-payment-validate__loader-ring"></span>
+							<span class="aio-payment-validate__loader-icon">
+								<v-icon size="32">credit_card</v-icon>
+							</span>
+						</div>
+					</div>
+
+					<span class="aio-payment-validate__eyebrow">Pago seguro</span>
+					<h1 class="aio-payment-validate__title">Verificando pago</h1>
+					<p class="aio-payment-validate__text">
+						Estamos confirmando tu transacción con la pasarela de pago.
+						En unos segundos serás redirigido automáticamente.
+					</p>
+
+					<ul class="aio-payment-validate__steps">
+						<li class="aio-payment-validate__step aio-payment-validate__step--active">
+							<span class="aio-payment-validate__step-dot"></span>
+							<span>Validando transacción</span>
+						</li>
+						<li class="aio-payment-validate__step">
+							<span class="aio-payment-validate__step-dot"></span>
+							<span>Confirmando orden</span>
+						</li>
+						<li class="aio-payment-validate__step">
+							<span class="aio-payment-validate__step-dot"></span>
+							<span>Generando comprobante</span>
+						</li>
+					</ul>
+				</div>
+
+				<div v-if="pago_exitoso" class="aio-payment-validate__state">
+					<div class="aio-payment-validate__visual">
+						<div class="aio-payment-validate__success-icon" aria-hidden="true">
+							<v-icon size="36">check</v-icon>
+						</div>
+					</div>
+
+					<span class="aio-payment-validate__eyebrow aio-payment-validate__eyebrow--success">Pago confirmado</span>
+					<h1 class="aio-payment-validate__title">¡Gracias por tu compra!</h1>
+					<p class="aio-payment-validate__text">
+						Tu pago fue procesado correctamente. Estamos generando tu factura
+						electrónica y te redirigiremos al historial de pedidos.
+					</p>
+
+					<ul class="aio-payment-validate__steps">
+						<li class="aio-payment-validate__step aio-payment-validate__step--done">
+							<span class="aio-payment-validate__step-dot">
+								<v-icon size="12">check</v-icon>
+							</span>
+							<span>Transacción validada</span>
+						</li>
+						<li class="aio-payment-validate__step aio-payment-validate__step--done">
+							<span class="aio-payment-validate__step-dot">
+								<v-icon size="12">check</v-icon>
+							</span>
+							<span>Orden confirmada</span>
+						</li>
+						<li class="aio-payment-validate__step aio-payment-validate__step--active">
+							<span class="aio-payment-validate__step-dot"></span>
+							<span>Generando comprobante</span>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</v-container>
 	</div>
 </template>
 
 <script>
-
-import api from "Api";
-import HtmlElement from "Constants/HtmlMailComprobante";
+import api from 'Api';
+import HtmlElement from 'Constants/HtmlMailComprobante';
 
 export default {
-	computed: {
-
-        
-
-        
-		
+	data() {
+		return {
+			cobro: true,
+			pago_exitoso: false,
+			id: '',
+			clientTransactionId: '',
+		};
 	},
 	async mounted() {
-        
-        if(this.$route.query?.clientTransactionId) {
-            this.clientTransactionId = this.$route.query.clientTransactionId;
-        }
+		if (this.$route.query && this.$route.query.clientTransactionId) {
+			this.clientTransactionId = this.$route.query.clientTransactionId;
+		}
 
-        if(this.$route.query?.id) {
-            this.id = this.$route.query.id;
-        }
+		if (this.$route.query && this.$route.query.id) {
+			this.id = this.$route.query.id;
+		}
 
-        let orden = this.clientTransactionId.split('@')[0];
-
-        this.onConfirmaPagoPayphone(this.id,this.clientTransactionId,orden);
-
-	
+		const orden = this.clientTransactionId.split('@')[0];
+		this.onConfirmaPagoPayphone(this.id, this.clientTransactionId, orden);
 	},
 	watch: {
-        "$route"(to) {
-            this.clientTransactionId = to.params.clientTransactionId;
-            this.id = to.params.id;
-        },
-    },
-	data () {
-		return{
-            cobro:true,
-            pago_exitoso:false,
-			id: "",
-            clientTransactionId: "",
-			selectedImage: null
-		}
+		$route(to) {
+			this.clientTransactionId = to.params.clientTransactionId;
+			this.id = to.params.id;
+		},
 	},
 	methods: {
+		async onConfirmaPagoPayphone(id, clientTxId, orden) {
+			try {
+				const arr_pay_confir = {
+					id: id,
+					clientId: clientTxId,
+					orden: orden,
+				};
 
-        async onConfirmaPagoPayphone(id, clientTxId,orden) {
+				const urlPayphone = await api.post(
+					'/api/shoppingcar/payphone/confirm',
+					arr_pay_confir
+				);
 
-            try {
-               
-                const arr_pay_confir = {
-                    id: id,
-                    clientId: clientTxId,
-                    orden: orden
-                };
-                
-                /*Ejecutamos api que genera link de pago payphone */
-                const urlPayphone = await api.post(
-                    "/api/shoppingcar/payphone/confirm",
-                    arr_pay_confir
-                );
+				if (urlPayphone.data.errorCode === 200) {
+					setTimeout(() => {
+						this.cobro = false;
+						this.pago_exitoso = true;
+						this.onProcesarFacturacion(orden);
+					}, 3000);
+				} else {
+					console.log(urlPayphone.data);
+				}
+			} catch (e) {
+				console.log(e);
+			}
+		},
 
-                //console.log(urlPayphone.data);
-                /*validamos si el link de pago se genero correctamente */
-                if (urlPayphone.data.errorCode === 200) {
+		async onProcesarFacturacion(orden) {
+			let html = '';
 
-                    /*confirmamos que la transaccion del pago fue exitosa */
+			const shopCartFelec = await api.get(
+				'/api/shoppingcar/get_comprobante_electronico/' + localStorage.id_orden
+			);
 
-                    setTimeout(() => {
+			const clave = shopCartFelec.data.claveAcceso;
+			const pathpdf = shopCartFelec.data.pathPdf;
+			const pathxml = shopCartFelec.data.pathXml;
 
-                        this.cobro = false;
-                        this.pago_exitoso = true;
+			const response = await api.get(`/api/users/${localStorage.id_users}`);
+			if (response && response.data && response.data.data) {
+				const shopCart = await api.get(
+					'/api/shoppingcar/get_shop_by_id/' + localStorage.id_orden
+				);
 
-                        this.onProcesarFacturacion(orden);
+				const comprobante = shopCart.data.data;
+				const user = response.data.data;
 
+				html = HtmlElement.html_body
+					.replace('@nombre_cliente', user.name_user + ' ' + user.last_name_user)
+					.replace('@valor', comprobante[0].shopping_car_total)
+					.replace('@documento', '001-001-' + ('000000000' + localStorage.id_orden).slice(-9))
+					.replace('@clave', clave)
+					.replace(
+						'@fecha',
+						new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
+					);
+			}
 
+			const arr_invoice = {
+				orden: orden,
+			};
 
-                    }, 3000);
+			await api.post(
+				'/api/shoppingcar/payphone/invoice/state',
+				arr_invoice
+			);
 
-                    
+			const data_send_mail = {
+				html: html,
+				email: localStorage.email,
+				pathPdf: pathpdf,
+				pathXml: pathxml,
+			};
 
-                /*
-                let html = HtmlElement.html_body
-                    .replace("@url_payphone", urlPayphone.data.url)
-                    .replace("@detalle", detallefinal)
-                    .replace(
-                    "@fecha",
-                    new Date().toLocaleDateString() +
-                        " " +
-                        new Date().toLocaleTimeString()
-                    )
-                    .replace("@numeroorden", localStorage.id_orden)
-                    .replace("@totalcantidad", this.cart.length)
-                    .replace("@subtotal", subtotal / 100)
-                    .replace("@impuesto", impuesto / 100)
-                    .replaceAll("@total", total / 100);
-                    const data_send_mail = {
-                    html: html,
-                    email: localStorage.email,
-                    };
-                    await api.post(
-                    "/api/shoppingcar/sendmail",
-                    data_send_mail
-                    );
-                    //console.log(EventoSendMail);
-                    this.$refs.loadComponent.close();
-                    const upd_shop = {
-                    url_payphone: urlPayphone.data.url,
-                    status: 2,
-                    id_shopping_car: localStorage.id_orden
-                    };
-                    this.updateShoppingPay(upd_shop).then((data) => {
-                        if(data.status === 200){
-                        this.$router.push('/account/order-history');
-                        }else{
-                        this.$snotify.error("El proceso no pudo ser gestionado", {
-                            closeOnClick: false,
-                            pauseOnHover: false,
-                            timeout: 1000,
-                        });
-                        }
-                    });*/
-                    
-                } else {
-                    console.log(urlPayphone.data);
-                }
-            } catch (e) {
-                console.log(e);
-                this.$refs.loadComponent.close();
-            }
+			api.post(
+				'/api/shoppingcar/sendmail_factura',
+				data_send_mail
+			);
 
-        },
-
-        async onProcesarFacturacion(orden) {
-
-
-            let html = '';
-
-            /* Procesamos la facturacion electronica */
-
-            const shopCartFelec = await api.get(
-                    "/api/shoppingcar/get_comprobante_electronico/" + localStorage.id_orden
-            );
-
-            let clave = shopCartFelec.data.claveAcceso;
-            let pathpdf = shopCartFelec.data.pathPdf;
-            let pathxml = shopCartFelec.data.pathXml;
-
-            /*obtenemos datos de facturacion*/                        
-            const response = await api.get(`/api/users/${localStorage.id_users}`);
-            if (response && response.data && response.data.data) {
-
-                const shopCart = await api.get(
-                    "/api/shoppingcar/get_shop_by_id/" + localStorage.id_orden
-                );
-
-                const comprobante = shopCart.data.data;
-                const user = response.data.data;
-
-                console.log(comprobante[0].shopping_car_total);
-
-                html = HtmlElement.html_body
-                    .replace("@nombre_cliente", user.name_user +' ' +user.last_name_user)
-                    .replace("@valor", comprobante[0].shopping_car_total)
-                    .replace("@documento", '001-001-' +("000000000" + localStorage.id_orden).slice(-9))
-                    .replace("@clave", clave)
-                    .replace("@fecha", 
-                        new Date().toLocaleDateString() +
-                        " " +
-                        new Date().toLocaleTimeString()
-                    )
-
-
-
-            }
-
-            /* actualiza estado */
-
-            const arr_invoice = {
-                orden: orden
-            };
-
-            await api.post(
-                "/api/shoppingcar/payphone/invoice/state",
-                arr_invoice
-            );
-
-            const data_send_mail = {
-                html: html,
-                email: localStorage.email,
-                pathPdf:pathpdf,
-                pathXml:pathxml
-            };
-
-            /* genera el envio de email con el comprobante electronico */
-
-            api.post(
-            "/api/shoppingcar/sendmail_factura",
-            data_send_mail
-            );
-
-            /*Redirecionando historial */
-            setTimeout(() => {
-                this.$router.push('/account/order-history');
-            }, 3000);
-
-
-        }
-		
-	}
-}
+			setTimeout(() => {
+				this.$router.push('/account/order-history');
+			}, 3000);
+		},
+	},
+};
 </script>

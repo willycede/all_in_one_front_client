@@ -30,7 +30,11 @@ const actions = {
    async getProductsByCategoryIdAndFilters(context, data) 
    {  
       const products = await api.get(`/api/products/${data.categoryId}`,{ params: {searchBy:  data.searchBy} });
-      context.commit('onGetAllProducts', products?.data?.data);
+      const list = products?.data?.data || [];
+      if (list.length > 0) {
+         list.forEach((product) => { product.price = moneyMask(product.price); });
+      }
+      context.commit('onGetAllProducts', list);
    },
    async getProductsBId(context, data) 
    {  
@@ -61,12 +65,8 @@ const mutations = {
         state.productList = products;
    },
    onGetAllProducts(state, products) {
-      state.productList = [];
-      setTimeout(() => {
-         state.productList = products;
-      }, 200);
-     
- },
+      state.productList = products || [];
+   },
    selectProductHandler(state, product) {
       state.selectedProduct = product;
    },

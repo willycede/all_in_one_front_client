@@ -1,22 +1,25 @@
 <script>
 import { mapGetters } from "vuex";
 import CryptoJS from 'crypto-js';
-//import emailjs from "@emailjs/browser";
 import api from "Api";
 import AppConfig from "../constants/AppConfig";
 import HtmlElement from "../constants/HtmlBodyMail";
-
-//import { Modal } from 'flowbite-vue'
-//import { ref } from 'vue'
+import CartDocumentsModal from "../components/Cart/CartDocumentsModal.vue";
 
 const key = '82f2ceed4c503896c8a291e560bd4325' // change to your key
 const iv = 'sinasinasisinaaa' // change to your iv
 
 
 export default {
+  components: {
+    CartDocumentsModal,
+  },
   data() {
     return {
+      isLoading: true,
       selectDeletedProduct: null,
+      docsModalOpen: false,
+      docsModalItem: null,
       total: null,
       uploadedDocuments: {}, // { id_details: { docType: file } }
       uploadingDocuments: {}, // Track upload status
@@ -35,53 +38,58 @@ export default {
     };
   },
   async mounted() {
-
-    
     this.tax = 0;
     this.shipping = 0;
-    /* Cobtenemos la orden activa del usuario para mostrar en la lista */
-    const shopCart = await api.get(
-      "/api/shoppingcar/get_shop/" + localStorage.id_users
-    );
-    /* Guardamos sesion de id shopp */
-    localStorage.setItem('id_orden',shopCart.data.data[0].id_shopping_car)
-    let cartsshop =
-      shopCart.data.data.length > 0 ? shopCart.data.data[0].id_shopping_car : 0;
-   /* obtenemos todos los detalle del shopp activo */
-    const shopCartDetails = await api.get(
-      "/api/shoppingcar/get_shopDetails/" + cartsshop
-    );
-    
-    // Parsear required_documents para cada item del carrito
-    if(shopCartDetails.data && shopCartDetails.data.data) {
-      const cartItems = shopCartDetails.data.data.map(item => {
-        // Parsear required_documents si existe
-        let requiredDocsArray = [];
-        if(item.required_documents && item.required_documents.trim() !== '') {
-          try {
-            // Si es un string separado por comas, convertirlo a array
-            if(typeof item.required_documents === 'string') {
-              requiredDocsArray = item.required_documents.split(',').map(doc => doc.trim());
-            } else if(Array.isArray(item.required_documents)) {
-              requiredDocsArray = item.required_documents;
+
+    if (!localStorage.id_users) {
+      this.isLoading = false;
+      return;
+    }
+
+    try {
+      const shopCart = await api.get(
+        '/api/shoppingcar/get_shop/' + localStorage.id_users
+      );
+      const carts = shopCart?.data?.data;
+      if (!carts?.length) {
+        this.$store.dispatch('addSetToCart', []);
+        return;
+      }
+
+      localStorage.setItem('id_orden', carts[0].id_shopping_car);
+      const cartsshop = carts[0].id_shopping_car;
+
+      const shopCartDetails = await api.get(
+        '/api/shoppingcar/get_shopDetails/' + cartsshop
+      );
+
+      if (shopCartDetails.data && shopCartDetails.data.data) {
+        const cartItems = shopCartDetails.data.data.map((item) => {
+          let requiredDocsArray = [];
+          if (item.required_documents && item.required_documents.trim() !== '') {
+            try {
+              if (typeof item.required_documents === 'string') {
+                requiredDocsArray = item.required_documents.split(',').map((doc) => doc.trim());
+              } else if (Array.isArray(item.required_documents)) {
+                requiredDocsArray = item.required_documents;
+              }
+            } catch (e) {
+              console.error('Error parsing required_documents:', e);
             }
-          } catch(e) {
-            console.error('Error parsing required_documents:', e);
           }
-        }
-        
-        console.log('Item parseado:', item.name, 'Documentos requeridos:', requiredDocsArray);
-        
-        return {
-          ...item,
-          required_documents_array: requiredDocsArray
-        };
-      });
-      
-      console.log('Cart items con documentos parseados:', cartItems);
-      this.$store.dispatch('addSetToCart', cartItems);
-    } else {
-      this.cart = shopCartDetails;
+
+          return {
+            ...item,
+            required_documents_array: requiredDocsArray,
+          };
+        });
+
+        this.$store.dispatch('addSetToCart', cartItems);
+      }
+    } catch (error) {
+      this.$store.dispatch('addSetToCart', []);
+    } finally {
+      this.isLoading = false;
     }
   },
   computed: {
@@ -253,15 +261,25 @@ export default {
     },
     onDeleteProductFromCart() {
       this.$refs.deleteConfirmationDialog.close();
-      this.$snotify.error("Product Removing from cart", {
-        closeOnClick: false,
-        pauseOnHover: false,
-        timeout: 1000,
-      });
-      this.$store.dispatch(
-        "onDeleteProductFromCart",
-        this.selectDeletedProduct
-      );
+      const product = this.selectDeletedProduct;
+      this.$store.dispatch('onDeleteProductFromCart', product)
+        .then(() => {
+          if (product?.id_details && this.uploadedDocuments[product.id_details]) {
+            this.$delete(this.uploadedDocuments, product.id_details);
+          }
+          this.$snotify.success('Producto eliminado del carrito', {
+            closeOnClick: false,
+            pauseOnHover: false,
+            timeout: 1500,
+          });
+        })
+        .catch(() => {
+          this.$snotify.error('No se pudo eliminar el producto. Intenta de nuevo.', {
+            closeOnClick: false,
+            pauseOnHover: false,
+            timeout: 2500,
+          });
+        });
     },
     async updateShoppingPay(pay){
       return await api.post(
@@ -421,232 +439,241 @@ export default {
     isDocumentUploaded(item, docType) {
       return !!(this.uploadedDocuments[item.id_details] && this.uploadedDocuments[item.id_details][docType]);
     },
+    getDocsUploadedCount(item) {
+      if (!item?.required_documents_array?.length) return 0;
+      return item.required_documents_array.filter((docType) => this.isDocumentUploaded(item, docType)).length;
+    },
+    isDocsComplete(item) {
+      if (!item?.required_documents_array?.length) return true;
+      return this.getDocsUploadedCount(item) === item.required_documents_array.length;
+    },
+    openDocsModal(item) {
+      this.docsModalItem = item;
+      this.docsModalOpen = true;
+    },
+    onDocsUpload({ item, docType, file }) {
+      this.handleFileUpload(item, docType, file);
+    },
   },
 };
 
 </script>
 <template>
+	<div class="aio-cart-page emb-cart-wrap">
+		<div class="aio-cart-page__hero">
+			<v-container>
+				<nav class="aio-cart-page__breadcrumb" aria-label="Ruta">
+					<router-link to="/">Inicio</router-link>
+					<v-icon size="14">chevron_right</v-icon>
+					<span>Carrito</span>
+				</nav>
+				<h1 class="aio-cart-page__title">Carrito de compras</h1>
+				<p class="aio-cart-page__subtitle">
+					Revisa tus productos y confirma tu pedido cuando estés listo.
+				</p>
+			</v-container>
+		</div>
 
-  <div class="emb-cart-wrap emb-card">
-    <div class="page-title-bar-car">
-      <div class="container">
-        <h1 class="mb-4" style="color: #000;">Carrito de compras</h1>
-        <p class="font-weight-regular">A continuacion encontrara el detalle de tus productos agregados al carrito.</p>
-      </div>
-    </div>
-    <div class="cart-content section-gap">
-      <v-container grid-list-xl py-0>
-        <div v-if="cart == ''" class="text-center">
-          <div class="text-center">
-            <div class="mb-6">
-              <img
-                alt="cart-empty"
-                height="128"
-                src="static/images/empty-cart.png"
-                width="128"
-              />
-            </div>
-            <h4>Tu Carrito Se Encuentra Vacío</h4>
-            <router-link class="primary--text" to="/"
-              >Ver Productos</router-link
-            >
-          </div>
-        </div>
-        <div v-else class="cart-shop-list">
+		<div class="aio-cart-page__body section-gap">
+			<v-container grid-list-xl py-0>
+				<div v-if="isLoading" class="aio-cart-page__loading">
+					<v-progress-circular indeterminate color="#A96DFA" size="40" width="3"></v-progress-circular>
+					<p>Cargando tu carrito...</p>
+				</div>
 
-          <div class="layout justify mt-0 mb-4 mx-0">
-            <div class="alert alert-info" role="alert">
-                <v-icon class="accent--text">info</v-icon> ALLINONE, te recomineda verificar tus datos de facturacion previo a confirmar la compra, ya que una vez generada la confirmacion la factura se emitira con los datos previmante ingresados
-            </div>
-          </div>
-          
-          <div class="emb-card mb-12 pa-6 white">
-            <div v-for="(item, index) in cart" :key="index">
-              <v-row class="cart-item-wrap">
-                <v-col
-                  cols="12"
-                  sm="12"
-                  md="2"
-                  class="d-inline-flex align-center justify-center"
-                >
-                  <img :src="item.url" :alt="item.name_img" width="100" />
-                </v-col>
-                <v-col
-                  cols="12"
-                  sm="6"
-                  md="4"
-                  class="d-inline-flex align-center justify-center"
-                >
-                  <div class="text-center">
-                    <h5 class="mb-1">{{ item.name }}</h5>
-                    <p class="mb-0">{{ item.description }}</p>
-                  </div>
-                </v-col>
-                <v-col
-                  cols="5"
-                  sm="2"
-                  md="1"
-                  class="d-inline-flex align-center justify-center"
-                >
-                  <v-text-field
-                    class="d-inline-block"
-                    type="number"
-                    v-model="item.details_quantity"
-                    min="1"
-                    max="10"
-                    placeholder="Quantity"
-                  >
-                  </v-text-field>
-                </v-col>
-                <v-col
-                  cols="5"
-                  sm="2"
-                  md="1"
-                  class="d-inline-flex align-center justify-center"
-                >
-                  <h5 class="mb-0">
-                    {{ formatNumber(item.details_price) }}
-                  </h5>
-                </v-col>
-                <v-col
-                  cols="6"
-                  sm="3"
-                  md="2"
-                  class="d-inline-flex align-center justify-center"
-                >
-                  <h4 class="mb-0">
-                    <emb-currency-sign></emb-currency-sign>
-                    {{ item.details_quantity * item.details_price }}
-                  </h4>
-                </v-col>
-                <v-col
-                  cols="2"
-                  sm="2"
-                  md="2"
-                  class="
-                    res-float-icon
-                    d-inline-flex
-                    align-center
-                    justify-md-center justify-end
-                  "
-                >
-                  <a
-                    class="accent--text remove-cart"
-                    @click="deleteProductFromCart(item)"
-                    href="javascript:void(0)"
-                  >
-                    <i class="material-icons font-weight-bold">close </i>
-                  </a>
-                </v-col>
-              </v-row>
-              
-              <!-- Document Upload Section -->
-              <v-row v-if="item.required_documents_array && item.required_documents_array.length > 0" class="mt-2">
-                <v-col cols="12">
-                  <v-alert type="warning" dense outlined class="mb-2">
-                    <strong>Documentos Requeridos:</strong> Este producto requiere que subas los siguientes documentos antes de confirmar la compra.
-                  </v-alert>
-                  <v-card outlined class="pa-3">
-                    <v-row v-for="(docType, docIndex) in item.required_documents_array" :key="docIndex" class="mb-2">
-                      <v-col cols="12" sm="4" class="d-flex align-center">
-                        <span class="font-weight-medium text-capitalize">{{ formatDocumentName(docType) }}</span>
-                        <span class="error--text ml-1">*</span>
-                        <v-icon v-if="isDocumentUploaded(item, docType)" color="success" small class="ml-2">mdi-check-circle</v-icon>
-                      </v-col>
-                      <v-col cols="12" sm="8">
-                        <v-file-input
-                          :value="uploadedDocuments[item.id_details] && uploadedDocuments[item.id_details][docType] ? uploadedDocuments[item.id_details][docType].file : null"
-                          @change="handleFileUpload(item, docType, $event)"
-                          :label="'Subir ' + formatDocumentName(docType)"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          prepend-icon="mdi-paperclip"
-                          :loading="uploadingDocuments[item.id_details] && uploadingDocuments[item.id_details][docType]"
-                          :disabled="uploadingDocuments[item.id_details] && uploadingDocuments[item.id_details][docType]"
-                          small-chips
-                          show-size
-                          dense
-                        >
-                        </v-file-input>
-                      </v-col>
-                    </v-row>
-                  </v-card>
-                </v-col>
-              </v-row>
-            </div>
-          </div>
-          <v-layout align-center justify-end>
-            <vue-snotify></vue-snotify>
-            <v-flex xs12 sm12 md5 lg5 xl5 py-0>
-              <div class="layout align-center justify-space-between subtotal">
-                <p>Subtotal</p>
-                <span>
-                  <emb-currency-sign></emb-currency-sign>
-                  {{ itemTotal }}
-                </span>
-              </div>
-              <div class="layout align-center justify-space-between subtotal">
-                <p>Descuento</p>
-                <span>
-                  <emb-currency-sign></emb-currency-sign>
-                  {{ shipping }}
-                </span>
-              </div>
-              <div class="layout align-center justify-space-between subtotal">
-                <p>Impuesto</p>
-                <span>
-                  <emb-currency-sign></emb-currency-sign>
-                  {{ tax }}
-                </span>
-              </div>
-              <v-divider class="my-3"></v-divider>
-              <div
-                class="
-                  layout
-                  align-center
-                  justify-space-between
-                  subtotal
-                  layout-gap
-                "
-              >
-                <h4>Total</h4>
-                <h4>
-                  <emb-currency-sign></emb-currency-sign>
-                  {{ getTotalPrice }}
-                </h4>
-              </div>
-              <div class="layout justify-end subtotal">
-                <v-btn
-                  large
-                  class="accent mr-0"
-                  @click="registraConfirmaShop()"
-                  href="javascript:void(0)"
-                >
-                  Confirmar
-                </v-btn>
-              </div>
-            </v-flex>
-          </v-layout>
-          <emb-confirmation-component
-            ref="confirmationDialog"
-            message="Por favor confirmar orden"
-            @onConfirm="onRegisterShop"
-          >
-          </emb-confirmation-component>
-          <emb-delete-confirmation
-            ref="deleteConfirmationDialog"
-            message="¿Desea Eliminar El Producto?"
-            @onConfirm="onDeleteProductFromCart"
-          >
-          </emb-delete-confirmation>
+				<div v-else-if="!cart || !cart.length" class="aio-cart-page__empty">
+					<div class="aio-cart-page__empty-icon">
+						<v-icon size="48">shopping_bag</v-icon>
+					</div>
+					<h2>Tu carrito está vacío</h2>
+					<p>Aún no has agregado productos. Explora el catálogo y encuentra lo que necesitas.</p>
+					<router-link to="/products" class="aio-cart-page__empty-btn">
+						<v-icon size="18">storefront</v-icon>
+						Ver productos
+					</router-link>
+				</div>
 
-          <emb-load-component
-            ref="loadComponent"
-            message="Registrando Orden.."
-          >
-          </emb-load-component>
+				<div v-else class="aio-cart-page__layout cart-shop-list">
+					<div class="aio-cart-page__main">
+						<div class="aio-cart-page__notice">
+							<v-icon size="20">info</v-icon>
+							<p>
+								Verifica tus
+								<router-link to="/account/profile">datos de facturación</router-link>
+								antes de confirmar. La factura se emitirá con la información registrada en tu cuenta.
+							</p>
+						</div>
 
-        </div>
-      </v-container>
-    </div>
-  </div>
+						<article
+							v-for="(item, index) in cart"
+							:key="item.id_details || index"
+							class="aio-cart-page__item"
+						>
+							<div class="aio-cart-page__item-main">
+								<div class="aio-cart-page__thumb">
+									<img :src="item.url" :alt="item.name_img || item.name">
+								</div>
+
+								<div class="aio-cart-page__info">
+									<h3 class="aio-cart-page__name">{{ item.name }}</h3>
+									<p v-if="item.description" class="aio-cart-page__desc">{{ item.description }}</p>
+								</div>
+
+								<div class="aio-cart-page__qty">
+									<label>Cantidad</label>
+									<v-text-field
+										v-model.number="item.details_quantity"
+										type="number"
+										min="1"
+										max="10"
+										outlined
+										dense
+										hide-details
+										class="aio-cart-page__qty-input"
+									></v-text-field>
+								</div>
+
+								<div class="aio-cart-page__unit-price">
+									<label>Precio</label>
+									<span>
+										<emb-currency-sign></emb-currency-sign>{{ formatNumber(item.details_price) }}
+									</span>
+								</div>
+
+								<div class="aio-cart-page__line-total">
+									<label>Total</label>
+									<strong>
+										<emb-currency-sign></emb-currency-sign>{{ formatNumber(item.details_quantity * item.details_price) }}
+									</strong>
+								</div>
+
+								<button
+									type="button"
+									class="aio-cart-page__remove"
+									title="Eliminar producto"
+									@click="deleteProductFromCart(item)"
+								>
+									<v-icon size="20">close</v-icon>
+								</button>
+							</div>
+
+							<div
+								v-if="item.required_documents_array && item.required_documents_array.length > 0"
+								class="aio-cart-page__docs-cta"
+							>
+								<div class="aio-cart-page__docs-cta-content">
+									<div class="aio-cart-page__docs-cta-icon">
+										<v-icon size="20">description</v-icon>
+									</div>
+									<div>
+										<strong>Documentación obligatoria</strong>
+										<p>
+											Este producto requiere adjuntar documentos antes de confirmar la compra.
+											Usa el botón para cargarlos.
+										</p>
+									</div>
+								</div>
+								<div class="aio-cart-page__docs-cta-actions">
+									<span
+										class="aio-cart-page__docs-badge"
+										:class="{ 'aio-cart-page__docs-badge--done': isDocsComplete(item) }"
+									>
+										<v-icon v-if="isDocsComplete(item)" size="14">check_circle</v-icon>
+										{{ getDocsUploadedCount(item) }}/{{ item.required_documents_array.length }} cargados
+									</span>
+									<button
+										type="button"
+										class="aio-cart-page__docs-btn"
+										@click="openDocsModal(item)"
+									>
+										<v-icon size="18">upload_file</v-icon>
+										Añadir documentación
+									</button>
+								</div>
+							</div>
+						</article>
+					</div>
+
+					<aside class="aio-cart-page__summary">
+						<div class="aio-cart-page__summary-card">
+							<h2 class="aio-cart-page__summary-title">Resumen del pedido</h2>
+
+							<div class="aio-cart-page__summary-row">
+								<span>Subtotal</span>
+								<span>
+									<emb-currency-sign></emb-currency-sign>{{ itemTotal }}
+								</span>
+							</div>
+							<div class="aio-cart-page__summary-row">
+								<span>Descuento</span>
+								<span>
+									<emb-currency-sign></emb-currency-sign>{{ shipping }}
+								</span>
+							</div>
+							<div class="aio-cart-page__summary-row">
+								<span>Impuesto</span>
+								<span>
+									<emb-currency-sign></emb-currency-sign>{{ tax }}
+								</span>
+							</div>
+
+							<div class="aio-cart-page__summary-divider"></div>
+
+							<div class="aio-cart-page__summary-row aio-cart-page__summary-row--total">
+								<span>Total</span>
+								<strong>
+									<emb-currency-sign></emb-currency-sign>{{ getTotalPrice }}
+								</strong>
+							</div>
+
+							<button
+								type="button"
+								class="aio-cart-page__confirm-btn"
+								@click="registraConfirmaShop"
+							>
+								<v-icon size="20">lock</v-icon>
+								Confirmar compra
+							</button>
+
+							<router-link to="/products" class="aio-cart-page__continue-link">
+								<v-icon size="16">arrow_back</v-icon>
+								Seguir comprando
+							</router-link>
+						</div>
+					</aside>
+				</div>
+
+				<vue-snotify></vue-snotify>
+				<emb-confirmation-component
+					ref="confirmationDialog"
+					title="¿Confirmar orden?"
+					message="Revisa que tu carrito y la documentación requerida estén completos antes de finalizar la compra."
+					confirm-label="Sí, confirmar"
+					cancel-label="Cancelar"
+					@onConfirm="onRegisterShop"
+				></emb-confirmation-component>
+				<emb-delete-confirmation
+					ref="deleteConfirmationDialog"
+					title="Eliminar producto"
+					message="¿Desea eliminar este producto del carrito? Esta acción no se puede deshacer."
+					confirm-label="Sí, eliminar"
+					cancel-label="Cancelar"
+					@onConfirm="onDeleteProductFromCart"
+				></emb-delete-confirmation>
+				<cart-documents-modal
+					v-model="docsModalOpen"
+					:item="docsModalItem"
+					:uploaded-documents="uploadedDocuments"
+					:uploading-documents="uploadingDocuments"
+					@upload="onDocsUpload"
+				></cart-documents-modal>
+				<emb-load-component
+					ref="loadComponent"
+					eyebrow="Procesando orden"
+					message="Registrando tu orden"
+					subtitle="Estamos preparando el enlace de pago. Por favor no cierres esta ventana."
+				></emb-load-component>
+			</v-container>
+		</div>
+	</div>
 </template>

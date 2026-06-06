@@ -1,14 +1,23 @@
 //=======================| App Configuration |========================//
 export default {
-	appLogo: '/static/images/logo2.png', 
-	appLogoDark: '/static/images/logo2.png',                         // App Logo,
-	brand: 'Embryo',                                        		   // Brand Name
-	copyrightText: '© All Rights Reversed | Made With Love by All in one team',     // Copyright Text
-	//theme color
+	appLogo: '/static/images/logo/AIO_LOGO_NAME_BLACK&COLOR.png',
+	appLogoFooter: '/static/images/logo/AIO_LOGO_NAME_ALL_WHITE.png',
+	appLogoDark: '/static/images/logo/AIO_LOGO_NAME_ALL_WHITE.png',
+	logo: {
+		// Imagen original: 3840 × 2160 px (16:9)
+		aspectRatio: 16 / 9,
+		height: 46,
+		heightCompact: 38,
+		heightFooter: 48,
+		maxWidth: 220,
+		maxWidthCompact: 168,
+	},
+	brand: 'All in One',
+	copyrightText: '© 2026 All in One. Todos los derechos reservados.',
 	porcentajeIVa:0.15,
 	color: {
-      primary: '#00006B',
-      accent : '#0068FF',
+      primary: '#A96DFA',
+      accent: '#CA1DFF',
 	},
 	apiUrl: process.env.VUE_APP_NODE_ENV == 'production' ? process.env.VUE_APP_API :  'http://localhost:3500',
 	algoliaApiKey: '6be0576ff61c053d5f9a3225e2a90f76',

@@ -10,7 +10,13 @@
 			>
 			<div class="site-logo py-4 mb-12">
 				<router-link to="/" class="d-block text-center">
-					<img alt="site-logo" height="34" :src="appLogo" width="160">
+					<img
+						alt="All in One"
+						class="admin-panel__logo"
+						:src="appLogo"
+						:height="logoSize.height"
+						:style="{ maxWidth: logoSize.maxWidth + 'px' }"
+					>
 				</router-link>
 			</div>
          <v-list dense class="admin-menu-wrap">
@@ -103,6 +109,10 @@ export default {
    data (){
       return{   
          appLogo: AppConfig.appLogo,
+         logoSize: {
+            height: AppConfig.logo.heightCompact,
+            maxWidth: AppConfig.logo.maxWidthCompact,
+         },
          drawer: null,
          userLinks: [
             {

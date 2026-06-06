@@ -1,180 +1,589 @@
 <template>
-	<div class="emb-signIn-wrap section-gap">
-		<div class="container py-0">
-			<v-layout row wrap align-center justify-center>
-				<v-flex sm12 md12 lg8 xl7>
-					<v-layout row mx-sm-0 mx-3 wrap align-center justify-center>
-						<v-flex sm6 md7 lg6 xl6 hidden-sm-and-down>
-							<div class="form-img sign-in-image"></div>
-						</v-flex>
-						<v-flex sm10 md5 lg5 xl6>
-							<div class="emb-card sign-in-form form-margin d-block white pa-6">
-								<h4>Inicio de sesión</h4>
-								<v-form ref="form" v-model="valid">
-									<v-text-field
-										type="email"
-										placeholder="Email*"
-                                        v-model="form.email"
-                                        :rules="emailRules"
-									>
-									</v-text-field>
-									<v-text-field
-										type="password"
-										placeholder="Contraseña*"
-                                        v-model="form.password"
-                                        :rules="passwordRules"
-									>
-									</v-text-field>
-									<v-btn class="accent mb-3 ma-0 mr-4" largE @click="saveDetails">
-										Ingresar
-									</v-btn>
-                                    <v-btn class="white mb-3 ma-0" largE @click="openModalrecoverPassword">
-										Recuperar clave
-									</v-btn>
-									<p>No tienes una cuenta? <router-link to="/client/register" class="accent--text">Da click para registrarte</router-link></p>
-								</v-form>
+	<div class="aio-login">
+		<div class="aio-login__layout">
+			<section class="aio-login__brand" aria-hidden="true">
+				<div class="aio-login__brand-glow"></div>
+				<div class="aio-login__brand-content">
+					<img
+						:src="appLogoWhite"
+						alt="All in One"
+						class="aio-login__brand-logo"
+					>
+					<h1 class="aio-login__brand-title">Tu marketplace de confianza</h1>
+					<p class="aio-login__brand-text">
+						Accede a productos y servicios de las mejores empresas en un solo lugar.
+					</p>
+				</div>
+			</section>
+
+			<section class="aio-login__form-wrap">
+				<div class="aio-login__card">
+					<div class="aio-login__card-header">
+						<img
+							:src="appLogo"
+							alt="All in One"
+							class="aio-login__logo-mobile"
+						>
+						<h2>Bienvenido de nuevo</h2>
+						<p>Ingresa tus credenciales para continuar</p>
+					</div>
+
+					<form class="aio-login__form" @submit.prevent="saveDetails">
+						<label class="aio-login__field">
+							<span class="aio-login__label">Correo electrónico</span>
+							<div class="aio-login__input-wrap">
+								<v-icon size="20" class="aio-login__field-icon">email</v-icon>
+								<input
+									v-model="form.email"
+									type="email"
+									class="aio-login__input"
+									placeholder="tu@email.com"
+									autocomplete="email"
+								>
 							</div>
-						</v-flex>
-					</v-layout>
-				</v-flex>
-			</v-layout>
+							<span v-if="emailError" class="aio-login__error">{{ emailError }}</span>
+						</label>
+
+						<label class="aio-login__field">
+							<span class="aio-login__label">Contraseña</span>
+							<div class="aio-login__input-wrap">
+								<v-icon size="20" class="aio-login__field-icon">lock_outline</v-icon>
+								<input
+									v-model="form.password"
+									:type="showPassword ? 'text' : 'password'"
+									class="aio-login__input"
+									placeholder="Mínimo 8 caracteres"
+									autocomplete="current-password"
+								>
+								<button
+									type="button"
+									class="aio-login__toggle-pass"
+									:aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+									@click="showPassword = !showPassword"
+								>
+									<v-icon size="20">{{ showPassword ? 'visibility_off' : 'visibility' }}</v-icon>
+								</button>
+							</div>
+							<span v-if="passwordError" class="aio-login__error">{{ passwordError }}</span>
+						</label>
+
+						<button type="submit" class="aio-login__submit" :disabled="loading">
+							<span v-if="loading">Ingresando...</span>
+							<span v-else>Ingresar</span>
+						</button>
+
+						<button type="button" class="aio-login__secondary" @click="openModalrecoverPassword">
+							¿Olvidaste tu contraseña?
+						</button>
+					</form>
+
+					<p class="aio-login__footer">
+						¿No tienes cuenta?
+						<router-link to="/client/register">Crea una aquí</router-link>
+					</p>
+				</div>
+			</section>
 		</div>
-        <v-dialog v-model="open" max-width="550">
-            <v-card class="py-6 px-2">
-                <h4 class=" text-center mb-6">Ingresa tu email para recuperar tu clave</h4>
-                <v-form ref="formRecovery" v-model="validRecovery">
-                    <v-text-field
-                        type="email"
-                        placeholder="Email*"
-                        v-model="formRecovery.email"
-                        :rules="emailRules"
-                    />
-                </v-form>
-                
-                <v-card-actions class="layout justify-center">
-                    <v-btn color="accent mx-2" @click="recoverPassword">Recuperar clave</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-   </div>
+
+		<v-dialog v-model="open" max-width="480" content-class="aio-login-dialog">
+			<div class="aio-login-dialog__card">
+				<div class="aio-login-dialog__header">
+					<span class="aio-login-dialog__icon">
+						<v-icon size="22" color="white">lock_reset</v-icon>
+					</span>
+					<div>
+						<h3>Recuperar contraseña</h3>
+						<p>Te enviaremos instrucciones a tu correo</p>
+					</div>
+				</div>
+
+				<form @submit.prevent="recoverPassword">
+					<label class="aio-login__field">
+						<span class="aio-login__label">Correo electrónico</span>
+						<div class="aio-login__input-wrap">
+							<v-icon size="20" class="aio-login__field-icon">email</v-icon>
+							<input
+								v-model="formRecovery.email"
+								type="email"
+								class="aio-login__input"
+								placeholder="tu@email.com"
+							>
+						</div>
+						<span v-if="recoveryEmailError" class="aio-login__error">{{ recoveryEmailError }}</span>
+					</label>
+
+					<div class="aio-login-dialog__actions">
+						<button type="button" class="aio-login__secondary" @click="open = false">Cancelar</button>
+						<button type="submit" class="aio-login__submit aio-login__submit--compact" :disabled="recoveryLoading">
+							<span v-if="recoveryLoading">Enviando...</span>
+							<span v-else>Enviar enlace</span>
+						</button>
+					</div>
+				</form>
+			</div>
+		</v-dialog>
+	</div>
 </template>
+
 <script>
-    import api from 'Api';
-	export default{
-		data(){
-			return{
-                open: false,
-                valid: false,
-                validRecovery: false,
-                formRecovery: {
-                    email: '',
-                },
-                form: {
-                    email: '',
-                    password: '',
-                    
-                },
-                emailRules: [
-					v => !!v || 'El email es requerido',
-					v => /.+@.+/.test(v) || 'El email ingresado es incorrecto'
-                ],
-                passwordRules: [
-                    v => !!v || 'La contraseña es requerida',
-                    v => !(v?.length < 8) || 'La contraseña debe tener más de 8 caracteres',
-                ],
-			}
+import api from 'Api';
+import AppConfig from 'Constants/AppConfig';
+
+export default {
+	data() {
+		return {
+			appLogo: AppConfig.appLogo,
+			appLogoWhite: AppConfig.appLogoFooter,
+			open: false,
+			submitted: false,
+			recoverySubmitted: false,
+			loading: false,
+			recoveryLoading: false,
+			showPassword: false,
+			formRecovery: {
+				email: '',
+			},
+			form: {
+				email: '',
+				password: '',
+			},
+			emailRules: [
+				(v) => !!v || 'El email es requerido',
+				(v) => /.+@.+/.test(v) || 'El email ingresado es incorrecto',
+			],
+			passwordRules: [
+				(v) => !!v || 'La contraseña es requerida',
+				(v) => !(v?.length < 8) || 'La contraseña debe tener más de 8 caracteres',
+			],
+		};
+	},
+	computed: {
+		emailError() {
+			if (!this.submitted && !this.form.email) return '';
+			const failed = this.emailRules.find((rule) => rule(this.form.email) !== true);
+			return failed ? failed(this.form.email) : '';
 		},
-        methods: {
-            recoverPassword(){
-                this.$refs.formRecovery.validate();
-                console.log(this.$refs.formRecovery.validate())
-				if(this.validRecovery){
-                    api.post('/api/users/resetPassword', this.formRecovery)
-                    .then(() => {
-                        this.$snotify.success('Clave recuperada con éxito, revise su correo porfavor',{
-                            closeOnClick: false,
-                            pauseOnHover: false,
-                            timeout: 2000,
-                            showProgressBar:false,
-                        });
-                    }).catch((err) => {
-                        let defaultErrorMessage = err?.response?.data?.error?.message ? err?.response?.data?.error?.message :  'Ocurrio un error inesperado'; 
-                        if (Object.keys(err?.response?.data?.error?.validationObject).length > 0) {
-                            this.$snotify.error(err.response.data.error.validationObject.email, {
-                                closeOnClick: false,
-                                pauseOnHover: false,
-                                timeout: 2000,
-                                showProgressBar:false,
-                            });
-                            this.$snotify.error(err.response.data.error.validationObject.password, {
-                                closeOnClick: false,
-                                pauseOnHover: false,
-                                timeout: 2000,
-                                showProgressBar:false,
-                            });
-                            return;
-                        }
-                         this.$snotify.error(defaultErrorMessage,{
-                            closeOnClick: false,
-                            pauseOnHover: false,
-                            timeout: 2000,
-                            showProgressBar:false,
-                        });
-                    });
-                }
-            },
-            openModalrecoverPassword(){
-                this.open = true;
-            },
-            saveDetails(){
-				this.$refs.form.validate();
-                console.log(this.$refs.form.validate())
-				if(this.valid){
-					api.post('/api/users/login', this.form)
-                    .then((res) => {
-                        this.$snotify.success('Bienvenidoo',{
-                            closeOnClick: false,
-                            pauseOnHover: false,
-                            timeout: 2000,
-                            showProgressBar:false,
-                        });
-                        localStorage.email = res.data.data.email;
-                        localStorage.id_users = res.data.data.id_users;
-                        localStorage.identification_number = res.data.data.identification_number;
-                        localStorage.name_user = res.data.data.name_user;
-                        localStorage.last_name_user = res.data.data.last_name_user;
-                        localStorage.id_user_rol = res.data.data.id_user_rol;
-                        localStorage.id_rol = res.data.data.id_rol;
-                        localStorage.id_company_user = res.data.data.id_company_user;
-                        localStorage.access_token = res.data.data.access_token;
-                        this.$router.push({ path: '/mainPage' });
-                        // this.$router.go('/mainPage');
-                    }).catch((err) => {
-                        let defaultErrorMessage = err?.response?.data?.error?.message ? err?.response?.data?.error?.message :  'Ocurrio un error inesperado'; 
-                        if (Object.keys(err?.response?.data?.error?.validationObject).length > 0) {
-                            this.$snotify.error(err.response.data.error.validationObject.email, {
-                                closeOnClick: false,
-                                pauseOnHover: false,
-                                timeout: 2000,
-                                showProgressBar:false,
-                            });
-                            this.$snotify.error(err.response.data.error.validationObject.password, {
-                                closeOnClick: false,
-                                pauseOnHover: false,
-                                timeout: 2000,
-                                showProgressBar:false,
-                            });
-                            return;
-                        }
-                         this.$snotify.error(defaultErrorMessage,{
-                            closeOnClick: false,
-                            pauseOnHover: false,
-                            timeout: 2000,
-                            showProgressBar:false,
-                        });
-                    });
-                }	
-		    }
-        }
+		passwordError() {
+			if (!this.submitted && !this.form.password) return '';
+			const failed = this.passwordRules.find((rule) => rule(this.form.password) !== true);
+			return failed ? failed(this.form.password) : '';
+		},
+		recoveryEmailError() {
+			if (!this.recoverySubmitted && !this.formRecovery.email) return '';
+			const failed = this.emailRules.find((rule) => rule(this.formRecovery.email) !== true);
+			return failed ? failed(this.formRecovery.email) : '';
+		},
+	},
+	methods: {
+		validateForm() {
+			this.submitted = true;
+			return this.emailRules.every((rule) => rule(this.form.email) === true)
+				&& this.passwordRules.every((rule) => rule(this.form.password) === true);
+		},
+		validateRecoveryForm() {
+			this.recoverySubmitted = true;
+			return this.emailRules.every((rule) => rule(this.formRecovery.email) === true);
+		},
+		recoverPassword() {
+			if (!this.validateRecoveryForm()) return;
+
+			this.recoveryLoading = true;
+			api.post('/api/users/resetPassword', this.formRecovery)
+				.then(() => {
+					this.$snotify.success('Clave recuperada con éxito, revise su correo por favor', {
+						closeOnClick: false,
+						pauseOnHover: false,
+						timeout: 2000,
+						showProgressBar: false,
+					});
+					this.open = false;
+				})
+				.catch((err) => {
+					this.handleApiError(err);
+				})
+				.finally(() => {
+					this.recoveryLoading = false;
+				});
+		},
+		openModalrecoverPassword() {
+			this.recoverySubmitted = false;
+			this.formRecovery.email = '';
+			this.open = true;
+		},
+		saveDetails() {
+			if (!this.validateForm()) return;
+
+			this.loading = true;
+			api.post('/api/users/login', this.form)
+				.then((res) => {
+					this.$snotify.success('Bienvenido', {
+						closeOnClick: false,
+						pauseOnHover: false,
+						timeout: 2000,
+						showProgressBar: false,
+					});
+					localStorage.email = res.data.data.email;
+					localStorage.id_users = res.data.data.id_users;
+					localStorage.identification_number = res.data.data.identification_number;
+					localStorage.name_user = res.data.data.name_user;
+					localStorage.last_name_user = res.data.data.last_name_user;
+					localStorage.id_user_rol = res.data.data.id_user_rol;
+					localStorage.id_rol = res.data.data.id_rol;
+					localStorage.id_company_user = res.data.data.id_company_user;
+					localStorage.access_token = res.data.data.access_token;
+					this.$store.dispatch('fetchWishlist');
+					this.$router.push({ path: '/mainPage' });
+				})
+				.catch((err) => {
+					this.handleApiError(err);
+				})
+				.finally(() => {
+					this.loading = false;
+				});
+		},
+		handleApiError(err) {
+			const defaultErrorMessage = err?.response?.data?.error?.message || 'Ocurrió un error inesperado';
+			const validationObject = err?.response?.data?.error?.validationObject;
+
+			if (validationObject && Object.keys(validationObject).length > 0) {
+				Object.values(validationObject).forEach((message) => {
+					if (message) {
+						this.$snotify.error(message, {
+							closeOnClick: false,
+							pauseOnHover: false,
+							timeout: 2000,
+							showProgressBar: false,
+						});
+					}
+				});
+				return;
+			}
+
+			this.$snotify.error(defaultErrorMessage, {
+				closeOnClick: false,
+				pauseOnHover: false,
+				timeout: 2000,
+				showProgressBar: false,
+			});
+		},
+	},
+};
+</script>
+
+<style scoped>
+.aio-login {
+	min-height: calc(100vh - 180px);
+	padding: 2rem 1.25rem 3rem;
+	background: linear-gradient(180deg, #faf8ff 0%, #f3eefb 100%);
+}
+
+.aio-login__layout {
+	max-width: 1080px;
+	margin: 0 auto;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	border-radius: 24px;
+	overflow: hidden;
+	box-shadow: 0 24px 64px rgba(169, 109, 250, 0.15);
+	min-height: 620px;
+}
+
+.aio-login__brand {
+	position: relative;
+	background: linear-gradient(145deg, #08080c 0%, #150820 55%, #1a0a28 100%);
+	padding: 3rem;
+	display: flex;
+	align-items: center;
+	overflow: hidden;
+}
+
+.aio-login__brand-glow {
+	position: absolute;
+	width: 320px;
+	height: 320px;
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(202, 29, 255, 0.35) 0%, transparent 70%);
+	top: -80px;
+	right: -80px;
+	pointer-events: none;
+}
+
+.aio-login__brand-content {
+	position: relative;
+	z-index: 1;
+}
+
+.aio-login__brand-logo {
+	height: 48px;
+	max-width: 220px;
+	object-fit: contain;
+	margin-bottom: 2rem;
+}
+
+.aio-login__brand-title {
+	margin: 0 0 1rem;
+	font-size: 1.75rem;
+	font-weight: 700;
+	color: #fff;
+	line-height: 1.25;
+}
+
+.aio-login__brand-text {
+	margin: 0;
+	font-size: 1rem;
+	line-height: 1.65;
+	color: rgba(255, 255, 255, 0.65);
+	max-width: 360px;
+}
+
+.aio-login__form-wrap {
+	background: #fff;
+	padding: 2.5rem 2.75rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.aio-login__card {
+	width: 100%;
+	max-width: 380px;
+}
+
+.aio-login__card-header {
+	margin-bottom: 2rem;
+}
+
+.aio-login__logo-mobile {
+	display: none;
+	height: 40px;
+	max-width: 180px;
+	object-fit: contain;
+	margin-bottom: 1.25rem;
+}
+
+.aio-login__card-header h2 {
+	margin: 0 0 0.375rem;
+	font-size: 1.625rem;
+	font-weight: 700;
+	color: #111827;
+}
+
+.aio-login__card-header p {
+	margin: 0;
+	font-size: 0.9375rem;
+	color: #6b7280;
+}
+
+.aio-login__form {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+
+.aio-login__field {
+	display: block;
+}
+
+.aio-login__label {
+	display: block;
+	margin-bottom: 0.5rem;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: #374151;
+}
+
+.aio-login__input-wrap {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	padding: 0 1rem;
+	height: 50px;
+	border: 2px solid #e5e7eb;
+	border-radius: 12px;
+	background: #fafafa;
+	transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.aio-login__input-wrap:focus-within {
+	border-color: #A96DFA;
+	background: #fff;
+	box-shadow: 0 0 0 4px rgba(169, 109, 250, 0.12);
+}
+
+.aio-login__field-icon {
+	color: #9ca3af !important;
+	flex-shrink: 0;
+}
+
+.aio-login__input {
+	flex: 1;
+	border: none;
+	background: transparent;
+	outline: none;
+	font-size: 0.9375rem;
+	color: #111827;
+	font-family: inherit;
+	min-width: 0;
+}
+
+.aio-login__input::placeholder {
+	color: #9ca3af;
+}
+
+.aio-login__toggle-pass {
+	border: none;
+	background: none;
+	padding: 0;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	color: #9ca3af;
+}
+
+.aio-login__toggle-pass:hover .v-icon {
+	color: #A96DFA !important;
+}
+
+.aio-login__error {
+	display: block;
+	margin-top: 0.375rem;
+	font-size: 0.75rem;
+	color: #dc2626;
+}
+
+.aio-login__submit {
+	width: 100%;
+	height: 50px;
+	border: none;
+	border-radius: 12px;
+	background: linear-gradient(135deg, #A96DFA 0%, #CA1DFF 100%);
+	color: #fff;
+	font-size: 0.9375rem;
+	font-weight: 700;
+	cursor: pointer;
+	box-shadow: 0 8px 24px rgba(202, 29, 255, 0.35);
+	transition: transform 0.2s, opacity 0.2s;
+	font-family: inherit;
+}
+
+.aio-login__submit:hover:not(:disabled) {
+	transform: translateY(-1px);
+}
+
+.aio-login__submit:disabled {
+	opacity: 0.7;
+	cursor: not-allowed;
+}
+
+.aio-login__submit--compact {
+	width: auto;
+	min-width: 140px;
+	padding: 0 1.25rem;
+	height: 44px;
+}
+
+.aio-login__secondary {
+	border: none;
+	background: none;
+	padding: 0;
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: #A96DFA;
+	cursor: pointer;
+	text-align: center;
+	font-family: inherit;
+	transition: color 0.2s;
+}
+
+.aio-login__secondary:hover {
+	color: #CA1DFF;
+}
+
+.aio-login__footer {
+	margin: 1.75rem 0 0;
+	text-align: center;
+	font-size: 0.875rem;
+	color: #6b7280;
+}
+
+.aio-login__footer a {
+	color: #CA1DFF;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.aio-login__footer a:hover {
+	color: #A96DFA;
+}
+
+.aio-login-dialog__card {
+	background: #fff;
+	border-radius: 20px;
+	padding: 1.75rem;
+}
+
+.aio-login-dialog__header {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	margin-bottom: 1.5rem;
+}
+
+.aio-login-dialog__icon {
+	width: 44px;
+	height: 44px;
+	border-radius: 12px;
+	background: linear-gradient(135deg, #A96DFA, #CA1DFF);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.aio-login-dialog__header h3 {
+	margin: 0;
+	font-size: 1.125rem;
+	font-weight: 700;
+	color: #111827;
+}
+
+.aio-login-dialog__header p {
+	margin: 0.25rem 0 0;
+	font-size: 0.8125rem;
+	color: #6b7280;
+}
+
+.aio-login-dialog__actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 1rem;
+	margin-top: 1.5rem;
+}
+
+@media (max-width: 959px) {
+	.aio-login__layout {
+		grid-template-columns: 1fr;
+		min-height: auto;
 	}
-</script>	
+
+	.aio-login__brand {
+		display: none;
+	}
+
+	.aio-login__form-wrap {
+		padding: 2rem 1.5rem;
+	}
+
+	.aio-login__logo-mobile {
+		display: block;
+	}
+}
+</style>
+
+<style>
+.aio-login-dialog {
+	box-shadow: none !important;
+	background: transparent !important;
+}
+</style>
