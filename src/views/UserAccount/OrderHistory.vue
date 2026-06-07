@@ -74,7 +74,7 @@
 								v-if="item.status == 2"
 								type="button"
 								class="aio-account-orders__action aio-account-orders__action--primary"
-								title="Link de pago"
+								title="Generar nuevo link de pago"
 								@click="openPayment(item)"
 							>
 								<v-icon size="18">payment</v-icon>
@@ -375,8 +375,33 @@ export default {
 		formatDate(value) {
 			return value ? moment(value).format(this.dateFormat) : '—';
 		},
-		openPayment(item) {
-			window.open(item.url_payphone, '_blank');
+		async openPayment(item) {
+			this.isPageLoading = true;
+
+			try {
+				const response = await api.post('/api/shoppingcar/payphone/regenerate', {
+					id_shopping_car: item.id_shopping_car,
+				});
+
+				if (response.data && response.data.errorCode === 200 && response.data.url) {
+					item.url_payphone = response.data.url;
+					window.open(response.data.url, '_blank');
+					this.$snotify.success('Link de pago generado. Se abrió en una nueva pestaña.', {
+						timeout: 3500,
+					});
+					return;
+				}
+
+				const message = (response.data && response.data.error && response.data.error.message)
+					|| 'No se pudo generar el link de pago';
+				this.$snotify.error(message, { timeout: 4000 });
+			} catch (error) {
+				const message = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)
+					|| 'No se pudo generar el link de pago';
+				this.$snotify.error(message, { timeout: 4000 });
+			} finally {
+				this.isPageLoading = false;
+			}
 		},
 		formatCurrency(value) {
 			return `$ ${parseFloat(value || 0).toFixed(2)}`;

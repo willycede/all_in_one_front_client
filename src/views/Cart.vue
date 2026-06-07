@@ -164,13 +164,14 @@ export default {
         this.$refs.confirmationDialog.close();
         this.$refs.loadComponent.openDialog();
         const arr_pay = {
+          id_shopping_car: localStorage.id_orden,
           amount: total,
           tax: impuesto,
           amountWithTax: subtotalAfterCoupon,
           service: 0,
           tip: 0,
           currency: "USD",
-          clientTransactionId: localStorage.id_orden+"@145636",
+          forceNewTransaction: true,
           reference: "PAGO ORDEN DE PAGO #" + localStorage.id_orden,
           oneTime: false,
           expireIn: 0,
@@ -214,34 +215,26 @@ export default {
             .replace("@impuesto", impuesto / 100)
             .replaceAll("@total", total / 100);
 
-
             const data_send_mail = {
               html: html,
               email: localStorage.email,
               name: `${localStorage.name_user} ${localStorage.last_name_user}`,
             };
-            await api.post(
-              "/api/shoppingcar/sendmail",
-              data_send_mail
-            );
-            //console.log(EventoSendMail);
+
+            try {
+              await api.post(
+                "/api/shoppingcar/sendmail",
+                data_send_mail
+              );
+            } catch (mailError) {
+              this.$snotify.warning(
+                "El link de pago se generó correctamente, pero no se pudo enviar el correo. Puedes pagar desde Mis pedidos.",
+                { timeout: 6000 }
+              );
+            }
+
             this.$refs.loadComponent.close();
-            const upd_shop = {
-              url_payphone: urlPayphone.data.url,
-              status: 2,
-              id_shopping_car: localStorage.id_orden
-            };
-            this.updateShoppingPay(upd_shop).then((data) => {
-                if(data.status === 200){
-                  this.$router.push('/account/order-history');
-                }else{
-                  this.$snotify.error("El proceso no pudo ser gestionado", {
-                    closeOnClick: false,
-                    pauseOnHover: false,
-                    timeout: 1000,
-                  });
-                }
-            });
+            this.$router.push('/account/order-history');
             
         } else {
           this.$refs.loadComponent.close();
