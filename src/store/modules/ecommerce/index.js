@@ -5,6 +5,7 @@ import router from "../../../router";
 import moment from 'moment';
 import api from 'Api';
 import { mapFavoriteFromApi, getProductIdFromPayload } from 'Helpers/favorites';
+import AppConfig from 'Constants/AppConfig';
 
 
 
@@ -73,7 +74,38 @@ const actions = {
             });
       },
       changeQuantityHandler(context, payload) {
-            context.commit('onChangeQuantityHandler', payload);
+            return context.dispatch('updateCartItemQuantity', payload);
+      },
+      updateCartItemQuantity(context, payload) {
+            const id_user = localStorage.getItem('id_users');
+            const quantity = parseInt(payload.details_quantity, 10) || 1;
+            const price = parseFloat(payload.details_price) || 0;
+            const subtotal = quantity * price;
+            const iva = subtotal * AppConfig.porcentajeIVa;
+            const total = subtotal + iva;
+
+            return api.post('/api/shoppingcar/create_shoppDetails', {
+                  id_user,
+                  id_details: payload.id_details,
+                  id_shopping_car: payload.id_shopping_car || localStorage.getItem('id_orden'),
+                  id_product: payload.id_product,
+                  details_quantity: quantity,
+                  details_price: price,
+                  details_discount: 0,
+                  details_subtotal: subtotal,
+                  details_iva: iva,
+                  details_total: total,
+                  status: 1,
+            }).then((response) => {
+                  context.commit('updateCartItemQuantity', {
+                        ...payload,
+                        details_quantity: quantity,
+                        details_subtotal: subtotal,
+                        details_iva: iva,
+                        details_total: total,
+                  });
+                  return response;
+            });
       },
       fetchWishlist(context) {
             const id_user = localStorage.getItem('id_users');
@@ -115,7 +147,39 @@ const actions = {
             context.commit("onPrintFinalReceipt", payload);
       },
       addAllWishlistItemToCart(context) {
-            context.commit("addAllWishlistItemToCart");
+            const items = [...context.state.wishlist];
+            if (!items.length) {
+                  return Promise.resolve([]);
+            }
+
+            const promises = items.map((item) => {
+                  const price = parseFloat(item.price) || 0;
+                  const quantity = 1;
+                  const subtotal = quantity * price;
+                  const iva = subtotal * AppConfig.porcentajeIVa;
+                  return context.dispatch('addProductToCart', {
+                        load_init: false,
+                        id_user: localStorage.getItem('id_users'),
+                        url: item.image,
+                        id_details: 0,
+                        name: item.name,
+                        id_shopping_car: localStorage.getItem('id_orden') || 0,
+                        id_product: item.id_product || item.id,
+                        details_quantity: quantity,
+                        details_price: price,
+                        details_discount: 0,
+                        details_subtotal: subtotal,
+                        details_iva: iva,
+                        details_total: subtotal + iva,
+                        status: 1,
+                        required_documents_array: [],
+                        uploaded_documents: {},
+                  });
+            });
+
+            return Promise.all(promises).then(() => {
+                  context.commit('setWishlist', []);
+            });
       },
       makePayment(context, payload) {
             context.commit('makePayment', payload);
@@ -308,6 +372,16 @@ const mutations = {
                   state.cart.splice(index, 1);
             }
       },
+      updateCartItemQuantity(state, payload) {
+            const detailId = payload.id_details || payload.id;
+            const index = state.cart.findIndex((item) => (item.id_details || item.id) === detailId);
+            if (index > -1) {
+                  state.cart.splice(index, 1, {
+                        ...state.cart[index],
+                        ...payload,
+                  });
+            }
+      },
 
       /**
        * method for adding item to wishlist
@@ -339,17 +413,6 @@ const mutations = {
             }
       },
 
-      /**
-       * method for adding all wishlist item to cart
-      */
-      addAllWishlistItemToCart(state) {
-            if (state.wishlist && state.wishlist.length > 0) {
-                  for (const wishlistItem of state.wishlist) {
-                        state.cart.push(wishlistItem);
-                  }
-            }
-            state.wishlist = [];
-      },
       /**
        * method to calcualte Order Id , transcation Id, ordered date , delivery date 
       */

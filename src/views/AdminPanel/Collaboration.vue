@@ -1,154 +1,234 @@
 <template>
-   <div class="emb-card pa-4">
-      <v-dialog max-width="500px" class="pa-4" v-model="open">
-			<template v-slot:activator="{ on }">
-				<v-btn color="primary" slot="activator" v-on="on" @click.stop="open = true" >
-					Add Users
-				</v-btn>
-			</template>	
+	<div class="aio-admin-collaboration">
+		<p class="aio-admin-settings__lead">
+			Usuarios vinculados a empresas del sistema. Puedes invitar por correo o quitar accesos.
+		</p>
+
+		<div class="aio-admin-card aio-admin-collaboration__toolbar pa-4 mb-4">
+			<v-btn color="primary" depressed @click="openDialog = true">
+				<v-icon left>person_add</v-icon>
+				Invitar usuario
+			</v-btn>
+		</div>
+
+		<div v-if="loadError" class="aio-admin-page__error mb-4">{{ loadError }}</div>
+
+		<div class="aio-admin-card pa-2">
+			<v-data-table
+				:headers="headers"
+				:items="collaborators"
+				:loading="isLoading"
+				hide-default-footer
+				no-data-text="No hay colaboradores registrados"
+				loading-text="Cargando colaboradores..."
+				class="aio-admin-collaboration__table"
+			>
+				<template v-slot:item.name="{ item }">
+					<span class="font-weight-medium">{{ item.name }}</span>
+				</template>
+				<template v-slot:item.roleLabel="{ item }">
+					<v-chip small :color="item.id_rol === 1 ? 'primary' : 'grey lighten-3'" :text-color="item.id_rol === 1 ? 'white' : 'grey darken-2'">
+						{{ item.roleLabel }}
+					</v-chip>
+				</template>
+				<template v-slot:item.action="{ item }">
+					<v-btn icon small color="error" :disabled="isDeleting" @click="confirmDelete(item)">
+						<v-icon small>delete</v-icon>
+					</v-btn>
+				</template>
+			</v-data-table>
+		</div>
+
+		<v-dialog v-model="openDialog" max-width="480">
 			<v-card>
-				<v-card-title
-					class="h4"
-				>
-				Add New User
-				</v-card-title>
+				<v-card-title class="headline">Invitar colaborador</v-card-title>
 				<v-card-text>
-					<v-form ref="form" v-model="valid" lazy-validation >
-						<v-text-field v-model="name"
-							:rules="nameRules" label="Name" required ></v-text-field>
-				
-						<v-text-field v-model="email" :rules="emailRules" 
-							label="E-mail" required ></v-text-field>
-				
-						<v-select v-model="select" :items="items"
-							:rules="[v => !!v || 'Item is required']"
-							label="Access Type" required ></v-select>
-
-						<v-btn color="primary" class="mr-3" @click="open = false">Close</v-btn>
-
-						<v-btn :disabled="!valid" color="error" 
-							@click="addItemToCollaborationList({'image':'/static/images/user.png','name':name,'email':email,'access':select})">
-							Submit
-						</v-btn>
+					<v-form ref="inviteForm" v-model="formValid">
+						<v-select
+							v-model="inviteForm.id_company"
+							:items="companies"
+							item-text="name"
+							item-value="id_company"
+							label="Empresa *"
+							outlined
+							dense
+							:rules="[v => !!v || 'Selecciona una empresa']"
+						></v-select>
+						<v-text-field
+							v-model="inviteForm.email"
+							label="Correo electrónico *"
+							type="email"
+							outlined
+							dense
+							:rules="emailRules"
+						></v-text-field>
+						<v-select
+							v-model="inviteForm.id_rol"
+							:items="roleOptions"
+							item-text="label"
+							item-value="value"
+							label="Rol *"
+							outlined
+							dense
+							:rules="[v => !!v || 'Selecciona un rol']"
+						></v-select>
 					</v-form>
 				</v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn text @click="openDialog = false">Cancelar</v-btn>
+					<v-btn color="primary" depressed :loading="isInviting" @click="submitInvite">Invitar</v-btn>
+				</v-card-actions>
 			</v-card>
-      </v-dialog>
-      <template>
-         <v-data-table
-            :headers="headers"
-				:items="collaborationData"
-				hide-default-footer
-         >
-				<template v-slot:item.image="{ item }">
-               <img :src="item.image" width="40">
-            </template>
-				<template v-slot:item.action="{ item }">
-					<v-btn icon color="grey" small>
-						<v-icon class="error--text" @click="deleteItemFromCollaborationList(item)">delete</v-icon>
-					</v-btn>
-				</template>	
-         </v-data-table>
-      </template>
-      <emb-delete-confirmation-2
-         ref="deleteConfirmationDialog"
-         messageTitle="Are you sure you want to delete?"
-         messageDescription="Are you sure you want to delete this user permanently?"
-         @onConfirm="ondeleteItemFromCollaborationList"
-         btn1="Cancel"
-         btn2="Yes"
-      >
-      </emb-delete-confirmation-2>
-   </div>
+		</v-dialog>
+
+		<emb-delete-confirmation-2
+			ref="deleteConfirmationDialog"
+			messageTitle="¿Eliminar colaborador?"
+			messageDescription="Se revocará el acceso de este usuario a la empresa seleccionada."
+			btn1="Cancelar"
+			btn2="Eliminar"
+			@onConfirm="deleteCollaborator"
+		></emb-delete-confirmation-2>
+	</div>
 </template>
 
 <script>
-import api from "Api";
+import api from 'Api';
 
 export default {
-  data() {
-    return {
-      collaborationList: null,
-      open: false,
-      select: null,
-      valid: true,
-      items: [{ text: "Admin" }, { text: "Write" }, { text: "Read" }],
-      name: "",
-      nameRules: [v => !!v || "Name is required"],
-      email: "",
-      emailRules: [
-        v => !!v || "E-mail is required",
-        v => /.+@.+/.test(v) || "E-mail must be valid"
-      ],
-      selectRules: [v => !!v || "Item is required"],
-      loader: true,
-      collaborationData: [],
-      headers: [
-        {
-          text: "Image",
-          sortable: false,
-          value: "image"
-        },
-        {
-          text: "Name",
-          sortable: false,
-          value: "name"
-        },
-        {
-          text: "Email",
-          sortable: false,
-          value: "email"
-        },
-        {
-          text: "Access",
-          sortable: false,
-          value: "access"
-        },
-        {
-          text: "Action",
-          sortable: false,
-          value: "action"
-        }
-      ],
-      selectDeletedItem: null
-    };
-  },
-  mounted() {
-    this.getCollaborationData();
-  },
-  methods: {
-    getCollaborationData() {
-      api
-        .get("collaborationData.json")
-        .then(response => {
-          this.collaborationList = response.data;
-          this.collaborationList.forEach(element => {
-            this.collaborationData.push(element);
-          });
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
-    addItemToCollaborationList(item) {
-      if (this.$refs.form.validate()) {
-        this.collaborationData.push(item);
-        this.open = false;
-        this.$refs.form.reset();
-      } else {
-        console.log("Invalid Inputs");
-      }
-    },
-
-    deleteItemFromCollaborationList(item) {
-      this.$refs.deleteConfirmationDialog.openDialog();
-      this.selectDeletedItem = item;
-    },
-    ondeleteItemFromCollaborationList() {
-      this.$refs.deleteConfirmationDialog.close();
-      let index = this.collaborationData.indexOf(this.selectDeletedItem);
-      this.collaborationData.splice(index, 1);
-    }
-  }
+	data() {
+		return {
+			isLoading: true,
+			isInviting: false,
+			isDeleting: false,
+			loadError: '',
+			openDialog: false,
+			formValid: false,
+			collaborators: [],
+			companies: [],
+			selectedItem: null,
+			inviteForm: {
+				email: '',
+				id_company: null,
+				id_rol: 2,
+			},
+			roleOptions: [
+				{ label: 'Administrador', value: 1 },
+				{ label: 'Cliente', value: 2 },
+			],
+			emailRules: [
+				(v) => !!v || 'El correo es obligatorio',
+				(v) => /.+@.+/.test(v) || 'Correo inválido',
+			],
+			headers: [
+				{ text: 'Nombre', value: 'name', sortable: false },
+				{ text: 'Correo', value: 'email', sortable: false },
+				{ text: 'Empresa', value: 'companyName', sortable: false },
+				{ text: 'Rol', value: 'roleLabel', sortable: false },
+				{ text: 'Acción', value: 'action', sortable: false, align: 'end' },
+			],
+		};
+	},
+	async mounted() {
+		await Promise.all([this.loadCollaborators(), this.loadCompanies()]);
+	},
+	methods: {
+		mapCollaborator(row) {
+			const roleId = parseInt(row.id_rol, 10);
+			return {
+				id_user_rol: row.id_user_rol,
+				id_company_user: row.id_company_user,
+				id_users: row.id_users,
+				id_rol: roleId,
+				name: row.name_user || '—',
+				email: row.email || '—',
+				companyName: row.name || row.company_name || '—',
+				roleLabel: roleId === 1 ? 'Administrador' : 'Cliente',
+			};
+		},
+		async loadCollaborators() {
+			this.isLoading = true;
+			this.loadError = '';
+			try {
+				const response = await api.get('/api/user_rol/');
+				const rows = (response.data && response.data.data) || [];
+				this.collaborators = rows.map(this.mapCollaborator);
+			} catch (error) {
+				this.loadError = 'No se pudo cargar la lista de colaboradores.';
+				this.collaborators = [];
+			} finally {
+				this.isLoading = false;
+			}
+		},
+		async loadCompanies() {
+			try {
+				const response = await api.get('/api/company/');
+				this.companies = (response.data && response.data.data) || [];
+				if (this.companies.length && !this.inviteForm.id_company) {
+					this.inviteForm.id_company = this.companies[0].id_company;
+				}
+			} catch (error) {
+				this.companies = [];
+			}
+		},
+		async submitInvite() {
+			if (!this.$refs.inviteForm.validate()) return;
+			this.isInviting = true;
+			try {
+				await api.post('/api/admin/collaborators', {
+					email: this.inviteForm.email.trim(),
+					id_company: this.inviteForm.id_company,
+					id_rol: this.inviteForm.id_rol,
+				});
+				this.$snotify.success('Colaborador invitado correctamente', { timeout: 2500 });
+				this.openDialog = false;
+				this.inviteForm.email = '';
+				this.$refs.inviteForm.resetValidation();
+				await this.loadCollaborators();
+			} catch (error) {
+				const message = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)
+					|| 'No se pudo invitar al usuario';
+				this.$snotify.error(message, { timeout: 4000 });
+			} finally {
+				this.isInviting = false;
+			}
+		},
+		confirmDelete(item) {
+			this.selectedItem = item;
+			this.$refs.deleteConfirmationDialog.openDialog();
+		},
+		async deleteCollaborator() {
+			if (!this.selectedItem || !this.selectedItem.id_company_user) return;
+			this.$refs.deleteConfirmationDialog.close();
+			this.isDeleting = true;
+			try {
+				await api.delete('/api/company_users/delete_company_users', {
+					data: { id_company_user: this.selectedItem.id_company_user },
+				});
+				this.$snotify.success('Colaborador eliminado', { timeout: 2500 });
+				await this.loadCollaborators();
+			} catch (error) {
+				this.$snotify.error('No se pudo eliminar el colaborador', { timeout: 3000 });
+			} finally {
+				this.isDeleting = false;
+				this.selectedItem = null;
+			}
+		},
+	},
 };
 </script>
+
+<style scoped>
+.aio-admin-settings__lead {
+	margin: 0 0 1rem;
+	font-size: 0.9375rem;
+	color: #6b7280;
+	line-height: 1.55;
+}
+
+.aio-admin-collaboration__toolbar {
+	display: flex;
+	justify-content: flex-end;
+}
+</style>

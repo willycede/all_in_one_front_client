@@ -80,6 +80,11 @@
 					<p class="aio-login__footer">
 						¿No tienes cuenta?
 						<router-link to="/client/register">Crea una aquí</router-link>
+						<br>
+						<span class="aio-login__footer-admin">
+							¿Administrador?
+							<router-link to="/client/admin-login">Accede al panel</router-link>
+						</span>
 					</p>
 				</div>
 			</section>
@@ -232,7 +237,8 @@ export default {
 					localStorage.id_company_user = res.data.data.id_company_user;
 					localStorage.access_token = res.data.data.access_token;
 					this.$store.dispatch('fetchWishlist');
-					this.$router.push({ path: '/mainPage' });
+					const redirect = this.$route.query.redirect;
+					this.$router.push(redirect ? redirect : '/mainPage');
 				})
 				.catch((err) => {
 					this.handleApiError(err);
@@ -514,6 +520,11 @@ export default {
 
 .aio-login__footer a:hover {
 	color: #A96DFA;
+}
+
+.aio-login__footer-admin {
+	display: inline-block;
+	margin-top: 0.75rem;
 }
 
 .aio-login-dialog__card {

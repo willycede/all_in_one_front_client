@@ -69,18 +69,37 @@
 
 <script>
 import AppConfig from 'Constants/AppConfig';
+import { isUserLoggedIn } from 'Helpers/auth';
 
 export default {
 	props: ['title', 'description', 'img'],
 	data() {
 		return {
+			isLoggedIn: false,
 			footerLogo: AppConfig.appLogoFooter,
 			logoSize: {
 				height: AppConfig.logo.heightFooter,
 				maxWidth: AppConfig.logo.maxWidth,
 			},
 			copyrightText: AppConfig.copyrightText,
-			linkColumns: [
+		};
+	},
+	computed: {
+		linkColumns() {
+			const accountLinks = this.isLoggedIn
+				? [
+					{ label: 'Perfil', to: '/account/profile' },
+					{ label: 'Historial de pedidos', to: '/account/order-history' },
+					{ label: 'Favoritos', to: '/favorites' },
+					{ label: 'Carrito', to: '/cart' },
+				]
+				: [
+					{ label: 'Iniciar sesión', to: '/client/login' },
+					{ label: 'Registrarse', to: '/client/register' },
+					{ label: 'Carrito', to: '/cart' },
+				];
+
+			return [
 				{
 					title: 'Ayuda',
 					links: [
@@ -101,15 +120,23 @@ export default {
 				},
 				{
 					title: 'Mi cuenta',
-					links: [
-						{ label: 'Perfil', to: '/account/profile' },
-						{ label: 'Historial de pedidos', to: '/account/order-history' },
-						{ label: 'Carrito', to: '/cart' },
-						{ label: 'Iniciar sesión', to: '/client/login' },
-					],
+					links: accountLinks,
 				},
-			],
-		};
+			];
+		},
+	},
+	watch: {
+		$route() {
+			this.refreshAuthState();
+		},
+	},
+	mounted() {
+		this.refreshAuthState();
+	},
+	methods: {
+		refreshAuthState() {
+			this.isLoggedIn = isUserLoggedIn();
+		},
 	},
 };
 </script>

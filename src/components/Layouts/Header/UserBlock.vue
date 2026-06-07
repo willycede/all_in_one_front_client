@@ -64,19 +64,31 @@
 </template>
 
 <script>
-import { isUserLoggedIn, getUserDisplayName, clearUserSession } from 'Helpers/auth';
+import { isUserLoggedIn, getUserDisplayName, clearUserSession, isAdminUser } from 'Helpers/auth';
 
 export default {
 	props: ['data'],
 	data() {
 		return {
 			isLoggedIn: false,
+			isAdmin: false,
 			userDisplayName: '',
 		};
 	},
 	computed: {
 		accountLinks() {
-			return (this.data || []).filter((link) => link.icon !== 'power_settings_new');
+			const links = (this.data || []).filter((link) => link.icon !== 'power_settings_new');
+			if (this.isAdmin) {
+				return [
+					{
+						icon: 'admin_panel_settings',
+						title: 'Administración',
+						path: '/admin-panel/reports',
+					},
+					...links,
+				];
+			}
+			return links;
 		},
 	},
 	watch: {
@@ -90,6 +102,7 @@ export default {
 	methods: {
 		refreshAuthState() {
 			this.isLoggedIn = isUserLoggedIn();
+			this.isAdmin = isAdminUser();
 			this.userDisplayName = this.isLoggedIn ? getUserDisplayName() : '';
 		},
 		onLogout() {

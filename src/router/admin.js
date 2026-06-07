@@ -9,13 +9,16 @@ const AdminProfile = () => import('Views/AdminPanel/Profile.vue');
 const AdminEditProfileInfo = () => import('Views/AdminPanel/EditProfileInfo.vue');
 const AdminProducts = () => import('Views/AdminPanel/Products.vue');
 const AdminProductsAdd = () => import('Views/AdminPanel/ProductsAdd.vue');
-const ProductsEdit = () => import('Views/AdminPanel/ProductsEdit.vue');
-const PrivacyPolicy = () => import('Views/AdminPanel/ProductsEdit.vue');
+const AdminProductsEdit = () => import('Views/AdminPanel/ProductsEdit.vue');
+const DocumentReview = () => import('Views/AdminPanel/DocumentReview.vue');
+const AdminCoupons = () => import('Views/AdminPanel/Coupons.vue');
+const PrivacyPolicy = () => import('Views/PrivacyPolicy');
 
 export default {
 	path: '/admin-panel',
 	component: Admin,
 	redirect:'/admin-panel/reports',
+	meta: { requiresAdmin: true },
 	children:[
 		{ 
 			path: 'reports',  
@@ -37,9 +40,19 @@ export default {
 			component: AdminProductsAdd, 
 			name:'AdminProductsAdd'
 		},
-		{ 
-			path: 'product-edit/:title/:id',
-			component: ProductsEdit, 
+		{
+			path: 'coupons',
+			component: AdminCoupons,
+			name: 'AdminCoupons',
+		},
+		{
+			path: 'documents',
+			component: DocumentReview,
+			name: 'AdminDocumentReview',
+		},
+		{
+			path: 'product-edit/:id',
+			component: AdminProductsEdit,
 			name:'ProductsEdit',
 		},
 		{ 

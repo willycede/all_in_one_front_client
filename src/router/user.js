@@ -1,12 +1,6 @@
 import UserPanel from 'Container/UserPanel';
 
-const HomeV2 = () => import('Views/HomeV2');
-const HomeV3 = () => import('Views/HomeV3');
-const Accessory = () => import('Views/Accesory');
-const Gadget = () => import('Views/Gadget');
-const Payment = () => import('Views/Payment/Payment');
 const Cart = () => import('Views/Cart');
-const FinalReceipt = () => import('Views/FinalReceipt');
 const AboutUs = () => import('Views/AboutUs');
 const TermCondiition = () => import('Views/TermsAndCondition');
 const Faq = () => import('Views/Faq');
@@ -29,10 +23,12 @@ const RedirectPayment = () => import('Views/RedirePay');
 //all_in_one
 const Register = () => import('Views/all_in_one/client/register/Register');
 const Login = () => import('Views/all_in_one/client/login/Login');
+const AdminLogin = () => import('Views/all_in_one/client/login/AdminLogin');
 const MainPage = () => import('Views/all_in_one/client/mainPage/MainPage');
 const ProductDetail = () => import('Views/all_in_one/client/productDetail/ProductDetail');
 const ProductWithFilters = () => import('Views/all_in_one/client/products/ProductsWithFilters');
 const ValidatePayment = () => import('Views/all_in_one/client/payment/ValidatePayment');
+const FavoritesPage = () => import('Views/Favorites');
 
 export default {
 	path: '/',
@@ -46,27 +42,21 @@ export default {
 				header: 1
 			 }
 		},
-		{ 
+		{
 			path: '/home-two',
-			component: HomeV2 ,
-			meta: {
-				header: 2
-			}
+			redirect: '/mainPage',
 		},
-		{ 
+		{
 			path: '/home-three',
-			component: HomeV3 ,
-			meta: {
-				header: 3
-			}
+			redirect: '/mainPage',
 		},
 		{
 			path: '/products/accessories',
-			component: Accessory 
+			redirect: '/products',
 		},
 		{ 
 			path: '/gadget',
-			component: Gadget 
+			redirect: '/products',
 		},
 		// {			
 		// 	path: '/products/:title',
@@ -88,31 +78,38 @@ export default {
 			path: '/botonpagomail/:urlPago',
 			component: RedirectPayment,
 		},
-		{			
+		{ 
 			path: '/payment/ValidatePayment',
 			component: ValidatePayment,
-		},
-		{			
-			path: '/payment/ValidatePayment/:id/:clientTransactionId',
-			component: ValidatePayment,
+			meta: { requiresAuth: true },
 		},
 		{ 
+			path: '/payment/ValidatePayment/:id/:clientTransactionId',
+			component: ValidatePayment,
+			meta: { requiresAuth: true },
+		},
+		{
 			path: '/checkout/payment',
-			component: Payment 
+			redirect: '/cart',
 		},
 		{ 
 			path: '/cart',
 			component: Cart,
+			meta: { requiresAuth: true },
+		},
+		{
+			path: '/favorites',
+			component: FavoritesPage,
+			meta: { requiresAuth: true },
 		},
 		{ 
 			path: '/products/:id',
 			component: ProductDetail, 
 			name:'productDetail'
 		},
-		{ 
-			path: '/checkout/final-receipt',  
-			component: FinalReceipt, 
-			name:'FinalReceipt'
+		{
+			path: '/checkout/final-receipt',
+			redirect: '/account/order-history',
 		},
 		{ 
 			path: '/about',  
@@ -133,6 +130,7 @@ export default {
 			path: '/account',  
 			component: Account, 
 			name:'Account',
+			meta: { requiresAuth: true },
 			children: [
             {
 					path: '/account/order-history',name:'OrderHistory',component: OrderHistory,
@@ -185,6 +183,11 @@ export default {
 			path: '/client/login',  
 			component: Login, 
 			name:'Login'
+		},
+		{
+			path: '/client/admin-login',
+			component: AdminLogin,
+			name: 'AdminLogin',
 		},
 		{ 
 			path: '/session/forgot-password',  

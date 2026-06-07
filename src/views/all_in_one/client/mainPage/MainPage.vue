@@ -49,6 +49,9 @@ export default {
 		};
 	},
 	async created() {
+		if (this.$route.query.denied === 'admin') {
+			this.$snotify.warning('No tienes permisos de administrador. Usa el login admin.', { timeout: 4000 });
+		}
 		await this.getCompanies();
 		await this.getRandomProducts();
 	},

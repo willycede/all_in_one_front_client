@@ -8,6 +8,7 @@ import Vue from 'vue'
 import vuetify from '@/plugins/vuetify'
 import * as VueGoogleMaps from 'vue2-google-maps'
 import Nprogress from 'nprogress'
+import { isUserLoggedIn, requiresAuthentication, requiresAdmin, isAdminUser, isGuestOnlyRoute, resolveAuthenticatedHome, ADMIN_LOGIN_PATH } from 'Helpers/auth'
 import VueI18n from 'vue-i18n'
 import Snotify, { SnotifyPosition } from 'vue-snotify'
 import InstantSearch from 'vue-instantsearch'
@@ -70,6 +71,31 @@ router.beforeEach((to, from, next) => {
 	if (!isSamePathQueryNavigation(to, from)) {
 		Nprogress.start();
 	}
+
+	if (requiresAuthentication(to) && !isUserLoggedIn()) {
+		next({ path: '/client/login', query: { redirect: to.fullPath } });
+		return;
+	}
+
+	if (isGuestOnlyRoute(to) && isUserLoggedIn()) {
+		next(resolveAuthenticatedHome(to.query.redirect));
+		return;
+	}
+
+	if (to.path === ADMIN_LOGIN_PATH && isAdminUser()) {
+		next({ path: '/admin-panel/reports' });
+		return;
+	}
+
+	if (requiresAdmin(to) && !isAdminUser()) {
+		if (isUserLoggedIn()) {
+			next({ path: '/mainPage', query: { denied: 'admin' } });
+			return;
+		}
+		next({ path: ADMIN_LOGIN_PATH, query: { redirect: to.fullPath } });
+		return;
+	}
+
 	next();
 })
 

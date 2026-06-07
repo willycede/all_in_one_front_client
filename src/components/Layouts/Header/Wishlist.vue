@@ -85,7 +85,11 @@
 				</emb-perfect-scrollbar>
 
 				<div class="aio-favorites-dropdown__footer">
-					<router-link to="/products" class="aio-favorites-dropdown__footer-btn">
+					<router-link to="/favorites" class="aio-favorites-dropdown__footer-btn">
+						<v-icon size="18">favorite</v-icon>
+						Ver todos
+					</router-link>
+					<router-link to="/products" class="aio-favorites-dropdown__footer-btn aio-favorites-dropdown__footer-btn--ghost">
 						<v-icon size="18">storefront</v-icon>
 						Seguir explorando
 					</router-link>

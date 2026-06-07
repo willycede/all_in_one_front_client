@@ -191,6 +191,15 @@
 
 							<div class="aio-product-detail__actions">
 								<button
+									type="button"
+									class="aio-product-detail__btn aio-product-detail__btn--ghost"
+									:class="{ 'aio-product-detail__btn--fav-active': isInWishlist }"
+									@click="toggleWishlist"
+								>
+									<v-icon size="20">{{ isInWishlist ? 'favorite' : 'favorite_border' }}</v-icon>
+									{{ isInWishlist ? 'En favoritos' : 'Agregar a favoritos' }}
+								</button>
+								<button
 									v-if="ifItemExistInCart(selectedProduct)"
 									type="button"
 									class="aio-product-detail__btn aio-product-detail__btn--secondary"
@@ -302,6 +311,8 @@ import { mapGetters } from 'vuex';
 import { moneyMask } from '../../../../helpers/helpers';
 import AppConfig from 'Constants/AppConfig';
 import { isProductInCart } from 'Helpers/cart';
+import { isProductInWishlist } from 'Helpers/favorites';
+import { isUserLoggedIn } from 'Helpers/auth';
 
 export default {
 	data() {
@@ -324,7 +335,10 @@ export default {
 		};
 	},
 	computed: {
-		...mapGetters(['selectedProduct', 'cart']),
+		...mapGetters(['selectedProduct', 'cart', 'wishlist']),
+		isInWishlist() {
+			return isProductInWishlist(this.wishlist, this.selectedProduct);
+		},
 		productImages() {
 			return this.selectedProduct?.images || [];
 		},
@@ -356,6 +370,9 @@ export default {
 	},
 	mounted() {
 		this.loadProduct();
+		if (isUserLoggedIn()) {
+			this.$store.dispatch('fetchWishlist');
+		}
 		window.addEventListener('keydown', this.handleKeydown);
 	},
 	beforeDestroy() {
@@ -564,6 +581,36 @@ export default {
 		},
 		ifItemExistInCart(result) {
 			return isProductInCart(this.cart, result);
+		},
+		toggleWishlist() {
+			if (!isUserLoggedIn()) {
+				this.$snotify.info('Inicia sesión para guardar favoritos', { timeout: 2500 });
+				return;
+			}
+
+			const product = this.selectedProduct;
+			if (this.isInWishlist) {
+				const favoriteItem = this.wishlist.find(
+					(w) => String(w.id_product || w.id) === String(product.id_products)
+				);
+				if (!favoriteItem) return;
+				this.$store.dispatch('onDeleteProductFromWishlist', favoriteItem)
+					.then(() => this.$snotify.success('Eliminado de favoritos', { timeout: 1500 }));
+				return;
+			}
+
+			this.$store.dispatch('addItemToWishlist', product)
+				.then(() => this.$snotify.success('Agregado a favoritos', { timeout: 1500 }))
+				.catch((error) => {
+					const message = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)
+						|| 'No se pudo agregar a favoritos';
+					if (message.includes('ya está en favoritos')) {
+						this.$store.dispatch('fetchWishlist');
+						this.$snotify.info('Este producto ya está en favoritos', { timeout: 2000 });
+						return;
+					}
+					this.$snotify.error(message, { timeout: 2500 });
+				});
 		},
 	},
 };

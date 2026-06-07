@@ -1,149 +1,164 @@
 <template>
-	<div class="admin-panel">
-      <vue-snotify></vue-snotify>
-      <v-navigation-drawer
-         v-model="drawer"
-         app
-         class="primary"
-			:right="rtlLayout"
-			width="230"
-			>
-			<div class="site-logo py-4 mb-12">
-				<router-link to="/" class="d-block text-center">
+	<div class="aio-admin">
+		<div
+			class="aio-admin__overlay"
+			:class="{ 'aio-admin__overlay--visible': sidebarOpen }"
+			@click="closeSidebar"
+		></div>
+
+		<aside
+			class="aio-admin__sidebar"
+			:class="{ 'aio-admin__sidebar--open': sidebarOpen }"
+		>
+			<div class="aio-admin__sidebar-brand">
+				<router-link to="/admin-panel/reports">
 					<img
 						alt="All in One"
-						class="admin-panel__logo"
-						:src="appLogo"
-						:height="logoSize.height"
-						:style="{ maxWidth: logoSize.maxWidth + 'px' }"
+						class="aio-admin__sidebar-logo"
+						:src="appLogoFooter"
 					>
 				</router-link>
+				<span class="aio-admin__sidebar-eyebrow">Panel admin</span>
 			</div>
-         <v-list dense class="admin-menu-wrap">
-            <template v-for="(menuItem , key) in adminPanelMenus">
-					<template v-if="menuItem.children == null">
-						<v-list-item :key="key" :to="menuItem.path" :class="menuItem.active" @click="updateSidebarMenu(menuItem)">
-							<v-list-item-action class="ma-0">
-								<v-icon>{{menuItem.icon}}</v-icon>
-							</v-list-item-action>
-							<v-list-item-content class="py-0 text-left pl-3">
-								<v-list-item-title >{{$t(menuItem.name)}}</v-list-item-title>
-							</v-list-item-content>
-						</v-list-item>
-					</template>
-					<template v-else>
-						<v-list-group
-							:key="key"
-							no-action
-							v-model="menuItem.active"
-							:prepend-icon="menuItem.icon"
-							append-icon='keyboard_arrow_down'
-						>
-							<template v-slot:activator>
-								<v-list :to="menuItem.path">
-									<v-list-item-content class="py-0 text-left pl-3">
-										<v-list-item-title>
-											<span>{{ $t(menuItem.name) }}</span>
-										</v-list-item-title>
-									</v-list-item-content>
-								</v-list>
-							 </template>
-							<template v-if="menuItem.children != null">
-								<v-list-item
-									@click="updateSidebarMenu(menuItem)"
-									v-for="(subItem,index) in menuItem.children"
-									v-bind:key="index"
-									:to="subItem.path"
-								>
-									<v-list-item-content>
-										<v-list-item-title class="white--text">
-											{{ $t(subItem.name) }}
-										</v-list-item-title>
-									</v-list-item-content>	
-								</v-list-item>
-							</template>
-						</v-list-group>
-					</template>
-            </template>
-         </v-list> 
-      </v-navigation-drawer>
 
-      <v-app-bar color="white" dark app class="admin-panel-toolbar">
-			<!-- <v-app-bar-nav-icon @click.stop="drawer = !drawer" class="primary ml-0" fab dark small></v-app-bar-nav-icon> -->
-			<v-btn class="mx-2" fab dark small color="primary"  @click.stop="drawer = !drawer">
-				<v-icon dark>menu</v-icon>
-			</v-btn>
-			<div class="d-inline-flex align-center ">
-				<div class="options mr-4">
-					<emb-lang></emb-lang>
+			<nav class="aio-admin__nav" aria-label="Menú administración">
+				<template v-for="(item, index) in adminPanelMenus">
+					<div v-if="item.children && item.children.length" :key="`group-${index}`" class="aio-admin__nav-group">
+						<span class="aio-admin__nav-group-label">{{ item.label }}</span>
+						<router-link
+							v-for="child in item.children"
+							:key="child.path"
+							:to="child.path"
+							class="aio-admin__nav-item aio-admin__nav-item--sub"
+							active-class="aio-admin__nav-item--active"
+							@click="closeSidebar"
+						>
+							<span>{{ child.label }}</span>
+						</router-link>
+					</div>
+
+					<router-link
+						v-else
+						:key="item.path || index"
+						:to="item.path"
+						class="aio-admin__nav-item"
+						active-class="aio-admin__nav-item--active"
+						@click="closeSidebar"
+					>
+						<span class="aio-admin__nav-icon">
+							<v-icon>{{ item.icon }}</v-icon>
+						</span>
+						<span>{{ item.label }}</span>
+					</router-link>
+				</template>
+			</nav>
+
+			<div class="aio-admin__sidebar-footer">
+				<button type="button" class="aio-admin__nav-item" @click="onLogout">
+					<span class="aio-admin__nav-icon">
+						<v-icon>power_settings_new</v-icon>
+					</span>
+					<span>Cerrar sesión admin</span>
+				</button>
+			</div>
+		</aside>
+
+		<div class="aio-admin__main">
+			<header class="aio-admin__topbar">
+				<div class="aio-admin__topbar-left">
+					<button type="button" class="aio-admin__menu-btn" @click="toggleSidebar">
+						<v-icon color="white">menu</v-icon>
+					</button>
+					<div>
+						<h1 class="aio-admin__page-title">{{ currentPageTitle }}</h1>
+						<p v-if="currentPageSubtitle" class="aio-admin__page-subtitle">{{ currentPageSubtitle }}</p>
+					</div>
 				</div>
-				<div class="notifications">
+				<div class="aio-admin__topbar-actions">
 					<emb-user-block :data="userLinks"></emb-user-block>
 				</div>
-			</div>
-      </v-app-bar>
-     
-      <v-main>
-         <v-container fill-height container-fluid>
-				<v-layout
-					justify-center
-					align-center
-					class="py-6 px-sm-2"
-				>
-					<v-flex>
-					<router-view></router-view>
-					</v-flex>
-				</v-layout>
-         </v-container>
-      </v-main>
-   </div>
+			</header>
+
+			<main class="aio-admin__content">
+				<router-view></router-view>
+			</main>
+		</div>
+
+		<vue-snotify></vue-snotify>
+	</div>
 </template>
 
 <script>
-   
-import UserBlock from 'Components/Layouts/Header/UserBlock'
-import Lang from 'Components/Layouts/Header/Lang'
-import AppConfig from "Constants/AppConfig";
+import UserBlock from 'Components/Layouts/Header/UserBlock';
+import AppConfig from 'Constants/AppConfig';
 import { mapGetters } from 'vuex';
+import { clearUserSession } from 'Helpers/auth';
+
+const PAGE_META = {
+	'/admin-panel/reports': { title: 'Reportes', subtitle: 'Resumen de actividad del marketplace' },
+	'/admin-panel/invoices': { title: 'Facturas', subtitle: 'Listado y gestión de facturación' },
+	'/admin-panel/documents': { title: 'Documentos', subtitle: 'Verificación de archivos de clientes' },
+	'/admin-panel/coupons': { title: 'Cupones', subtitle: 'Códigos promocionales del carrito' },
+	'/admin-panel/products': { title: 'Productos', subtitle: 'Catálogo conectado a la API' },
+	'/admin-panel/product-add': { title: 'Nuevo producto', subtitle: 'Publica un artículo en el catálogo de la tienda' },
+	'/admin-panel/account/profile': { title: 'Mi perfil', subtitle: 'Datos de tu cuenta administrador' },
+	'/admin-panel/account/settings': { title: 'Configuración', subtitle: 'Preferencias y seguridad de tu cuenta admin' },
+	'/admin-panel/account/collaboration': { title: 'Colaboración', subtitle: 'Usuarios con acceso al panel' },
+};
+
 export default {
-   data (){
-      return{   
-         appLogo: AppConfig.appLogo,
-         logoSize: {
-            height: AppConfig.logo.heightCompact,
-            maxWidth: AppConfig.logo.maxWidthCompact,
-         },
-         drawer: null,
-         userLinks: [
-            {
-               icon:'account_circle',
-               title: 'Profile',
-               path:"/admin-panel/account/profile"
-            },
-            {
-               icon:'settings',
-               title:'Account Settings',
-               path:"/admin-panel/account/settings"
-            },
-            { 
-               icon:'power_settings_new',
-               title: 'LogOut',
-               path:"/client/login"
-            }
-         ]
-      }
-   },
-   computed:{
-      ...mapGetters(["adminPanelMenus","rtlLayout"])
-   },
-	methods:{
-		updateSidebarMenu(currentMenu){
-			this.$store.dispatch('changeActiveMenu', currentMenu);
-		}
+	data() {
+		return {
+			appLogoFooter: AppConfig.appLogoFooter,
+			sidebarOpen: false,
+			userLinks: [
+				{
+					icon: 'account_circle',
+					title: 'Perfil',
+					path: '/admin-panel/account/profile',
+				},
+				{
+					icon: 'storefront',
+					title: 'Ir a la tienda',
+					path: '/mainPage',
+				},
+			],
+		};
 	},
-   components:{
-      embUserBlock:UserBlock,
-      embLang: Lang
-   },
-}
+	computed: {
+		...mapGetters(['adminPanelMenus']),
+		currentPageMeta() {
+			const path = this.$route.path;
+			if (PAGE_META[path]) {
+				return PAGE_META[path];
+			}
+			if (path.indexOf('/admin-panel/product-edit') === 0) {
+				return { title: 'Editar producto', subtitle: 'Modifica los datos del catálogo' };
+			}
+			return { title: 'Administración', subtitle: 'All in One' };
+		},
+		currentPageTitle() {
+			return this.currentPageMeta.title;
+		},
+		currentPageSubtitle() {
+			return this.currentPageMeta.subtitle;
+		},
+	},
+	methods: {
+		toggleSidebar() {
+			this.sidebarOpen = !this.sidebarOpen;
+		},
+		closeSidebar() {
+			this.sidebarOpen = false;
+		},
+		onLogout() {
+			clearUserSession();
+			this.$store.dispatch('clearWishlist');
+			this.$router.push('/client/admin-login');
+		},
+	},
+	components: {
+		embUserBlock: UserBlock,
+	},
+};
 </script>

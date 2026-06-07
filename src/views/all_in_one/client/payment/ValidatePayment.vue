@@ -40,7 +40,7 @@
 					</ul>
 				</div>
 
-				<div v-if="pago_exitoso" class="aio-payment-validate__state">
+				<div v-else-if="pago_exitoso" class="aio-payment-validate__state">
 					<div class="aio-payment-validate__visual">
 						<div class="aio-payment-validate__success-icon" aria-hidden="true">
 							<v-icon size="36">check</v-icon>
@@ -73,6 +73,27 @@
 						</li>
 					</ul>
 				</div>
+
+				<div v-else-if="pago_error" class="aio-payment-validate__state">
+					<div class="aio-payment-validate__visual">
+						<div class="aio-payment-validate__error-icon" aria-hidden="true">
+							<v-icon size="36">error_outline</v-icon>
+						</div>
+					</div>
+
+					<span class="aio-payment-validate__eyebrow aio-payment-validate__eyebrow--error">Error en el pago</span>
+					<h1 class="aio-payment-validate__title">No pudimos verificar el pago</h1>
+					<p class="aio-payment-validate__text">{{ errorMessage }}</p>
+
+					<div class="aio-payment-validate__actions">
+						<button type="button" class="aio-payment-validate__btn" @click="retryValidation">
+							Reintentar
+						</button>
+						<router-link to="/account/order-history" class="aio-payment-validate__btn aio-payment-validate__btn--ghost">
+							Ir a mis pedidos
+						</router-link>
+					</div>
+				</div>
 			</div>
 		</v-container>
 	</div>
@@ -87,6 +108,8 @@ export default {
 		return {
 			cobro: true,
 			pago_exitoso: false,
+			pago_error: false,
+			errorMessage: '',
 			id: '',
 			clientTransactionId: '',
 		};
@@ -110,6 +133,18 @@ export default {
 		},
 	},
 	methods: {
+		showPaymentError(message) {
+			this.cobro = false;
+			this.pago_exitoso = false;
+			this.pago_error = true;
+			this.errorMessage = message || 'Ocurrió un error al validar la transacción.';
+		},
+		retryValidation() {
+			this.pago_error = false;
+			this.cobro = true;
+			const orden = this.clientTransactionId.split('@')[0];
+			this.onConfirmaPagoPayphone(this.id, this.clientTransactionId, orden);
+		},
 		async onConfirmaPagoPayphone(id, clientTxId, orden) {
 			try {
 				const arr_pay_confir = {
@@ -123,17 +158,21 @@ export default {
 					arr_pay_confir
 				);
 
-				if (urlPayphone.data.errorCode === 200) {
+				if (urlPayphone.data && urlPayphone.data.errorCode === 200 && urlPayphone.data.success !== false) {
 					setTimeout(() => {
 						this.cobro = false;
 						this.pago_exitoso = true;
 						this.onProcesarFacturacion(orden);
 					}, 3000);
 				} else {
-					console.log(urlPayphone.data);
+					const message = (urlPayphone.data && urlPayphone.data.message)
+						|| 'La pasarela no confirmó el pago';
+					this.showPaymentError(message);
 				}
 			} catch (e) {
-				console.log(e);
+				const message = (e.response && e.response.data && e.response.data.error && e.response.data.error.message)
+					|| 'Error de conexión al verificar el pago';
+				this.showPaymentError(message);
 			}
 		},
 

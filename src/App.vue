@@ -1,9 +1,6 @@
 <template>
 	<v-app>
 		<router-view></router-view>
-	    <div class="rtl-layout" @click="toggleRTLLayout">
-	      <a class="text-xl" href="javascript:void(0);">RTL</a>
-	    </div>
 	    <cookie-banner />
 	</v-app>
 </template>
@@ -31,6 +28,7 @@ export default {
 		if(this.rtlLayout) {
 			this.$vuetify.rtl = this.rtlLayout;
 		}
+		this.$store.dispatch('loadMenus');
 	},
 	methods: {
 		/**

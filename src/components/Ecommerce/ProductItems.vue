@@ -6,9 +6,8 @@
 			'aio-shop-grid-wrap--initial': isInitialLoad && isLoading,
 		}"
 	>
-		<!-- Carga inicial: skeletons -->
 		<div v-if="isInitialLoad && isLoading" class="aio-shop-grid aio-shop-grid--skeleton">
-			<div v-for="n in 6" :key="'sk-' + n" class="aio-shop-skeleton">
+			<div v-for="n in skeletonCount" :key="'sk-' + n" class="aio-shop-skeleton">
 				<div class="aio-shop-skeleton__media"></div>
 				<div class="aio-shop-skeleton__body">
 					<div class="aio-shop-skeleton__line aio-shop-skeleton__line--wide"></div>
@@ -17,7 +16,6 @@
 			</div>
 		</div>
 
-		<!-- Sin resultados (solo cuando ya terminó de cargar) -->
 		<div v-else-if="!isLoading && !isRefreshing && (!productList || productList.length === 0)" class="aio-shop-grid__state">
 			<span class="aio-shop-grid__state-icon">
 				<v-icon size="32" color="#A96DFA">inventory_2</v-icon>
@@ -26,9 +24,8 @@
 			<p>No encontramos productos con los filtros seleccionados.</p>
 		</div>
 
-		<!-- Grid con productos -->
 		<div v-else class="aio-shop-grid__content">
-			<div v-if="isRefreshing" class="aio-shop-grid__overlay" aria-hidden="true">
+			<div v-if="isRefreshing || isPageLoading" class="aio-shop-grid__overlay" aria-hidden="true">
 				<div class="aio-shop-grid__overlay-inner">
 					<v-progress-circular indeterminate color="#A96DFA" size="28" width="2"></v-progress-circular>
 					<span>Actualizando...</span>
@@ -42,6 +39,76 @@
 					:data="product"
 				></product-item>
 			</transition-group>
+
+			<div v-if="pagination.total > 0" class="aio-account-orders__pagination-wrap">
+				<div class="aio-account-orders__pagination-toolbar">
+					<p class="aio-account-orders__pagination-info">
+						Mostrando {{ rangeStart }}–{{ rangeEnd }} de {{ pagination.total }} productos
+					</p>
+					<div class="aio-account-orders__page-size">
+						<span class="aio-account-orders__page-size-label">Por página</span>
+						<button
+							v-for="size in pageSizeOptions"
+							:key="size"
+							type="button"
+							class="aio-account-orders__page-size-btn"
+							:class="{ 'aio-account-orders__page-size-btn--active': pagination.limit === size }"
+							:disabled="isLoading || isPageLoading || isRefreshing"
+							:aria-pressed="pagination.limit === size"
+							@click="changePageSize(size)"
+						>
+							{{ size }}
+						</button>
+					</div>
+				</div>
+
+				<nav
+					v-if="pagination.totalPages > 1"
+					class="aio-account-orders__pagination"
+					aria-label="Paginación del catálogo"
+				>
+					<button
+						type="button"
+						class="aio-account-orders__page-btn aio-account-orders__page-btn--nav"
+						:disabled="!pagination.hasPrevPage || isPageLoading || isRefreshing"
+						aria-label="Página anterior"
+						@click="goToPage(pagination.page - 1)"
+					>
+						<v-icon size="20">chevron_left</v-icon>
+					</button>
+
+					<template v-for="(pageItem, index) in pageItems">
+						<span
+							v-if="pageItem === 'ellipsis'"
+							:key="'ellipsis-' + index"
+							class="aio-account-orders__page-ellipsis"
+							aria-hidden="true"
+						>…</span>
+						<button
+							v-else
+							:key="'page-' + pageItem"
+							type="button"
+							class="aio-account-orders__page-btn"
+							:class="{ 'aio-account-orders__page-btn--active': pageItem === pagination.page }"
+							:disabled="isPageLoading || isRefreshing"
+							:aria-current="pageItem === pagination.page ? 'page' : null"
+							@click="goToPage(pageItem)"
+						>
+							{{ pageItem }}
+						</button>
+					</template>
+
+					<button
+						type="button"
+						class="aio-account-orders__page-btn aio-account-orders__page-btn--nav"
+						:disabled="!pagination.hasNextPage || isPageLoading || isRefreshing"
+						aria-label="Página siguiente"
+						@click="goToPage(pagination.page + 1)"
+					>
+						<v-icon size="20">chevron_right</v-icon>
+					</button>
+				</nav>
+			</div>
 		</div>
 	</div>
 </template>
@@ -49,6 +116,17 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import ProductItem from './ProductItem';
+import {
+	PRODUCT_DEFAULT_PAGE_SIZE,
+	PRODUCT_PAGE_SIZE_OPTIONS,
+	emptyProductPagination,
+} from '../../store/modules/client/products/index';
+import {
+	buildCatalogQuery,
+	parseCatalogQuery,
+	catalogFiltersChanged,
+	catalogQueryEquals,
+} from '../../helpers/catalogQuery';
 
 export default {
 	components: {
@@ -59,22 +137,181 @@ export default {
 			isLoading: true,
 			isInitialLoad: true,
 			isRefreshing: false,
+			isPageLoading: false,
+			suppressRouteWatch: false,
 			loadRequestId: 0,
+			activeCategoryId: undefined,
+			activeSearch: '',
+			activeMinPrice: '',
+			activeMaxPrice: '',
+			activeCityId: null,
+			activeSortBy: 'name_asc',
+			pageSizeOptions: PRODUCT_PAGE_SIZE_OPTIONS,
 		};
 	},
-	computed: mapGetters(['productList']),
+	computed: {
+		...mapGetters(['productList', 'productPagination']),
+		pagination() {
+			return this.productPagination || emptyProductPagination();
+		},
+		skeletonCount() {
+			return this.parseLimit(this.$route.query.limit);
+		},
+		rangeStart() {
+			if (!this.pagination.total) return 0;
+			return (this.pagination.page - 1) * this.pagination.limit + 1;
+		},
+		rangeEnd() {
+			return Math.min(this.pagination.page * this.pagination.limit, this.pagination.total);
+		},
+		pageItems() {
+			const total = this.pagination.totalPages;
+			const current = this.pagination.page;
+			if (total <= 7) {
+				return Array.from({ length: total }, (_, i) => i + 1);
+			}
+
+			const pages = new Set([1, total, current]);
+			if (current > 1) pages.add(current - 1);
+			if (current < total) pages.add(current + 1);
+			if (current <= 3) {
+				pages.add(2);
+				pages.add(3);
+			}
+			if (current >= total - 2) {
+				pages.add(total - 1);
+				pages.add(total - 2);
+			}
+
+			const sorted = [...pages].sort((a, b) => a - b);
+			const items = [];
+			sorted.forEach((page, index) => {
+				if (index > 0 && page - sorted[index - 1] > 1) {
+					items.push('ellipsis');
+				}
+				items.push(page);
+			});
+			return items;
+		},
+	},
+	watch: {
+		'$route.query': {
+			handler(newQuery, oldQuery) {
+				if (this.suppressRouteWatch || !oldQuery) return;
+
+				const next = parseCatalogQuery(newQuery);
+				const prev = parseCatalogQuery(oldQuery);
+				const filtersChanged = catalogFiltersChanged(next, prev);
+				const paginationChanged = String(next.page) !== String(prev.page)
+					|| String(next.limit) !== String(prev.limit);
+
+				if (!filtersChanged && !paginationChanged) return;
+
+				this.syncActiveFilters(next);
+				this.loadProducts({
+					...next,
+					categoryId: next.categoryId || undefined,
+					page: filtersChanged ? 1 : next.page,
+					limit: next.limit,
+					silent: paginationChanged && !filtersChanged,
+				});
+			},
+		},
+	},
 	async mounted() {
-		const categoryId = this.$route.query?.generalCategoryId || undefined;
-		const searchBy = this.$route.query?.searchBy || '';
-		await this.loadProducts({ categoryId, searchBy });
+		const parsed = parseCatalogQuery(this.$route.query);
+		this.syncActiveFilters(parsed);
+
+		await this.syncRouteQuery(parsed.page, parsed.limit, parsed);
+		await this.loadProducts({
+			...parsed,
+			categoryId: parsed.categoryId || undefined,
+		});
 	},
 	methods: {
 		...mapActions(['getProductsByCategoryIdAndFilters']),
-		async loadProducts({ categoryId, searchBy } = {}) {
+		syncActiveFilters(filters) {
+			this.activeCategoryId = filters.categoryId || undefined;
+			this.activeSearch = filters.searchBy || '';
+			this.activeMinPrice = filters.minPrice || '';
+			this.activeMaxPrice = filters.maxPrice || '';
+			this.activeCityId = filters.cityId || null;
+			this.activeSortBy = filters.sortBy || 'name_asc';
+		},
+		parsePage(value) {
+			const page = parseInt(value, 10);
+			return Number.isFinite(page) && page > 0 ? page : 1;
+		},
+		parseLimit(value) {
+			const limit = parseInt(value, 10);
+			return PRODUCT_PAGE_SIZE_OPTIONS.includes(limit) ? limit : PRODUCT_DEFAULT_PAGE_SIZE;
+		},
+		buildRouteQuery(page, limit, filters = {}) {
+			return buildCatalogQuery({
+				categoryId: filters.categoryId !== undefined ? filters.categoryId : this.activeCategoryId,
+				searchBy: filters.searchBy !== undefined ? filters.searchBy : this.activeSearch,
+				minPrice: filters.minPrice !== undefined ? filters.minPrice : this.activeMinPrice,
+				maxPrice: filters.maxPrice !== undefined ? filters.maxPrice : this.activeMaxPrice,
+				cityId: filters.cityId !== undefined ? filters.cityId : this.activeCityId,
+				sortBy: filters.sortBy !== undefined ? filters.sortBy : this.activeSortBy,
+				page: this.parsePage(page),
+				limit: this.parseLimit(limit),
+			});
+		},
+		async syncRouteQuery(page, limit, filters = {}) {
+			const nextQuery = this.buildRouteQuery(page, limit, filters);
+			const current = parseCatalogQuery(this.$route.query);
+			const nextParsed = parseCatalogQuery(nextQuery);
+
+			if (catalogQueryEquals(current, nextParsed)) return;
+
+			this.suppressRouteWatch = true;
+			try {
+				await this.$router.replace({ path: '/products', query: nextQuery }).catch(() => {});
+			} finally {
+				this.$nextTick(() => {
+					this.suppressRouteWatch = false;
+				});
+			}
+		},
+		async loadProducts({
+			categoryId,
+			searchBy,
+			minPrice,
+			maxPrice,
+			cityId,
+			sortBy,
+			page = 1,
+			limit,
+			silent = false,
+		} = {}) {
 			const requestId = ++this.loadRequestId;
 			const isFirstLoad = this.isInitialLoad;
+			const requestPage = this.parsePage(page);
+			const requestLimit = this.parseLimit(limit || this.pagination.limit);
 
-			if (!isFirstLoad) {
+			if (categoryId !== undefined) {
+				this.activeCategoryId = categoryId || undefined;
+			}
+			if (searchBy !== undefined) {
+				this.activeSearch = searchBy || '';
+			}
+			if (minPrice !== undefined) {
+				this.activeMinPrice = minPrice || '';
+			}
+			if (maxPrice !== undefined) {
+				this.activeMaxPrice = maxPrice || '';
+			}
+			if (cityId !== undefined) {
+				this.activeCityId = cityId || null;
+			}
+			if (sortBy !== undefined) {
+				this.activeSortBy = sortBy || 'name_asc';
+			}
+
+			if (silent) {
+				this.isPageLoading = true;
+			} else if (!isFirstLoad) {
 				this.isRefreshing = true;
 			} else {
 				this.isLoading = true;
@@ -82,16 +319,50 @@ export default {
 
 			try {
 				await this.getProductsByCategoryIdAndFilters({
-					categoryId: categoryId || undefined,
-					searchBy: searchBy || '',
+					categoryId: this.activeCategoryId,
+					searchBy: this.activeSearch,
+					minPrice: this.activeMinPrice,
+					maxPrice: this.activeMaxPrice,
+					cityId: this.activeCityId,
+					sortBy: this.activeSortBy,
+					page: requestPage,
+					limit: requestLimit,
 				});
+				await this.syncRouteQuery(requestPage, requestLimit);
 			} finally {
 				if (requestId === this.loadRequestId) {
 					this.isLoading = false;
 					this.isRefreshing = false;
+					this.isPageLoading = false;
 					this.isInitialLoad = false;
 					this.$emit('loaded');
 				}
+			}
+		},
+		async goToPage(page) {
+			const nextPage = this.parsePage(page);
+			if (nextPage === this.pagination.page) return;
+			await this.loadProducts({
+				page: nextPage,
+				limit: this.pagination.limit,
+				silent: true,
+			});
+			this.scrollToTop();
+		},
+		async changePageSize(limit) {
+			const nextLimit = this.parseLimit(limit);
+			if (nextLimit === this.pagination.limit) return;
+			await this.loadProducts({
+				page: 1,
+				limit: nextLimit,
+				silent: true,
+			});
+			this.scrollToTop();
+		},
+		scrollToTop() {
+			const hero = document.querySelector('.aio-shop__body');
+			if (hero) {
+				hero.scrollIntoView({ behavior: 'smooth', block: 'start' });
 			}
 		},
 	},

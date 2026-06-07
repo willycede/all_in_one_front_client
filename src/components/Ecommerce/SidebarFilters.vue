@@ -52,6 +52,71 @@
 			</div>
 		</div>
 
+		<div class="aio-shop-sidebar__panel">
+			<h3 class="aio-shop-sidebar__title">Precio</h3>
+			<div class="aio-shop-sidebar__price-row">
+				<input
+					v-model="minPrice"
+					type="number"
+					min="0"
+					step="0.01"
+					class="aio-shop-sidebar__price-input"
+					placeholder="Mín"
+					aria-label="Precio mínimo"
+				>
+				<span class="aio-shop-sidebar__price-sep">—</span>
+				<input
+					v-model="maxPrice"
+					type="number"
+					min="0"
+					step="0.01"
+					class="aio-shop-sidebar__price-input"
+					placeholder="Máx"
+					aria-label="Precio máximo"
+				>
+			</div>
+			<button type="button" class="aio-shop-sidebar__apply-btn" @click="applyPriceFilter">
+				Aplicar precio
+			</button>
+		</div>
+
+		<div class="aio-shop-sidebar__panel">
+			<h3 class="aio-shop-sidebar__title">Ciudad</h3>
+			<select
+				v-model="selectedCityId"
+				class="aio-shop-sidebar__select"
+				aria-label="Filtrar por ciudad"
+				@change="applyFilters({ syncRoute: true })"
+			>
+				<option value="">Todas las ciudades</option>
+				<option
+					v-for="city in catalogCities"
+					:key="city.id_city"
+					:value="city.id_city"
+				>
+					{{ city.name }}
+				</option>
+			</select>
+		</div>
+
+		<div class="aio-shop-sidebar__panel">
+			<h3 class="aio-shop-sidebar__title">Ordenar</h3>
+			<select
+				v-model="sortBy"
+				class="aio-shop-sidebar__select"
+				aria-label="Ordenar productos"
+				@change="applyFilters({ syncRoute: true })"
+			>
+				<option
+					v-for="option in sortOptions"
+					:key="option.value"
+					:value="option.value"
+				>
+					{{ option.label }}
+				</option>
+			</select>
+		</div>
+
 		<button type="button" class="aio-shop-sidebar__clear" @click="clearFilters">
 			<v-icon size="18">filter_alt_off</v-icon>
 			Limpiar filtros
@@ -60,16 +125,29 @@
 </template>
 
 <script>
+import api from 'Api';
 import { mapActions, mapGetters } from 'vuex';
+import {
+	buildCatalogQuery,
+	parseCatalogQuery,
+	CATALOG_SORT_OPTIONS,
+	DEFAULT_CATALOG_SORT,
+} from 'Helpers/catalogQuery';
 
 export default {
 	data() {
 		return {
 			selectedCategory: null,
 			searchBy: '',
+			minPrice: '',
+			maxPrice: '',
+			selectedCityId: '',
+			sortBy: DEFAULT_CATALOG_SORT,
+			catalogCities: [],
 			searchDebounce: null,
 			isSearching: false,
 			skipRouteSync: false,
+			sortOptions: CATALOG_SORT_OPTIONS,
 		};
 	},
 	computed: mapGetters(['generalCategories']),
@@ -81,57 +159,57 @@ export default {
 					this.skipRouteSync = false;
 					return;
 				}
-				this.selectedCategory = query?.generalCategoryId
-					? parseInt(query.generalCategoryId, 10)
-					: null;
-				this.searchBy = query?.searchBy || '';
+				const parsed = parseCatalogQuery(query);
+				this.selectedCategory = parsed.categoryId;
+				this.searchBy = parsed.searchBy;
+				this.minPrice = parsed.minPrice;
+				this.maxPrice = parsed.maxPrice;
+				this.selectedCityId = parsed.cityId ? String(parsed.cityId) : '';
+				this.sortBy = parsed.sortBy;
 			},
 		},
 	},
 	async created() {
-		await this.getGeneralCategories();
+		await Promise.all([
+			this.getGeneralCategories(),
+			this.loadCatalogCities(),
+		]);
 	},
 	methods: {
 		...mapActions(['getGeneralCategories']),
+		async loadCatalogCities() {
+			try {
+				const response = await api.get('/api/cities/catalog');
+				this.catalogCities = response?.data?.data || [];
+			} catch (error) {
+				this.catalogCities = [];
+			}
+		},
 		currentFilters() {
 			return {
 				categoryId: this.selectedCategory,
 				searchBy: this.searchBy.trim(),
+				minPrice: this.minPrice,
+				maxPrice: this.maxPrice,
+				cityId: this.selectedCityId || null,
+				sortBy: this.sortBy,
 			};
 		},
-		syncUrlSilently() {
-			const url = new URL(window.location.href);
-			url.pathname = '/products';
-			url.search = '';
-
-			if (this.selectedCategory) {
-				url.searchParams.set('generalCategoryId', this.selectedCategory);
-			}
-			if (this.searchBy.trim()) {
-				url.searchParams.set('searchBy', this.searchBy.trim());
-			}
-
-			window.history.replaceState(window.history.state, '', url.toString());
-		},
 		updateRoute() {
-			const query = {};
-			if (this.selectedCategory) {
-				query.generalCategoryId = this.selectedCategory;
-			}
-			if (this.searchBy.trim()) {
-				query.searchBy = this.searchBy.trim();
-			}
+			const query = buildCatalogQuery({
+				...this.currentFilters(),
+				page: 1,
+				limit: this.$route.query.limit || 12,
+			});
 			this.skipRouteSync = true;
 			this.$router.replace({ path: '/products', query }).catch(() => {});
 		},
 		emitFilters() {
 			this.$emit('apply-filters', this.currentFilters());
 		},
-		applyFilters({ syncRoute = false, silentUrl = false } = {}) {
+		applyFilters({ syncRoute = false } = {}) {
 			if (syncRoute) {
 				this.updateRoute();
-			} else if (silentUrl) {
-				this.syncUrlSilently();
 			}
 			this.emitFilters();
 		},
@@ -139,7 +217,7 @@ export default {
 			clearTimeout(this.searchDebounce);
 			this.isSearching = true;
 			this.searchDebounce = setTimeout(() => {
-				this.applyFilters({ silentUrl: true });
+				this.applyFilters({ syncRoute: true });
 			}, 400);
 		},
 		onSearchComplete() {
@@ -149,9 +227,16 @@ export default {
 			this.selectedCategory = categoryId;
 			this.applyFilters({ syncRoute: true });
 		},
+		applyPriceFilter() {
+			this.applyFilters({ syncRoute: true });
+		},
 		clearFilters() {
 			this.selectedCategory = null;
 			this.searchBy = '';
+			this.minPrice = '';
+			this.maxPrice = '';
+			this.selectedCityId = '';
+			this.sortBy = DEFAULT_CATALOG_SORT;
 			this.isSearching = false;
 			clearTimeout(this.searchDebounce);
 			this.applyFilters({ syncRoute: true });

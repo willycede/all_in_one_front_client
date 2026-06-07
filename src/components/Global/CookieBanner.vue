@@ -29,7 +29,7 @@ import { isUserLoggedIn } from 'Helpers/auth';
 
 const STORAGE_KEY = 'cookie_consent';
 const CURRENT_VERSION = 'v1';
-const HIDDEN_ROUTES = ['/client/login', '/client/register'];
+const HIDDEN_ROUTES = ['/client/login', '/client/register', '/client/admin-login'];
 
 export default {
     name: 'CookieBanner',

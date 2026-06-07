@@ -54,7 +54,7 @@ export default {
 		};
 	},
 	computed: {
-		...mapGetters(['generalCategories', 'productList']),
+		...mapGetters(['generalCategories', 'productPagination']),
 		pageTitle() {
 			if (this.activeCategoryId && this.generalCategories?.length) {
 				const match = this.generalCategories.find(
@@ -65,8 +65,18 @@ export default {
 			return 'Todos los productos';
 		},
 		pageSubtitle() {
+			const parts = [];
 			if (this.activeSearch) {
-				return `Resultados para "${this.activeSearch}"`;
+				parts.push(`"${this.activeSearch}"`);
+			}
+			if (this.activeCategoryId && this.generalCategories?.length) {
+				const match = this.generalCategories.find(
+					(c) => String(c.idgeneral_categories) === String(this.activeCategoryId)
+				);
+				if (match) parts.push(match.name);
+			}
+			if (parts.length) {
+				return `Resultados para ${parts.join(' · ')}`;
 			}
 			if (this.activeCategoryId) {
 				return 'Explora los productos de esta categoría';
@@ -74,8 +84,8 @@ export default {
 			return 'Encuentra lo que necesitas en nuestro marketplace';
 		},
 		productCount() {
-			if (!this.productList) return null;
-			return this.productList.length;
+			if (!this.productPagination) return null;
+			return this.productPagination.total;
 		},
 	},
 	watch: {
@@ -91,7 +101,6 @@ export default {
 		onApplyFilters({ categoryId, searchBy }) {
 			this.activeCategoryId = categoryId || null;
 			this.activeSearch = searchBy || '';
-			this.$refs.productItems.loadProducts({ categoryId, searchBy });
 		},
 		onProductsLoaded() {
 			if (this.$refs.sidebarFilters) {

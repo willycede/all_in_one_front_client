@@ -35,48 +35,55 @@ export const menus = [
 
 export const adminPanelMenus = [
 	{
-      path: '/admin-panel/reports',
-      name:"message.reports",
-      icon: 'poll',
-      children:null,
-		active: true
-   },
-   {
-      path: '/admin-panel/invoices',
-      name:"message.invoices",
-      icon: 'recent_actors',
-      children:null,
-		active: false
-   },
-   {
-      path: '',
-      name:"message.products",
-      icon: 'shopping_cart',
-		active: false,
-      children: [
+		path: '/admin-panel/reports',
+		label: 'Reportes',
+		icon: 'poll',
+		children: null,
+	},
+	{
+		path: '/admin-panel/invoices',
+		label: 'Facturas',
+		icon: 'receipt_long',
+		children: null,
+	},
+	{
+		path: '/admin-panel/documents',
+		label: 'Documentos',
+		icon: 'description',
+		children: null,
+	},
+	{
+		path: '/admin-panel/coupons',
+		label: 'Cupones',
+		icon: 'local_offer',
+		children: null,
+	},
+	{
+		path: '',
+		label: 'Productos',
+		icon: 'inventory_2',
+		children: [
 			{
-				name: "message.products",
-				path: "/admin-panel/products"
+				label: 'Listado',
+				path: '/admin-panel/products',
 			},
 			{
-				name: "message.productAdd",
-				path: "/admin-panel/product-add"
-         },
-      ]
-      
-   },
-   {
-      path: '/admin-panel/account/profile',
-      name:"message.profile",
-      icon: 'account_circle',
-		active: false,
-      children: null
-   },
-   {
-      path: '/home',
-      name:"message.goToSite",
-      icon: 'home',
-		active: false,
-      children: null
-   },
+				label: 'Nuevo producto',
+				path: '/admin-panel/product-add',
+			},
+		],
+	},
+	{
+		path: '/admin-panel/account/profile',
+		label: 'Mi perfil',
+		icon: 'account_circle',
+		children: null,
+	},
+	{
+		path: '/mainPage',
+		label: 'Ir a la tienda',
+		icon: 'storefront',
+		children: null,
+		external: false,
+	},
 ]

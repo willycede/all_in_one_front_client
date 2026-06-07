@@ -73,6 +73,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { buildCatalogQuery } from 'Helpers/catalogQuery';
 
 export default {
 	data() {
@@ -103,18 +104,13 @@ export default {
 			this.selectedCategory = value;
 		},
 		onSearch() {
-			const route = { path: '/products' };
-			const query = {};
-			if (this.selectedCategory) {
-				query.generalCategoryId = this.selectedCategory;
-			}
-			if (this.query.trim()) {
-				query.searchBy = this.query.trim();
-			}
-			if (Object.keys(query).length) {
-				route.query = query;
-			}
-			this.$router.push(route);
+			const query = buildCatalogQuery({
+				categoryId: this.selectedCategory ? parseInt(this.selectedCategory, 10) : null,
+				searchBy: this.query.trim(),
+				page: 1,
+				limit: this.$route.query.limit || 12,
+			});
+			this.$router.push({ path: '/products', query });
 		},
 	},
 };

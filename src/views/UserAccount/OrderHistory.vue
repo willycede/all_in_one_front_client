@@ -85,7 +85,7 @@
 								type="button"
 								class="aio-account-orders__action aio-account-orders__action--danger"
 								title="Cancelar orden"
-								@click="refreshOrderHistory(item)"
+								@click="cancelOrder(item)"
 							>
 								<v-icon size="18">cancel</v-icon>
 								Cancelar
@@ -95,7 +95,7 @@
 								type="button"
 								class="aio-account-orders__action aio-account-orders__action--secondary"
 								title="Procesar factura"
-								@click="refreshOrderHistory(item)"
+								@click="reprocessInvoice(item)"
 							>
 								<v-icon size="18">published_with_changes</v-icon>
 								Reprocesar
@@ -399,7 +399,7 @@ export default {
 				? 'aio-account-orders__badge--invoice-pending'
 				: 'aio-account-orders__badge--invoice-done';
 		},
-		async refreshOrderHistory(item) {
+		async cancelOrder(item) {
 			this.isPageLoading = true;
 			const params = this.getRequestParams();
 
@@ -408,12 +408,37 @@ export default {
 					`/api/order_history/delete_order_history/${item.id_shopping_car}/${localStorage.id_users}`,
 					{ params }
 				);
-				this.applyOrderResponse(historyDetails?.data?.data);
+				this.applyOrderResponse(historyDetails && historyDetails.data && historyDetails.data.data);
+				this.$snotify.success('Orden cancelada', { timeout: 2000 });
 
 				if (this.tableData.length === 0 && this.pagination.page > 1) {
 					await this.syncRouteQuery(this.pagination.page - 1, this.pagination.limit);
 					await this.loadOrders(this.pagination.page - 1, { silent: true });
 				}
+			} catch (error) {
+				const message = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)
+					|| 'No se pudo cancelar la orden';
+				this.$snotify.error(message, { timeout: 3000 });
+			} finally {
+				this.isPageLoading = false;
+			}
+		},
+		async reprocessInvoice(item) {
+			this.isPageLoading = true;
+			const params = this.getRequestParams();
+
+			try {
+				const historyDetails = await api.post(
+					`/api/order_history/reprocess_invoice/${item.id_shopping_car}/${localStorage.id_users}`,
+					null,
+					{ params }
+				);
+				this.applyOrderResponse(historyDetails && historyDetails.data && historyDetails.data.data);
+				this.$snotify.success('Factura reprocesada correctamente', { timeout: 2500 });
+			} catch (error) {
+				const message = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)
+					|| 'No se pudo reprocesar la factura';
+				this.$snotify.error(message, { timeout: 3000 });
 			} finally {
 				this.isPageLoading = false;
 			}

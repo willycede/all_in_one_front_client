@@ -8,7 +8,7 @@
 				
 			</template>
 			<template v-slot:item.action="{ item }">
-				<router-link :to="'/admin-panel/product-edit/'+item.type+'/'+item.id">
+				<router-link :to="'/admin-panel/product-edit/' + item.id">
 					<v-btn
 						small icon
 						class="primary--text"

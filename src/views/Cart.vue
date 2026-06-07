@@ -5,6 +5,8 @@ import api from "Api";
 import AppConfig from "../constants/AppConfig";
 import HtmlElement from "../constants/HtmlBodyMail";
 import CartDocumentsModal from "../components/Cart/CartDocumentsModal.vue";
+import CartCoupon from "../components/Cart/CartCoupon.vue";
+import { parseRequiredDocuments, formatDocumentName as formatDocLabel } from 'Helpers/documents';
 
 const key = '82f2ceed4c503896c8a291e560bd4325' // change to your key
 const iv = 'sinasinasisinaaa' // change to your iv
@@ -13,6 +15,7 @@ const iv = 'sinasinasisinaaa' // change to your iv
 export default {
   components: {
     CartDocumentsModal,
+    CartCoupon,
   },
   data() {
     return {
@@ -21,8 +24,13 @@ export default {
       docsModalOpen: false,
       docsModalItem: null,
       total: null,
+      cartId: null,
+      couponCode: '',
+      couponDescription: '',
+      couponDiscount: 0,
       uploadedDocuments: {}, // { id_details: { docType: file } }
-      uploadingDocuments: {}, // Track upload status
+      uploadingDocuments: {},
+      quantityTimers: {},
       headers: [
         {
           text: "Product",
@@ -50,13 +58,16 @@ export default {
       const shopCart = await api.get(
         '/api/shoppingcar/get_shop/' + localStorage.id_users
       );
-      const carts = shopCart?.data?.data;
-      if (!carts?.length) {
+      const carts = shopCart && shopCart.data && shopCart.data.data;
+      if (!carts || !carts.length) {
         this.$store.dispatch('addSetToCart', []);
         return;
       }
 
       localStorage.setItem('id_orden', carts[0].id_shopping_car);
+      this.cartId = carts[0].id_shopping_car;
+      this.couponCode = carts[0].coupon_code || '';
+      this.couponDiscount = parseFloat(carts[0].coupon_discount) || 0;
       const cartsshop = carts[0].id_shopping_car;
 
       const shopCartDetails = await api.get(
@@ -64,27 +75,13 @@ export default {
       );
 
       if (shopCartDetails.data && shopCartDetails.data.data) {
-        const cartItems = shopCartDetails.data.data.map((item) => {
-          let requiredDocsArray = [];
-          if (item.required_documents && item.required_documents.trim() !== '') {
-            try {
-              if (typeof item.required_documents === 'string') {
-                requiredDocsArray = item.required_documents.split(',').map((doc) => doc.trim());
-              } else if (Array.isArray(item.required_documents)) {
-                requiredDocsArray = item.required_documents;
-              }
-            } catch (e) {
-              console.error('Error parsing required_documents:', e);
-            }
-          }
-
-          return {
-            ...item,
-            required_documents_array: requiredDocsArray,
-          };
-        });
+        const cartItems = shopCartDetails.data.data.map((item) => ({
+          ...item,
+          required_documents_array: parseRequiredDocuments(item.required_documents),
+        }));
 
         this.$store.dispatch('addSetToCart', cartItems);
+        await this.loadCartDocuments(cartItems);
       }
     } catch (error) {
       this.$store.dispatch('addSetToCart', []);
@@ -97,38 +94,35 @@ export default {
     console: () => console,
     window: () => window,
     itemTotal() {
-      let productTotal = null;
-      if (this.cart.length > 0) {
-        for (const item of this.cart) {
-          productTotal += item.details_price * item.details_quantity;
-        }
-        return productTotal.toFixed(2);
-      } else {
-        return productTotal.toFixed(2);
+      if (!this.cart.length) return '0.00';
+      let productTotal = 0;
+      for (const item of this.cart) {
+        productTotal += item.details_price * item.details_quantity;
       }
+      return productTotal.toFixed(2);
     },
     shipping() {
       return (0.0).toFixed(2);
     },
+    couponDiscountFormatted() {
+      return (parseFloat(this.couponDiscount) || 0).toFixed(2);
+    },
     tax() {
-      let tax = null;
-      if (this.cart.length > 0) {
-        for (const item of this.cart) {
-          tax += item.details_price * item.details_quantity * AppConfig.porcentajeIVa;
-        }
-        return tax.toFixed(2);
-      } else {
-        return tax.toFixed(2);
+      if (!this.cart.length) return '0.00';
+      let tax = 0;
+      for (const item of this.cart) {
+        tax += item.details_price * item.details_quantity * AppConfig.porcentajeIVa;
       }
+      return tax.toFixed(2);
     },
     getTotalPrice() {
       let totalPrice = 0;
       let subtotal = parseFloat(this.itemTotal);
-      let descuento = parseFloat(this.shipping);
+      let descuento = parseFloat(this.couponDiscount) || 0;
       let impuesto = parseFloat(this.tax);
       if (this.cart.length > 0) {
         totalPrice += subtotal - descuento + impuesto;
-        return totalPrice.toFixed(2);
+        return Math.max(0, totalPrice).toFixed(2);
       } else {
         return totalPrice.toFixed(2);
       }
@@ -163,14 +157,16 @@ export default {
       try {
         /*Creramos variables de los totales de pago de la orden para crear arreglo payphone */
         let subtotal = parseInt(parseFloat(this.itemTotal) * 100);
+        let couponCents = parseInt(parseFloat(this.couponDiscount) * 100);
+        let subtotalAfterCoupon = Math.max(0, subtotal - couponCents);
         let impuesto = parseInt(parseFloat(this.tax) * 100);
-        let total = parseInt(parseFloat(this.getTotalPrice * 100).toFixed(2));
+        let total = parseInt(parseFloat(this.getTotalPrice) * 100);
         this.$refs.confirmationDialog.close();
         this.$refs.loadComponent.openDialog();
         const arr_pay = {
           amount: total,
           tax: impuesto,
-          amountWithTax: subtotal,
+          amountWithTax: subtotalAfterCoupon,
           service: 0,
           tip: 0,
           currency: "USD",
@@ -248,11 +244,16 @@ export default {
             });
             
         } else {
-          console.log(urlPayphone.data);
+          this.$refs.loadComponent.close();
+          const message = (urlPayphone.data && urlPayphone.data.error && urlPayphone.data.error.message)
+            || 'No se pudo generar el link de pago';
+          this.$snotify.error(message, { timeout: 4000 });
         }
       } catch (e) {
-        //console.log(e);
         this.$refs.loadComponent.close();
+        const message = (e.response && e.response.data && e.response.data.error && e.response.data.error.message)
+          || 'Error al procesar la orden';
+        this.$snotify.error(message, { timeout: 4000 });
       }
     },
     deleteProductFromCart(product) {
@@ -302,9 +303,50 @@ export default {
 
       return CryptoJS.enc.Utf8.stringify(cipher).toString()
     },
-    /* Format document name for display */
     formatDocumentName(docType) {
-      return docType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      return formatDocLabel(docType);
+    },
+    async loadCartDocuments(cartItems) {
+      for (const item of cartItems) {
+        if (!item.id_details || !item.required_documents_array || !item.required_documents_array.length) {
+          continue;
+        }
+
+        try {
+          const response = await api.get(`/api/product_documents/cart-detail/${item.id_details}`);
+          const docs = (response.data && response.data.data) || [];
+          if (!docs.length) continue;
+
+          const mapped = {};
+          docs.forEach((doc) => {
+            mapped[doc.document_type] = {
+              url: doc.document_url,
+              file_name: doc.file_name,
+            };
+          });
+          this.$set(this.uploadedDocuments, item.id_details, mapped);
+        } catch (error) {
+          // Sin documentos previos para esta línea
+        }
+      }
+    },
+    onQuantityChange(item) {
+      const detailId = item.id_details;
+      if (!detailId) return;
+
+      if (this.quantityTimers[detailId]) {
+        clearTimeout(this.quantityTimers[detailId]);
+      }
+
+      this.quantityTimers[detailId] = setTimeout(() => {
+        const quantity = Math.max(1, parseInt(item.details_quantity, 10) || 1);
+        item.details_quantity = quantity;
+
+        this.$store.dispatch('updateCartItemQuantity', item)
+          .catch(() => {
+            this.$snotify.error('No se pudo actualizar la cantidad', { timeout: 2000 });
+          });
+      }, 500);
     },
     /* Handle file upload */
     async handleFileUpload(item, docType, file) {
@@ -454,6 +496,16 @@ export default {
     onDocsUpload({ item, docType, file }) {
       this.handleFileUpload(item, docType, file);
     },
+    onCouponApplied(payload) {
+      this.couponCode = payload?.coupon_code || '';
+      this.couponDescription = payload?.coupon_description || '';
+      this.couponDiscount = parseFloat(payload?.discount_amount) || 0;
+    },
+    onCouponRemoved() {
+      this.couponCode = '';
+      this.couponDescription = '';
+      this.couponDiscount = 0;
+    },
   },
 };
 
@@ -530,6 +582,7 @@ export default {
 										dense
 										hide-details
 										class="aio-cart-page__qty-input"
+										@input="onQuantityChange(item)"
 									></v-text-field>
 								</div>
 
@@ -598,14 +651,29 @@ export default {
 						<div class="aio-cart-page__summary-card">
 							<h2 class="aio-cart-page__summary-title">Resumen del pedido</h2>
 
+							<cart-coupon
+								v-if="cartId"
+								:cart-id="cartId"
+								:applied-code="couponCode"
+								:description="couponDescription"
+								@applied="onCouponApplied"
+								@removed="onCouponRemoved"
+							></cart-coupon>
+
 							<div class="aio-cart-page__summary-row">
 								<span>Subtotal</span>
 								<span>
 									<emb-currency-sign></emb-currency-sign>{{ itemTotal }}
 								</span>
 							</div>
+							<div v-if="parseFloat(couponDiscount) > 0" class="aio-cart-page__summary-row aio-cart-page__summary-row--discount">
+								<span>Cupón{{ couponCode ? ` (${couponCode})` : '' }}</span>
+								<span>
+									-<emb-currency-sign></emb-currency-sign>{{ couponDiscountFormatted }}
+								</span>
+							</div>
 							<div class="aio-cart-page__summary-row">
-								<span>Descuento</span>
+								<span>Envío</span>
 								<span>
 									<emb-currency-sign></emb-currency-sign>{{ shipping }}
 								</span>

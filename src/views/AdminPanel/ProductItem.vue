@@ -10,7 +10,7 @@
 					</v-btn>
 				</div>
 
-				<router-link :to="'/admin-panel/product-edit/'+data.type+'/'+data.id">
+				<router-link :to="'/admin-panel/product-edit/' + data.id">
 					<div class="add-to-cart">
 						<v-btn
 							class="accent"
