@@ -17,25 +17,25 @@
 						</div>
 					</div>
 
-					<span class="aio-payment-validate__eyebrow">Pago seguro</span>
-					<h1 class="aio-payment-validate__title">Verificando pago</h1>
+					<span class="aio-payment-validate__eyebrow">{{ $t('paymentPage.securePayment') }}</span>
+					<h1 class="aio-payment-validate__title">{{ $t('paymentPage.verifying') }}</h1>
 					<p class="aio-payment-validate__text">
-						Estamos confirmando tu transacción con la pasarela de pago.
-						En unos segundos serás redirigido automáticamente.
+						{{ $t('paymentPage.verifyingHint') }}
+						{{ $t('paymentPage.verifyingHintRedirect') }}
 					</p>
 
 					<ul class="aio-payment-validate__steps">
 						<li class="aio-payment-validate__step aio-payment-validate__step--active">
 							<span class="aio-payment-validate__step-dot"></span>
-							<span>Validando transacción</span>
+							<span>{{ $t('paymentPage.stepValidating') }}</span>
 						</li>
 						<li class="aio-payment-validate__step">
 							<span class="aio-payment-validate__step-dot"></span>
-							<span>Confirmando orden</span>
+							<span>{{ $t('paymentPage.stepConfirming') }}</span>
 						</li>
 						<li class="aio-payment-validate__step">
 							<span class="aio-payment-validate__step-dot"></span>
-							<span>Generando comprobante</span>
+							<span>{{ $t('paymentPage.stepReceipt') }}</span>
 						</li>
 					</ul>
 				</div>
@@ -47,11 +47,10 @@
 						</div>
 					</div>
 
-					<span class="aio-payment-validate__eyebrow aio-payment-validate__eyebrow--success">Pago confirmado</span>
-					<h1 class="aio-payment-validate__title">¡Gracias por tu compra!</h1>
+					<span class="aio-payment-validate__eyebrow aio-payment-validate__eyebrow--success">{{ $t('paymentPage.paymentConfirmed') }}</span>
+					<h1 class="aio-payment-validate__title">{{ $t('paymentPage.success') }}</h1>
 					<p class="aio-payment-validate__text">
-						Tu pago fue procesado correctamente. Estamos generando tu factura
-						electrónica y te redirigiremos al historial de pedidos.
+						{{ $t('paymentPage.successHintRedirect') }}
 					</p>
 
 					<ul class="aio-payment-validate__steps">
@@ -59,17 +58,17 @@
 							<span class="aio-payment-validate__step-dot">
 								<v-icon size="12">check</v-icon>
 							</span>
-							<span>Transacción validada</span>
+							<span>{{ $t('paymentPage.stepValidated') }}</span>
 						</li>
 						<li class="aio-payment-validate__step aio-payment-validate__step--done">
 							<span class="aio-payment-validate__step-dot">
 								<v-icon size="12">check</v-icon>
 							</span>
-							<span>Orden confirmada</span>
+							<span>{{ $t('paymentPage.stepOrderConfirmed') }}</span>
 						</li>
 						<li class="aio-payment-validate__step aio-payment-validate__step--active">
 							<span class="aio-payment-validate__step-dot"></span>
-							<span>Generando comprobante</span>
+							<span>{{ $t('paymentPage.stepReceipt') }}</span>
 						</li>
 					</ul>
 				</div>
@@ -81,16 +80,16 @@
 						</div>
 					</div>
 
-					<span class="aio-payment-validate__eyebrow aio-payment-validate__eyebrow--error">Error en el pago</span>
-					<h1 class="aio-payment-validate__title">No pudimos verificar el pago</h1>
+					<span class="aio-payment-validate__eyebrow aio-payment-validate__eyebrow--error">{{ $t('paymentPage.paymentErrorEyebrow') }}</span>
+					<h1 class="aio-payment-validate__title">{{ $t('paymentPage.error') }}</h1>
 					<p class="aio-payment-validate__text">{{ errorMessage }}</p>
 
 					<div class="aio-payment-validate__actions">
 						<button type="button" class="aio-payment-validate__btn" @click="retryValidation">
-							Reintentar
+							{{ $t('paymentPage.retry') }}
 						</button>
 						<router-link to="/account/order-history" class="aio-payment-validate__btn aio-payment-validate__btn--ghost">
-							Ir a mis pedidos
+							{{ $t('paymentPage.goToOrders') }}
 						</router-link>
 					</div>
 				</div>
@@ -138,7 +137,7 @@ export default {
 			this.cobro = false;
 			this.pago_exitoso = false;
 			this.pago_error = true;
-			this.errorMessage = message || 'Ocurrió un error al validar la transacción.';
+			this.errorMessage = message || this.$t('paymentPage.validationError');
 		},
 		retryValidation() {
 			this.pago_error = false;

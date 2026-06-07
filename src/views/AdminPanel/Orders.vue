@@ -11,7 +11,7 @@
 			<div class="aio-admin-invoices__toolbar">
 				<v-text-field
 					v-model="search"
-					label="Buscar orden, cliente, entrega..."
+					:label="$t('adminOrders.searchPlaceholder')"
 					outlined
 					dense
 					hide-details
@@ -28,14 +28,14 @@
 				</v-btn-toggle>
 
 				<v-btn-toggle v-model="invoiceFilter" mandatory dense class="aio-admin-invoices__filters" @change="reload">
-					<v-btn value="all" small>Factura: todas</v-btn>
+					<v-btn value="all" small>{{ $t('adminOrders.invoiceAll') }}</v-btn>
 					<v-btn value="pending" small>{{ $t('adminOrders.invoicePending') }}</v-btn>
 					<v-btn value="invoiced" small>{{ $t('adminOrders.invoiceDone') }}</v-btn>
 				</v-btn-toggle>
 
 				<v-btn color="primary" depressed @click="reload">
 					<v-icon left>search</v-icon>
-					Buscar
+					{{ $t('adminOrders.searchButton') }}
 				</v-btn>
 			</div>
 		</div>
@@ -51,18 +51,18 @@
 
 		<div v-else-if="!orders.length" class="aio-admin-page__empty aio-admin-card">
 			<v-icon size="40" color="#A96DFA">shopping_bag</v-icon>
-			<h3>Sin pedidos</h3>
+			<h3>{{ $t('adminOrders.noOrders') }}</h3>
 		</div>
 
 		<div v-else class="aio-admin-card pa-0 aio-admin-table-wrap">
 			<table class="aio-admin-table">
 				<thead>
 					<tr>
-						<th>Orden</th>
-						<th>Cliente</th>
-						<th>Total</th>
-						<th>Estado</th>
-						<th>Factura</th>
+						<th>{{ $t('adminOrders.orderColumn') }}</th>
+						<th>{{ $t('adminOrders.customerColumn') }}</th>
+						<th>{{ $t('adminOrders.totalColumn') }}</th>
+						<th>{{ $t('adminOrders.statusColumn') }}</th>
+						<th>{{ $t('adminOrders.invoiceColumn') }}</th>
 						<th>{{ $t('adminOrders.delivery') }}</th>
 						<th></th>
 					</tr>
@@ -88,7 +88,7 @@
 								<span class="aio-admin-invoices__name">{{ item.delivery_recipient_name || '—' }}</span>
 								<span class="aio-admin-invoices__email">{{ item.delivery_address || '—' }}</span>
 							</template>
-							<span v-else class="aio-admin-invoices__email">Misma dirección cliente</span>
+							<span v-else class="aio-admin-invoices__email">{{ $t('adminOrders.sameAddress') }}</span>
 						</td>
 						<td class="aio-admin-invoices__actions">
 							<v-btn
@@ -117,7 +117,7 @@
 			</table>
 
 			<div v-if="pagination.totalPages > 1" class="aio-admin-invoices__pagination pa-4">
-				<p>Página {{ pagination.page }} de {{ pagination.totalPages }}</p>
+				<p>{{ $t('adminOrders.pageOf', { page: pagination.page, total: pagination.totalPages }) }}</p>
 				<div>
 					<v-btn icon small :disabled="!pagination.hasPrevPage" @click="goToPage(pagination.page - 1)">
 						<v-icon>chevron_left</v-icon>
@@ -128,6 +128,16 @@
 				</div>
 			</div>
 		</div>
+
+		<emb-delete-confirmation
+			ref="cancelOrderDialog"
+			icon="cancel"
+			:title="$t('adminOrders.cancelTitle')"
+			:message="pendingCancelMessage"
+			:confirm-label="$t('adminOrders.cancelConfirmYes')"
+			:cancel-label="$t('common.cancel')"
+			@onConfirm="executeCancelOrder"
+		></emb-delete-confirmation>
 	</div>
 </template>
 
@@ -146,6 +156,7 @@ export default {
 			orders: [],
 			reprocessingId: null,
 			cancellingId: null,
+			pendingCancelItem: null,
 			pagination: {
 				page: 1,
 				limit: 10,
@@ -155,6 +166,12 @@ export default {
 				hasNextPage: false,
 			},
 		};
+	},
+	computed: {
+		pendingCancelMessage() {
+			if (!this.pendingCancelItem) return '';
+			return this.$t('adminOrders.cancelConfirm', { id: this.pendingCancelItem.id_shopping_car });
+		},
 	},
 	mounted() {
 		this.loadOrders();
@@ -201,7 +218,7 @@ export default {
 				this.orders = (payload && payload.items ? payload.items.map(this.mapOrder) : []);
 				this.pagination = { ...this.pagination, ...(payload && payload.pagination) };
 			} catch (error) {
-				this.errorMessage = getApiErrorMessage(error, 'No se pudieron cargar los pedidos');
+				this.errorMessage = getApiErrorMessage(error, this.$t('adminOrders.loadError'));
 			} finally {
 				this.isLoading = false;
 			}
@@ -210,25 +227,31 @@ export default {
 			this.reprocessingId = item.id_shopping_car;
 			try {
 				await api.post(`/api/admin/invoices/${item.id_shopping_car}/reprocess`);
-				this.$snotify.success('Factura reprocesada');
+				this.$snotify.success(this.$t('adminOrders.reprocessSuccess'));
 				await this.loadOrders(this.pagination.page);
 			} catch (error) {
-				this.$snotify.error(getApiErrorMessage(error, 'No se pudo reprocesar'));
+				this.$snotify.error(getApiErrorMessage(error, this.$t('adminOrders.reprocessError')));
 			} finally {
 				this.reprocessingId = null;
 			}
 		},
-		async cancelOrder(item) {
-			if (!window.confirm(`¿Cancelar la orden #${item.id_shopping_car}? Se notificará al cliente y administradores.`)) {
-				return;
-			}
+		cancelOrder(item) {
+			this.pendingCancelItem = item;
+			this.$refs.cancelOrderDialog.openDialog();
+		},
+		async executeCancelOrder() {
+			this.$refs.cancelOrderDialog.close();
+			const item = this.pendingCancelItem;
+			this.pendingCancelItem = null;
+			if (!item) return;
+
 			this.cancellingId = item.id_shopping_car;
 			try {
 				await api.post(`/api/admin/orders/${item.id_shopping_car}/cancel`);
-				this.$snotify.success('Pedido cancelado');
+				this.$snotify.success(this.$t('adminOrders.cancelSuccess'));
 				await this.loadOrders(this.pagination.page);
 			} catch (error) {
-				this.$snotify.error(getApiErrorMessage(error, 'No se pudo cancelar'));
+				this.$snotify.error(getApiErrorMessage(error, this.$t('adminOrders.cancelError')));
 			} finally {
 				this.cancellingId = null;
 			}

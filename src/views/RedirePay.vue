@@ -31,11 +31,10 @@
 						</div>
 					</div>
 
-					<span class="aio-payment-validate__eyebrow">Enlace seguro</span>
-					<h1 class="aio-payment-validate__title">Preparando tu pago</h1>
+					<span class="aio-payment-validate__eyebrow">{{ $t('paymentPage.secureLink') }}</span>
+					<h1 class="aio-payment-validate__title">{{ $t('paymentPage.preparing') }}</h1>
 					<p class="aio-payment-validate__text">
-						Estamos validando tu enlace de pago. En unos segundos serás redirigido
-						a la pasarela Payphone para completar la transacción.
+						{{ $t('paymentPage.preparingHint') }}
 					</p>
 
 					<ul class="aio-payment-validate__steps">
@@ -46,7 +45,7 @@
 							<span class="aio-payment-validate__step-dot">
 								<v-icon v-if="activeStep > 1" size="12">check</v-icon>
 							</span>
-							<span>Validando enlace</span>
+							<span>{{ $t('paymentPage.validatingLink') }}</span>
 						</li>
 						<li
 							class="aio-payment-validate__step"
@@ -55,14 +54,14 @@
 							<span class="aio-payment-validate__step-dot">
 								<v-icon v-if="activeStep > 2" size="12">check</v-icon>
 							</span>
-							<span>Conectando con Payphone</span>
+							<span>{{ $t('paymentPage.stepConnectingPayphone') }}</span>
 						</li>
 						<li
 							class="aio-payment-validate__step"
 							:class="{ 'aio-payment-validate__step--active': activeStep >= 3 }"
 						>
 							<span class="aio-payment-validate__step-dot"></span>
-							<span>Abriendo pasarela de pago</span>
+							<span>{{ $t('paymentPage.stepOpeningGateway') }}</span>
 						</li>
 					</ul>
 				</div>
@@ -73,17 +72,17 @@
 							<v-icon size="36">link_off</v-icon>
 						</div>
 					</div>
-					<span class="aio-payment-validate__eyebrow aio-payment-validate__eyebrow--error">Enlace no válido</span>
+					<span class="aio-payment-validate__eyebrow aio-payment-validate__eyebrow--error">{{ $t('paymentPage.invalidLink') }}</span>
 					<h1 class="aio-payment-validate__title">{{ errorTitle }}</h1>
 					<p class="aio-payment-validate__text">
 						{{ errorMessage }}
 					</p>
 					<div class="aio-payment-validate__actions">
 						<router-link to="/account/order-history" class="aio-payment-validate__btn">
-							Ir a mis pedidos
+							{{ $t('paymentPage.goToOrders') }}
 						</router-link>
 						<router-link to="/cart" class="aio-payment-validate__btn aio-payment-validate__btn--ghost">
-							Volver al carrito
+							{{ $t('paymentPage.backToCart') }}
 						</router-link>
 					</div>
 				</div>
@@ -106,11 +105,14 @@ export default {
 			activeStep: 1,
 			stepTimer: null,
 			redirectTimer: null,
-			errorTitle: 'No pudimos abrir el pago',
-			errorMessage: 'El enlace de pago no está disponible o ha expirado. Genera uno nuevo desde tus pedidos.',
+			errorTitle: '',
+			errorMessage: '',
 		};
 	},
 	async mounted() {
+		this.errorTitle = this.$t('paymentPage.linkErrorOpenTitle');
+		this.errorMessage = this.$t('paymentPage.linkErrorOpenDefault');
+
 		const orderId = this.$route.query && this.$route.query.orden;
 		const rawUrl = this.$route.query && this.$route.query.urlPago;
 
@@ -133,14 +135,14 @@ export default {
 			const payload = response && response.data;
 
 			if (!payload || payload.errorCode !== 200 || !payload.url) {
-				this.showLinkError('No pudimos abrir el pago', 'El enlace de pago no está disponible. Genera uno nuevo desde Mis pedidos.');
+				this.showLinkError(this.$t('paymentPage.linkErrorOpenTitle'), this.$t('paymentPage.linkErrorUnavailable'));
 				return;
 			}
 
 			this.urlPago = payload.url;
 			this.startRedirectFlow();
 		} catch (error) {
-			const message = getApiErrorMessage(error, 'El enlace de pago no está disponible.');
+			const message = getApiErrorMessage(error, this.$t('paymentPage.linkErrorUnavailable'));
 			const step = error.response
 				&& error.response.data
 				&& error.response.data.error
@@ -148,21 +150,21 @@ export default {
 
 			if (step === 'order_cancelled') {
 				this.showLinkError(
-					'Pedido cancelado',
-					'Esta orden fue cancelada. El enlace de pago ya no está activo.'
+					this.$t('paymentPage.cancelledOrder'),
+					this.$t('paymentPage.cancelledHint')
 				);
 				return;
 			}
 
 			if (step === 'order_paid') {
 				this.showLinkError(
-					'Pedido ya pagado',
-					'Esta orden ya fue pagada. Revisa el comprobante en Mis pedidos.'
+					this.$t('paymentPage.alreadyPaid'),
+					this.$t('paymentPage.alreadyPaidHint')
 				);
 				return;
 			}
 
-			this.showLinkError('No pudimos abrir el pago', message);
+			this.showLinkError(this.$t('paymentPage.linkErrorOpenTitle'), message);
 		}
 	},
 	beforeDestroy() {

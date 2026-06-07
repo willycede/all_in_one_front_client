@@ -9,6 +9,7 @@
 
 		<div v-if="isLoading" class="aio-account-panel__loading">
 			<v-progress-circular indeterminate color="#A96DFA" size="36" width="3"></v-progress-circular>
+			<p>{{ $t('common.loading') }}</p>
 		</div>
 
 		<template v-else>
@@ -114,7 +115,7 @@ export default {
 				const res = await api.get('/api/users/2fa/status');
 				this.status = (res && res.data && res.data.data) || this.status;
 			} catch (error) {
-				this.$snotify.error(getApiErrorMessage(error, 'No se pudo cargar el estado de seguridad'));
+				this.$snotify.error(getApiErrorMessage(error, this.$t('account.securityLoadError')));
 			} finally {
 				this.isLoading = false;
 			}
@@ -125,7 +126,7 @@ export default {
 				const res = await api.post('/api/users/2fa/setup');
 				this.setupData = res && res.data && res.data.data;
 			} catch (error) {
-				this.$snotify.error(getApiErrorMessage(error, 'No se pudo iniciar la configuración'));
+				this.$snotify.error(getApiErrorMessage(error, this.$t('account.securitySetupError')));
 			} finally {
 				this.isBusy = false;
 			}
@@ -143,7 +144,7 @@ export default {
 				localStorage.two_factor_enabled = '1';
 				this.$snotify.success(this.$t('account.twoFactorEnabledToast'));
 			} catch (error) {
-				this.$snotify.error(getApiErrorMessage(error, 'Código incorrecto'));
+				this.$snotify.error(getApiErrorMessage(error, this.$t('account.securityCodeError')));
 			} finally {
 				this.isBusy = false;
 			}
@@ -163,7 +164,7 @@ export default {
 				localStorage.two_factor_enabled = '0';
 				this.$snotify.success(this.$t('account.twoFactorDisabledToast'));
 			} catch (error) {
-				this.$snotify.error(getApiErrorMessage(error, 'No se pudo desactivar 2FA'));
+				this.$snotify.error(getApiErrorMessage(error, this.$t('account.securityDisableError')));
 			} finally {
 				this.isBusy = false;
 			}
@@ -172,41 +173,3 @@ export default {
 };
 </script>
 
-<style scoped>
-.aio-account-security__card {
-	background: #fff;
-	border: 1px solid #E8E0F5;
-	border-radius: 16px;
-	padding: 24px;
-}
-.aio-account-security__status {
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-	gap: 16px;
-	margin-bottom: 20px;
-}
-.aio-account-security__qr {
-	display: block;
-	max-width: 220px;
-	margin: 16px auto;
-	border-radius: 12px;
-}
-.aio-account-security__manual code,
-.aio-account-security__backup code {
-	word-break: break-all;
-}
-.aio-account-security__setup,
-.aio-account-security__disable {
-	display: grid;
-	gap: 12px;
-	margin-top: 16px;
-}
-.aio-account-security__backup ul {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 8px;
-	padding-left: 0;
-	list-style: none;
-}
-</style>

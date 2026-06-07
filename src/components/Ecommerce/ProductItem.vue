@@ -13,7 +13,7 @@
 						type="button"
 						class="aio-shop-card__btn aio-shop-card__btn--ghost"
 						:class="{ 'aio-shop-card__btn--fav-active': isInWishlist }"
-						:aria-label="isInWishlist ? 'Quitar de favoritos' : 'Agregar a favoritos'"
+						:aria-label="isInWishlist ? $t('productsPage.removeFromFavorites') : $t('productsPage.addToFavorites')"
 						@click.stop="toggleWishlist(data)"
 					>
 						<v-icon size="20">{{ isInWishlist ? 'favorite' : 'favorite_border' }}</v-icon>
@@ -21,7 +21,7 @@
 					<button
 						type="button"
 						class="aio-shop-card__btn aio-shop-card__btn--ghost"
-						aria-label="Ver producto"
+						:aria-label="$t('productsPage.viewProduct')"
 						@click.stop="goToDetail(data)"
 					>
 						<v-icon size="20">visibility</v-icon>
@@ -30,7 +30,7 @@
 						v-if="ifItemExistInCart(data)"
 						type="button"
 						class="aio-shop-card__btn aio-shop-card__btn--primary"
-						aria-label="Ver carrito"
+						:aria-label="$t('productsPage.viewCart')"
 						@click.stop="$router.push('/cart')"
 					>
 						<v-icon size="20" color="white">shopping_bag</v-icon>
@@ -39,7 +39,7 @@
 						v-else
 						type="button"
 						class="aio-shop-card__btn aio-shop-card__btn--primary"
-						aria-label="Agregar al carrito"
+						:aria-label="$t('productsPage.addToCart')"
 						@click.stop="addProductToCart(data)"
 					>
 						<v-icon size="20" color="white">add_shopping_cart</v-icon>
@@ -53,7 +53,7 @@
 
 			<span v-if="requiresDocuments" class="aio-shop-card__tag">
 				<v-icon size="12">description</v-icon>
-				Requiere documentos
+				{{ $t('productsPage.requiresDocuments') }}
 			</span>
 
 			<div class="aio-shop-card__footer emb-meta-info">
@@ -135,9 +135,9 @@ export default {
 					uploaded_documents: {},
 				};
 
-				let message = 'Producto agregado al carrito';
+				let message = this.$t('productsPage.addedToCart');
 				if (requiredDocsArray.length > 0) {
-					message += '. Recuerda subir los documentos requeridos en el carrito.';
+					message = this.$t('productsPage.addedToCartWithDocs');
 				}
 
 				this.$snotify.success(message, {
@@ -151,7 +151,7 @@ export default {
 					this.$store.dispatch('addProductToCart', newProduct);
 				}, 500);
 			} else {
-				this.$snotify.success('Se requiere inicio de sesión para poder agregar productos al carrito.', {
+				this.$snotify.success(this.$t('productsPage.loginRequiredCart'), {
 					closeOnClick: false,
 					pauseOnHover: false,
 					timeout: 4000,
@@ -164,7 +164,7 @@ export default {
 		},
 		toggleWishlist(item) {
 			if (!isUserLoggedIn()) {
-				this.$snotify.info('Inicia sesión para guardar favoritos', {
+				this.$snotify.info(this.$t('productsPage.favoritesLogin'), {
 					closeOnClick: false,
 					pauseOnHover: false,
 					timeout: 2500,
@@ -180,25 +180,25 @@ export default {
 
 				this.$store.dispatch('onDeleteProductFromWishlist', favoriteItem)
 					.then(() => {
-						this.$snotify.success('Eliminado de favoritos', { timeout: 1500 });
+						this.$snotify.success(this.$t('productsPage.removedFromFavorites'), { timeout: 1500 });
 					})
 					.catch(() => {
-						this.$snotify.error('No se pudo quitar de favoritos', { timeout: 2000 });
+						this.$snotify.error(this.$t('productsPage.removeFromFavoritesError'), { timeout: 2000 });
 					});
 				return;
 			}
 
 			this.$store.dispatch('addItemToWishlist', item)
 				.then(() => {
-					this.$snotify.success('Agregado a favoritos', { timeout: 1500 });
+					this.$snotify.success(this.$t('productsPage.addedToFavorites'), { timeout: 1500 });
 				})
 				.catch((error) => {
 					const message = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)
-						|| (error.message === 'LOGIN_REQUIRED' ? 'Inicia sesión para guardar favoritos' : 'No se pudo agregar a favoritos');
+						|| (error.message === 'LOGIN_REQUIRED' ? this.$t('productsPage.favoritesLogin') : this.$t('productsPage.favoritesError'));
 
-					if (message.includes('ya está en favoritos')) {
+					if (message.includes('ya está en favoritos') || message.toLowerCase().includes('already in favorites')) {
 						this.$store.dispatch('fetchWishlist');
-						this.$snotify.info('Este producto ya está en favoritos', { timeout: 2000 });
+						this.$snotify.info(this.$t('productsPage.alreadyInFavorites'), { timeout: 2000 });
 						return;
 					}
 

@@ -2,30 +2,27 @@
 	<div class="aio-account-panel profile-wrapper">
 		<div v-if="isLoading" class="aio-account-panel__loading">
 			<v-progress-circular indeterminate color="#A96DFA" size="36" width="3"></v-progress-circular>
-			<p>Cargando tu perfil...</p>
+			<p>{{ $t('account.profileLoading') }}</p>
 		</div>
 
 		<template v-else>
 			<div class="aio-account-panel__header">
 				<div>
-					<h2 class="aio-account-panel__title">Información del usuario</h2>
-					<p class="aio-account-panel__subtitle">Datos usados para facturación y contacto</p>
+					<h2 class="aio-account-panel__title">{{ $t('account.profileTitle') }}</h2>
+					<p class="aio-account-panel__subtitle">{{ $t('account.profileSubtitle') }}</p>
 				</div>
 				<router-link
 					:to="{ name: 'EditProfileInfo', query: { type: 'info' } }"
 					class="aio-account-panel__edit-btn"
 				>
 					<v-icon size="18">edit</v-icon>
-					Editar
+					{{ $t('common.edit') }}
 				</router-link>
 			</div>
 
 			<div class="aio-account-panel__notice">
 				<v-icon size="20">info</v-icon>
-				<p>
-					Esta información se utiliza para generar tu factura tras el pago.
-					Si algún dato es incorrecto, actualízalo antes de comprar.
-				</p>
+				<p>{{ $t('account.profileNotice') }}</p>
 			</div>
 
 			<div class="aio-account-panel__grid">
@@ -64,31 +61,31 @@ export default {
 			return [
 				{
 					key: 'name',
-					label: 'Nombres',
+					label: this.$t('account.firstName'),
 					value: this.user.name_user || localStorage.getItem('name_user'),
 					icon: 'person_outline',
 				},
 				{
 					key: 'last',
-					label: 'Apellidos',
+					label: this.$t('account.lastName'),
 					value: this.user.last_name_user || localStorage.getItem('last_name_user'),
 					icon: 'person_outline',
 				},
 				{
 					key: 'email',
-					label: 'Email',
+					label: this.$t('account.emailLabel'),
 					value: this.user.email || localStorage.getItem('email'),
 					icon: 'email',
 				},
 				{
 					key: 'id',
-					label: 'Cédula / RUC',
+					label: this.$t('account.idNumber'),
 					value: this.user.identification_number || localStorage.getItem('identification_number'),
 					icon: 'badge',
 				},
 				{
 					key: 'address',
-					label: 'Dirección',
+					label: this.$t('account.addressLabel'),
 					value: this.user.address,
 					icon: 'location_on',
 					full: true,

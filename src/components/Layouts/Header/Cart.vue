@@ -16,7 +16,7 @@
 						<v-icon>shopping_cart</v-icon>
 						<span v-if="cart.length > 0" class="onsus-action-btn__badge">{{ cart.length }}</span>
 					</span>
-					<span class="onsus-action-btn__label">Carrito</span>
+					<span class="onsus-action-btn__label">{{ $t('nav.cart') }}</span>
 				</button>
 			</template>
 

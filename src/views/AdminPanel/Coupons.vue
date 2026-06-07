@@ -4,7 +4,7 @@
 			<div></div>
 			<v-btn color="primary" depressed @click="openCreateDialog">
 				<v-icon left>add</v-icon>
-				Nuevo cupón
+				{{ $t('adminCoupons.newCoupon') }}
 			</v-btn>
 		</div>
 
@@ -15,26 +15,26 @@
 
 		<div v-if="isLoading" class="aio-admin-page__loading aio-admin-card">
 			<v-progress-circular indeterminate color="primary"></v-progress-circular>
-			<span>Cargando cupones...</span>
+			<span>{{ $t('adminCoupons.loading') }}</span>
 		</div>
 
 		<div v-else-if="!coupons.length" class="aio-admin-page__empty aio-admin-card">
 			<v-icon size="40" color="#A96DFA">local_offer</v-icon>
-			<h3>Sin cupones</h3>
-			<p>Crea el primer código promocional.</p>
+			<h3>{{ $t('adminCoupons.empty') }}</h3>
+			<p>{{ $t('adminCoupons.emptyHint') }}</p>
 		</div>
 
 		<div v-else class="aio-admin-card pa-0 aio-admin-table-wrap">
 			<table class="aio-admin-table">
 				<thead>
 					<tr>
-						<th>Código</th>
-						<th>Descripción</th>
-						<th>Descuento</th>
-						<th>Mínimo</th>
-						<th>Usos</th>
-						<th>Vigencia</th>
-						<th>Estado</th>
+						<th>{{ $t('adminCoupons.codeColumn') }}</th>
+						<th>{{ $t('adminCoupons.descriptionColumn') }}</th>
+						<th>{{ $t('adminCoupons.discountColumn') }}</th>
+						<th>{{ $t('adminCoupons.minColumn') }}</th>
+						<th>{{ $t('adminCoupons.usesColumn') }}</th>
+						<th>{{ $t('adminCoupons.validityColumn') }}</th>
+						<th>{{ $t('adminCoupons.statusColumn') }}</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -51,7 +51,7 @@
 								class="aio-admin-badge"
 								:class="coupon.status === 1 ? 'aio-admin-badge--success' : 'aio-admin-badge--muted'"
 							>
-								{{ coupon.status === 1 ? 'Activo' : 'Inactivo' }}
+								{{ coupon.status === 1 ? $t('adminCoupons.active') : $t('adminCoupons.inactive') }}
 							</span>
 						</td>
 						<td class="aio-admin-coupons__actions">
@@ -74,7 +74,7 @@
 
 		<v-dialog v-model="dialogOpen" max-width="560" persistent>
 			<v-card>
-				<v-card-title>{{ editingId ? 'Editar cupón' : 'Nuevo cupón' }}</v-card-title>
+				<v-card-title>{{ editingId ? $t('adminCoupons.editTitle') : $t('adminCoupons.createTitle') }}</v-card-title>
 				<v-card-text>
 					<v-text-field
 						v-model="form.code"

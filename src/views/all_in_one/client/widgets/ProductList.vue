@@ -2,12 +2,12 @@
 	<section class="aio-featured">
 		<div class="aio-featured__head">
 			<div class="aio-featured__head-text">
-				<span class="aio-featured__eyebrow">Selección especial</span>
+				<span class="aio-featured__eyebrow">{{ $t('featured.eyebrow') }}</span>
 				<h2 class="aio-featured__title">{{ secTitle }}</h2>
-				<p class="aio-featured__subtitle">Lo mejor de nuestro catálogo, seleccionado para ti</p>
+				<p class="aio-featured__subtitle">{{ $t('featured.subtitle') }}</p>
 			</div>
 			<router-link to="/products" class="aio-featured__link">
-				Ver catálogo completo
+				{{ $t('featured.viewCatalog') }}
 				<v-icon size="16">east</v-icon>
 			</router-link>
 		</div>
@@ -18,7 +18,7 @@
 
 		<div v-else-if="featuredProducts.length === 0" class="aio-featured__state">
 			<v-icon size="40" color="#A96DFA">inventory_2</v-icon>
-			<p>No hay productos disponibles por el momento</p>
+			<p>{{ $t('featured.empty') }}</p>
 		</div>
 
 		<div v-else class="aio-featured__grid">
@@ -29,7 +29,7 @@
 				@click="goToDetail(product)"
 			>
 				<div class="aio-featured__media">
-					<span class="aio-featured__badge">Destacado</span>
+					<span class="aio-featured__badge">{{ $t('featured.badge') }}</span>
 					<img
 						v-if="product.images && product.images[0]"
 						class="aio-featured__img"
@@ -45,7 +45,7 @@
 					<h3 class="aio-featured__name">{{ product.name }}</h3>
 					<div class="aio-featured__row">
 						<span class="aio-featured__price">{{ product.price }}</span>
-						<button type="button" class="aio-featured__btn" aria-label="Ver producto">
+						<button type="button" class="aio-featured__btn" :aria-label="$t('featured.viewProduct')">
 							<v-icon size="16" color="white">arrow_forward</v-icon>
 						</button>
 					</div>

@@ -17,7 +17,7 @@
 						<v-icon>favorite_border</v-icon>
 						<span v-if="wishlist.length > 0" class="onsus-action-btn__badge">{{ wishlist.length }}</span>
 					</span>
-					<span class="onsus-action-btn__label">Favoritos</span>
+					<span class="onsus-action-btn__label">{{ $t('nav.wishlist') }}</span>
 				</button>
 			</template>
 

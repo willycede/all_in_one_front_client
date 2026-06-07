@@ -1,15 +1,15 @@
 <template>
 	<aside class="aio-shop-sidebar">
 		<div class="aio-shop-sidebar__panel">
-			<h3 class="aio-shop-sidebar__title">Buscar</h3>
+			<h3 class="aio-shop-sidebar__title">{{ $t('productsPage.searchTitle') }}</h3>
 			<div class="aio-shop-sidebar__search" :class="{ 'aio-shop-sidebar__search--loading': isSearching }">
 				<v-icon size="20" class="aio-shop-sidebar__search-icon">search</v-icon>
 				<input
 					v-model="searchBy"
 					type="search"
 					class="aio-shop-sidebar__search-input"
-					placeholder="Nombre del producto..."
-					aria-label="Buscar producto"
+					:placeholder="$t('productsPage.searchProductPlaceholder')"
+					:aria-label="$t('productsPage.searchProductAria')"
 					@input="onSearchInput"
 				>
 				<v-progress-circular
@@ -24,7 +24,7 @@
 		</div>
 
 		<div class="aio-shop-sidebar__panel">
-			<h3 class="aio-shop-sidebar__title">Categorías</h3>
+			<h3 class="aio-shop-sidebar__title">{{ $t('productsPage.categories') }}</h3>
 			<div class="aio-shop-sidebar__categories">
 				<button
 					type="button"
@@ -32,7 +32,7 @@
 					:class="{ 'aio-shop-sidebar__cat--active': !selectedCategory }"
 					@click="selectCategory(null)"
 				>
-					<span>Todas</span>
+					<span>{{ $t('productsPage.allCategories') }}</span>
 					<v-icon v-if="!selectedCategory" size="16">check</v-icon>
 				</button>
 				<button
@@ -53,7 +53,7 @@
 		</div>
 
 		<div class="aio-shop-sidebar__panel">
-			<h3 class="aio-shop-sidebar__title">Precio</h3>
+			<h3 class="aio-shop-sidebar__title">{{ $t('productsPage.priceFilter') }}</h3>
 			<div class="aio-shop-sidebar__price-row">
 				<input
 					v-model="minPrice"
@@ -61,8 +61,8 @@
 					min="0"
 					step="0.01"
 					class="aio-shop-sidebar__price-input"
-					placeholder="Mín"
-					aria-label="Precio mínimo"
+					:placeholder="$t('productsPage.priceMinPlaceholder')"
+					:aria-label="$t('productsPage.priceMinAria')"
 				>
 				<span class="aio-shop-sidebar__price-sep">—</span>
 				<input
@@ -71,24 +71,24 @@
 					min="0"
 					step="0.01"
 					class="aio-shop-sidebar__price-input"
-					placeholder="Máx"
-					aria-label="Precio máximo"
+					:placeholder="$t('productsPage.priceMaxPlaceholder')"
+					:aria-label="$t('productsPage.priceMaxAria')"
 				>
 			</div>
 			<button type="button" class="aio-shop-sidebar__apply-btn" @click="applyPriceFilter">
-				Aplicar precio
+				{{ $t('productsPage.applyPrice') }}
 			</button>
 		</div>
 
 		<div class="aio-shop-sidebar__panel">
-			<h3 class="aio-shop-sidebar__title">Ciudad</h3>
+			<h3 class="aio-shop-sidebar__title">{{ $t('productsPage.city') }}</h3>
 			<select
 				v-model="selectedCityId"
 				class="aio-shop-sidebar__select"
-				aria-label="Filtrar por ciudad"
+				:aria-label="$t('productsPage.filterByCity')"
 				@change="applyFilters({ syncRoute: true })"
 			>
-				<option value="">Todas las ciudades</option>
+				<option value="">{{ $t('productsPage.allCities') }}</option>
 				<option
 					v-for="city in catalogCities"
 					:key="city.id_city"
@@ -100,15 +100,15 @@
 		</div>
 
 		<div class="aio-shop-sidebar__panel">
-			<h3 class="aio-shop-sidebar__title">Ordenar</h3>
+			<h3 class="aio-shop-sidebar__title">{{ $t('productsPage.sortFilter') }}</h3>
 			<select
 				v-model="sortBy"
 				class="aio-shop-sidebar__select"
-				aria-label="Ordenar productos"
+				:aria-label="$t('productsPage.sortProductsAria')"
 				@change="applyFilters({ syncRoute: true })"
 			>
 				<option
-					v-for="option in sortOptions"
+					v-for="option in translatedSortOptions"
 					:key="option.value"
 					:value="option.value"
 				>
@@ -119,7 +119,7 @@
 
 		<button type="button" class="aio-shop-sidebar__clear" @click="clearFilters">
 			<v-icon size="18">filter_alt_off</v-icon>
-			Limpiar filtros
+			{{ $t('productsPage.clearFilters') }}
 		</button>
 	</aside>
 </template>
@@ -134,6 +134,13 @@ import {
 	DEFAULT_CATALOG_SORT,
 } from 'Helpers/catalogQuery';
 
+const SORT_LABEL_KEYS = {
+	name_asc: 'productsPage.sortNameAsc',
+	name_desc: 'productsPage.sortNameDesc',
+	price_asc: 'productsPage.sortPriceAsc',
+	price_desc: 'productsPage.sortPriceDesc',
+};
+
 export default {
 	data() {
 		return {
@@ -147,10 +154,17 @@ export default {
 			searchDebounce: null,
 			isSearching: false,
 			skipRouteSync: false,
-			sortOptions: CATALOG_SORT_OPTIONS,
 		};
 	},
-	computed: mapGetters(['generalCategories']),
+	computed: {
+		...mapGetters(['generalCategories']),
+		translatedSortOptions() {
+			return CATALOG_SORT_OPTIONS.map((option) => ({
+				value: option.value,
+				label: this.$t(SORT_LABEL_KEYS[option.value] || option.label),
+			}));
+		},
+	},
 	watch: {
 		'$route.query': {
 			immediate: true,

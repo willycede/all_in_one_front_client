@@ -15,11 +15,11 @@
 						>
 					</router-link>
 					<p class="aio-footer__tagline">
-						Tu marketplace de confianza. Productos y servicios de las mejores empresas en un solo lugar.
+						{{ $t('footer.tagline') }}
 					</p>
 					<div v-if="img" class="aio-footer__payments">
-						<span class="aio-footer__payments-label">Métodos de pago</span>
-						<img :src="img" alt="Métodos de pago aceptados" class="aio-footer__payments-img">
+						<span class="aio-footer__payments-label">{{ $t('footer.paymentMethods') }}</span>
+						<img :src="img" :alt="$t('footer.paymentMethodsAlt')" class="aio-footer__payments-img">
 					</div>
 				</div>
 
@@ -35,7 +35,7 @@
 				</div>
 
 				<div class="aio-footer__contact">
-					<h3 class="aio-footer__col-title">Contacto</h3>
+					<h3 class="aio-footer__col-title">{{ $t('footer.contact') }}</h3>
 					<ul class="aio-footer__contact-list">
 						<li>
 							<span class="aio-footer__contact-icon"><v-icon size="18">location_on</v-icon></span>
@@ -56,11 +56,11 @@
 			<div class="aio-footer__bar">
 				<p class="aio-footer__copy">{{ copyrightText }}</p>
 				<div class="aio-footer__bar-links">
-					<router-link to="/privacy-policy">Privacidad</router-link>
+					<router-link to="/privacy-policy">{{ $t('footer.privacyShort') }}</router-link>
 					<span class="aio-footer__dot"></span>
-					<router-link to="/term-condition">Términos</router-link>
+					<router-link to="/term-condition">{{ $t('footer.termsShort') }}</router-link>
 					<span class="aio-footer__dot"></span>
-					<router-link to="/contact">Contacto</router-link>
+					<router-link to="/contact">{{ $t('nav.contact') }}</router-link>
 				</div>
 			</div>
 		</v-container>
@@ -88,38 +88,38 @@ export default {
 		linkColumns() {
 			const accountLinks = this.isLoggedIn
 				? [
-					{ label: 'Perfil', to: '/account/profile' },
-					{ label: 'Historial de pedidos', to: '/account/order-history' },
-					{ label: 'Favoritos', to: '/favorites' },
-					{ label: 'Carrito', to: '/cart' },
+					{ label: this.$t('account.profile'), to: '/account/profile' },
+					{ label: this.$t('account.orderHistory'), to: '/account/order-history' },
+					{ label: this.$t('nav.favorites'), to: '/favorites' },
+					{ label: this.$t('nav.cart'), to: '/cart' },
 				]
 				: [
-					{ label: 'Iniciar sesión', to: '/client/login' },
-					{ label: 'Registrarse', to: '/client/register' },
-					{ label: 'Carrito', to: '/cart' },
+					{ label: this.$t('nav.login'), to: '/client/login' },
+					{ label: this.$t('nav.register'), to: '/client/register' },
+					{ label: this.$t('nav.cart'), to: '/cart' },
 				];
 
 			return [
 				{
-					title: 'Ayuda',
+					title: this.$t('footer.help'),
 					links: [
-						{ label: 'Contacto', to: '/contact' },
-						{ label: 'Política de privacidad', to: '/privacy-policy' },
-						{ label: 'Términos y condiciones', to: '/term-condition' },
-						{ label: 'Preguntas frecuentes', to: '/faq' },
+						{ label: this.$t('nav.contact'), to: '/contact' },
+						{ label: this.$t('nav.privacy'), to: '/privacy-policy' },
+						{ label: this.$t('nav.terms'), to: '/term-condition' },
+						{ label: this.$t('nav.faq'), to: '/faq' },
 					],
 				},
 				{
-					title: 'Categorías',
+					title: this.$t('footer.categories'),
 					links: [
-						{ label: 'Accesorios', to: '/products?generalCategoryId=1' },
-						{ label: 'Seguros', to: '/products?generalCategoryId=2' },
-						{ label: 'Rastreo', to: '/products?generalCategoryId=3' },
-						{ label: 'Ver todos', to: '/products' },
+						{ label: this.$t('nav.accessories'), to: '/products?generalCategoryId=1' },
+						{ label: this.$t('nav.insurance'), to: '/products?generalCategoryId=2' },
+						{ label: this.$t('nav.tracking'), to: '/products?generalCategoryId=3' },
+						{ label: this.$t('footer.viewAll'), to: '/products' },
 					],
 				},
 				{
-					title: 'Mi cuenta',
+					title: this.$t('footer.myAccount'),
 					links: accountLinks,
 				},
 			];

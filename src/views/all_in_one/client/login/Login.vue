@@ -147,7 +147,7 @@
 					</label>
 
 					<div class="aio-login-dialog__actions">
-						<button type="button" class="aio-login__secondary" @click="open = false">Cancelar</button>
+						<button type="button" class="aio-login__secondary" @click="open = false">{{ $t('common.cancel') }}</button>
 						<button type="submit" class="aio-login__submit aio-login__submit--compact" :disabled="recoveryLoading">
 							<span v-if="recoveryLoading">Enviando...</span>
 							<span v-else>Enviar enlace</span>

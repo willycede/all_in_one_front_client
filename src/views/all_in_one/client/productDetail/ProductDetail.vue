@@ -22,9 +22,9 @@
 			<div class="aio-product-detail__hero">
 				<v-container>
 					<nav class="aio-product-detail__breadcrumb" aria-label="Breadcrumb">
-						<router-link to="/mainPage">Inicio</router-link>
+						<router-link to="/mainPage">{{ $t('nav.home') }}</router-link>
 						<v-icon size="14">chevron_right</v-icon>
-						<router-link to="/products">Catálogo</router-link>
+						<router-link to="/products">{{ $t('productsPage.catalog') }}</router-link>
 						<v-icon size="14">chevron_right</v-icon>
 						<span>{{ selectedProduct.name }}</span>
 					</nav>
@@ -39,7 +39,7 @@
 						<div class="aio-product-detail__gallery">
 							<div v-if="productImages.length > 1" class="aio-product-detail__thumbs-col">
 								<span class="aio-product-detail__thumbs-label">
-									{{ productImages.length }} fotos
+									{{ $t('productsPage.photos', { count: productImages.length }) }}
 								</span>
 								<div ref="thumbsScroll" class="aio-product-detail__thumbs">
 									<button
@@ -48,7 +48,7 @@
 										type="button"
 										class="aio-product-detail__thumb"
 										:class="{ 'aio-product-detail__thumb--active': selectedImageIndex === index }"
-										:aria-label="`Ver imagen ${index + 1} de ${productImages.length}`"
+										:aria-label="$t('productsPage.viewImage', { index: index + 1, total: productImages.length })"
 										:aria-current="selectedImageIndex === index ? 'true' : 'false'"
 										@click="selectImage(index)"
 									>
@@ -88,7 +88,7 @@
 
 									<div v-if="mainImageError" class="aio-product-detail__main-fallback">
 										<v-icon size="48" color="#A96DFA">image_not_supported</v-icon>
-										<span>Imagen no disponible</span>
+										<span>{{ $t('productsPage.imageUnavailable') }}</span>
 									</div>
 
 									<img
@@ -106,7 +106,7 @@
 										v-if="mainImageLoaded && !mainImageError"
 										type="button"
 										class="aio-product-detail__zoom-btn"
-										aria-label="Ampliar imagen"
+										:aria-label="$t('productsPage.zoomImage')"
 										@click.stop="openLightbox(selectedImageIndex)"
 									>
 										<v-icon size="20" color="white">zoom_in</v-icon>
@@ -122,7 +122,7 @@
 
 								<p v-if="mainImageLoaded && !mainImageError" class="aio-product-detail__zoom-hint">
 									<v-icon size="16">zoom_in</v-icon>
-									Clic en la imagen o en la lupa para ampliar
+									{{ $t('productsPage.zoomHint') }}
 								</p>
 							</div>
 						</div>
@@ -135,13 +135,13 @@
 									class="aio-product-detail__stock"
 									:class="selectedProduct.status ? 'aio-product-detail__stock--in' : 'aio-product-detail__stock--out'"
 								>
-									{{ selectedProduct.status ? 'En stock' : 'Fuera de stock' }}
+									{{ selectedProduct.status ? $t('productsPage.inStock') : $t('productsPage.outOfStock') }}
 								</span>
 							</div>
 
 							<ul class="aio-product-detail__meta">
 								<li>
-									<span>Código</span>
+									<span>{{ $t('productsPage.code') }}</span>
 									<strong>{{ selectedProduct.external_product_id || '—' }}</strong>
 								</li>
 							</ul>
@@ -153,20 +153,20 @@
 							<div v-if="hasRequiredDocuments" class="aio-product-detail__alert">
 								<v-icon size="18">info</v-icon>
 								<p>
-									<strong>Documentos requeridos.</strong>
-									Podrás subirlos en el carrito antes de confirmar tu pedido.
+									<strong>{{ $t('productsPage.requiredDocsTitle') }}</strong>
+									{{ $t('productsPage.requiredDocsHint') }}
 								</p>
 							</div>
 
 							<div class="aio-product-detail__form">
 								<div v-if="selectedProduct.cities && selectedProduct.cities.length > 0" class="aio-product-detail__field">
-									<label>Ciudad</label>
+									<label>{{ $t('productsPage.city') }}</label>
 									<v-select
 										v-model="selectedCity"
 										:items="selectedProduct.cities"
 										item-text="name"
 										item-value="id_city"
-										placeholder="Seleccionar ciudad"
+										:placeholder="$t('productsPage.selectCity')"
 										outlined
 										dense
 										hide-details
@@ -175,16 +175,16 @@
 								</div>
 
 								<div class="aio-product-detail__field aio-product-detail__field--qty">
-									<label>Cantidad</label>
+									<label>{{ $t('common.quantity') }}</label>
 									<div class="aio-product-detail__qty">
-										<button type="button" aria-label="Disminuir" @click="decreaseQty">−</button>
+										<button type="button" :aria-label="$t('productsPage.decreaseQty')" @click="decreaseQty">−</button>
 										<input
 											v-model.number="productQuantity"
 											type="number"
 											min="1"
-											aria-label="Cantidad"
+											:aria-label="$t('common.quantity')"
 										>
-										<button type="button" aria-label="Aumentar" @click="increaseQty">+</button>
+										<button type="button" :aria-label="$t('productsPage.increaseQty')" @click="increaseQty">+</button>
 									</div>
 								</div>
 							</div>
@@ -197,7 +197,7 @@
 									@click="toggleWishlist"
 								>
 									<v-icon size="20">{{ isInWishlist ? 'favorite' : 'favorite_border' }}</v-icon>
-									{{ isInWishlist ? 'En favoritos' : 'Agregar a favoritos' }}
+									{{ isInWishlist ? $t('productsPage.inFavorites') : $t('productsPage.addToFavorites') }}
 								</button>
 								<button
 									v-if="ifItemExistInCart(selectedProduct)"
@@ -206,7 +206,7 @@
 									@click="$router.push('/cart')"
 								>
 									<v-icon size="20">shopping_bag</v-icon>
-									Ver en el carrito
+									{{ $t('productsPage.viewInCart') }}
 								</button>
 								<button
 									v-else
@@ -215,7 +215,7 @@
 									@click="addProductToCart(selectedProduct)"
 								>
 									<v-icon size="20" color="white">add_shopping_cart</v-icon>
-									Agregar al carrito
+									{{ $t('productsPage.addToCart') }}
 								</button>
 							</div>
 						</div>
@@ -226,9 +226,9 @@
 
 		<div v-else class="aio-product-detail__empty">
 			<v-icon size="48" color="#A96DFA">inventory_2</v-icon>
-			<h2>Producto no encontrado</h2>
+			<h2>{{ $t('productsPage.notFound') }}</h2>
 			<router-link to="/products" class="aio-product-detail__btn aio-product-detail__btn--primary">
-				Volver al catálogo
+				{{ $t('productsPage.backToCatalog') }}
 			</router-link>
 		</div>
 
@@ -239,8 +239,8 @@
 			content-class="aio-product-lightbox"
 			@click:outside="closeLightbox"
 		>
-			<div class="aio-product-lightbox__panel" role="dialog" aria-modal="true" :aria-label="`Imagen ampliada: ${selectedProduct?.name || ''}`">
-				<button type="button" class="aio-product-lightbox__close" aria-label="Cerrar" @click="closeLightbox">
+			<div class="aio-product-lightbox__panel" role="dialog" aria-modal="true" :aria-label="$t('productsPage.enlargedImage', { name: selectedProduct?.name || '' })">
+				<button type="button" class="aio-product-lightbox__close" :aria-label="$t('productsPage.lightboxClose')" @click="closeLightbox">
 					<v-icon color="white">close</v-icon>
 				</button>
 
@@ -248,7 +248,7 @@
 					v-if="productImages.length > 1"
 					type="button"
 					class="aio-product-lightbox__nav aio-product-lightbox__nav--prev"
-					aria-label="Imagen anterior"
+					:aria-label="$t('productsPage.prevImage')"
 					@click="lightboxPrev"
 				>
 					<v-icon color="white">chevron_left</v-icon>
@@ -269,7 +269,7 @@
 					>
 					<div v-if="lightboxError" class="aio-product-lightbox__error">
 						<v-icon size="40" color="#A96DFA">broken_image</v-icon>
-						<span>No se pudo cargar la imagen</span>
+						<span>{{ $t('productsPage.lightboxError') }}</span>
 					</div>
 				</div>
 
@@ -277,7 +277,7 @@
 					v-if="productImages.length > 1"
 					type="button"
 					class="aio-product-lightbox__nav aio-product-lightbox__nav--next"
-					aria-label="Imagen siguiente"
+					:aria-label="$t('productsPage.nextImage')"
 					@click="lightboxNext"
 				>
 					<v-icon color="white">chevron_right</v-icon>
@@ -294,10 +294,10 @@
 							type="button"
 							class="aio-product-lightbox__thumb"
 							:class="{ 'aio-product-lightbox__thumb--active': lightboxIndex === index }"
-							:aria-label="`Ver imagen ${index + 1}`"
+							:aria-label="$t('productsPage.viewImage', { index: index + 1, total: productImages.length })"
 							@click="openLightbox(index)"
 						>
-							<img :src="img.url" :alt="`Miniatura ${index + 1}`" loading="lazy">
+							<img :src="img.url" :alt="$t('productsPage.thumbnail', { index: index + 1 })" loading="lazy">
 						</button>
 					</div>
 				</div>
@@ -516,7 +516,7 @@ export default {
 		},
 		addProductToCart(item) {
 			if (item.cities && item.cities.length > 0 && !this.selectedCity) {
-				this.$snotify.error('Por favor selecciona una ciudad', {
+				this.$snotify.error(this.$t('productsPage.selectCityError'), {
 					closeOnClick: false,
 					pauseOnHover: false,
 					timeout: 2000,
@@ -526,7 +526,7 @@ export default {
 			}
 
 			if (!this.productQuantity || this.productQuantity < 1) {
-				this.$snotify.error('Por favor ingresa una cantidad válida', {
+				this.$snotify.error(this.$t('productsPage.invalidQtyError'), {
 					closeOnClick: false,
 					pauseOnHover: false,
 					timeout: 2000,
@@ -560,7 +560,7 @@ export default {
 					uploaded_documents: {},
 				};
 
-				this.$snotify.success('Producto agregado al carrito', {
+				this.$snotify.success(this.$t('productsPage.addedToCart'), {
 					closeOnClick: false,
 					pauseOnHover: false,
 					timeout: 1000,
@@ -571,7 +571,7 @@ export default {
 					this.$store.dispatch('addProductToCart', newProduct);
 				}, 500);
 			} else {
-				this.$snotify.success('Se requiere inicio de sesión para poder agregar productos al carrito.', {
+				this.$snotify.success(this.$t('productsPage.loginRequiredCart'), {
 					closeOnClick: false,
 					pauseOnHover: false,
 					timeout: 4000,
@@ -584,7 +584,7 @@ export default {
 		},
 		toggleWishlist() {
 			if (!isUserLoggedIn()) {
-				this.$snotify.info('Inicia sesión para guardar favoritos', { timeout: 2500 });
+				this.$snotify.info(this.$t('productsPage.favoritesLogin'), { timeout: 2500 });
 				return;
 			}
 
@@ -595,18 +595,18 @@ export default {
 				);
 				if (!favoriteItem) return;
 				this.$store.dispatch('onDeleteProductFromWishlist', favoriteItem)
-					.then(() => this.$snotify.success('Eliminado de favoritos', { timeout: 1500 }));
+					.then(() => this.$snotify.success(this.$t('productsPage.removedFromFavorites'), { timeout: 1500 }));
 				return;
 			}
 
 			this.$store.dispatch('addItemToWishlist', product)
-				.then(() => this.$snotify.success('Agregado a favoritos', { timeout: 1500 }))
+				.then(() => this.$snotify.success(this.$t('productsPage.addedToFavorites'), { timeout: 1500 }))
 				.catch((error) => {
 					const message = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)
-						|| 'No se pudo agregar a favoritos';
-					if (message.includes('ya está en favoritos')) {
+						|| this.$t('productsPage.favoritesError');
+					if (message.includes('ya está en favoritos') || message.toLowerCase().includes('already in favorites')) {
 						this.$store.dispatch('fetchWishlist');
-						this.$snotify.info('Este producto ya está en favoritos', { timeout: 2000 });
+						this.$snotify.info(this.$t('productsPage.alreadyInFavorites'), { timeout: 2000 });
 						return;
 					}
 					this.$snotify.error(message, { timeout: 2500 });

@@ -1,7 +1,7 @@
 <template>
 	<div v-if="generalCategories.length > 0" class="aio-hero">
 		<div class="aio-hero__frame">
-			<button type="button" class="aio-hero__arrow aio-hero__arrow--prev" aria-label="Anterior" @click="prev">
+			<button type="button" class="aio-hero__arrow aio-hero__arrow--prev" :aria-label="$t('hero.prev')" @click="prev">
 				<v-icon>chevron_left</v-icon>
 			</button>
 
@@ -15,17 +15,17 @@
 						<div class="aio-hero__overlay"></div>
 						<div class="aio-hero__container">
 							<div class="aio-hero__content">
-								<span class="aio-hero__eyebrow">Explora nuestras categorías</span>
+								<span class="aio-hero__eyebrow">{{ $t('hero.exploreCategories') }}</span>
 								<h2 class="aio-hero__title">{{ activeCategory.name }}</h2>
 								<p class="aio-hero__desc">
-									Descubre productos y servicios de {{ activeCategory.name.toLowerCase() }} en un solo lugar.
+									{{ $t('hero.categoryDesc', { name: activeCategory.name.toLowerCase() }) }}
 								</p>
 								<button
 									type="button"
 									class="aio-hero__cta"
 									@click="goToProducts(activeCategory.idgeneral_categories)"
 								>
-									Ver productos
+									{{ $t('hero.viewProducts') }}
 									<v-icon size="18">arrow_forward</v-icon>
 								</button>
 							</div>
@@ -34,7 +34,7 @@
 				</transition>
 			</div>
 
-			<button type="button" class="aio-hero__arrow aio-hero__arrow--next" aria-label="Siguiente" @click="next">
+			<button type="button" class="aio-hero__arrow aio-hero__arrow--next" :aria-label="$t('hero.next')" @click="next">
 				<v-icon>chevron_right</v-icon>
 			</button>
 		</div>
@@ -47,7 +47,7 @@
 					type="button"
 					class="aio-hero__dot"
 					:class="{ 'aio-hero__dot--active': index === activeIndex }"
-					:aria-label="`Ir a ${category.name}`"
+					:aria-label="$t('hero.goToCategory', { name: category.name })"
 					@click="goTo(index)"
 				></button>
 			</div>

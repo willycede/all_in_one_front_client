@@ -5,14 +5,14 @@
 				<div class="aio-auth__brand-glow"></div>
 				<div class="aio-auth__brand-content">
 					<img :src="appLogoWhite" alt="All in One" class="aio-auth__brand-logo">
-					<h1 class="aio-auth__brand-title">Únete a All in One</h1>
+					<h1 class="aio-auth__brand-title">{{ $t('signup.brandTitle') }}</h1>
 					<p class="aio-auth__brand-text">
-						Crea tu cuenta y descubre productos y servicios de las mejores empresas en un solo lugar.
+						{{ $t('signup.brandText') }}
 					</p>
 					<ul class="aio-auth__brand-list">
-						<li><v-icon size="18">check_circle</v-icon> Compra segura</li>
-						<li><v-icon size="18">check_circle</v-icon> Historial de pedidos</li>
-						<li><v-icon size="18">check_circle</v-icon> Ofertas exclusivas</li>
+						<li><v-icon size="18">check_circle</v-icon> {{ $t('signup.benefitSecure') }}</li>
+						<li><v-icon size="18">check_circle</v-icon> {{ $t('signup.benefitOrders') }}</li>
+						<li><v-icon size="18">check_circle</v-icon> {{ $t('signup.benefitOffers') }}</li>
 					</ul>
 				</div>
 			</section>
@@ -21,21 +21,21 @@
 				<div class="aio-auth__card">
 					<div class="aio-auth__card-header">
 						<img :src="appLogo" alt="All in One" class="aio-auth__logo-mobile">
-						<h2>Crear cuenta</h2>
-						<p>Completa tus datos para registrarte</p>
+						<h2>{{ $t('signup.title') }}</h2>
+						<p>{{ $t('signup.subtitle') }}</p>
 					</div>
 
 					<form class="aio-auth__form" @submit.prevent="saveDetails">
 						<div class="aio-auth__row">
 							<label class="aio-auth__field">
-								<span class="aio-auth__label">Nombres</span>
+								<span class="aio-auth__label">{{ $t('signup.firstName') }}</span>
 								<div class="aio-auth__input-wrap">
 									<v-icon size="20" class="aio-auth__field-icon">person_outline</v-icon>
 									<input
 										v-model="formData.name_user"
 										type="text"
 										class="aio-auth__input"
-										placeholder="Tu nombre"
+										:placeholder="$t('signup.placeholderFirstName')"
 										autocomplete="given-name"
 									>
 								</div>
@@ -43,14 +43,14 @@
 							</label>
 
 							<label class="aio-auth__field">
-								<span class="aio-auth__label">Apellidos</span>
+								<span class="aio-auth__label">{{ $t('signup.lastName') }}</span>
 								<div class="aio-auth__input-wrap">
 									<v-icon size="20" class="aio-auth__field-icon">person_outline</v-icon>
 									<input
 										v-model="formData.last_name_user"
 										type="text"
 										class="aio-auth__input"
-										placeholder="Tu apellido"
+										:placeholder="$t('signup.placeholderLastName')"
 										autocomplete="family-name"
 									>
 								</div>
@@ -59,14 +59,14 @@
 						</div>
 
 						<label class="aio-auth__field">
-							<span class="aio-auth__label">Cédula</span>
+							<span class="aio-auth__label">{{ $t('signup.idNumber') }}</span>
 							<div class="aio-auth__input-wrap">
 								<v-icon size="20" class="aio-auth__field-icon">badge</v-icon>
 								<input
 									v-model="formData.identification_number"
 									type="text"
 									class="aio-auth__input"
-									placeholder="10 o 13 dígitos"
+									:placeholder="$t('signup.placeholderId')"
 									inputmode="numeric"
 								>
 							</div>
@@ -74,14 +74,14 @@
 						</label>
 
 						<label class="aio-auth__field">
-							<span class="aio-auth__label">Correo electrónico</span>
+							<span class="aio-auth__label">{{ $t('signup.email') }}</span>
 							<div class="aio-auth__input-wrap">
 								<v-icon size="20" class="aio-auth__field-icon">email</v-icon>
 								<input
 									v-model="formData.email"
 									type="email"
 									class="aio-auth__input"
-									placeholder="tu@email.com"
+									:placeholder="$t('signup.placeholderEmail')"
 									autocomplete="email"
 								>
 							</div>
@@ -89,20 +89,20 @@
 						</label>
 
 						<label class="aio-auth__field">
-							<span class="aio-auth__label">Contraseña</span>
+							<span class="aio-auth__label">{{ $t('signup.password') }}</span>
 							<div class="aio-auth__input-wrap">
 								<v-icon size="20" class="aio-auth__field-icon">lock_outline</v-icon>
 								<input
 									v-model="formData.password"
 									:type="showPassword ? 'text' : 'password'"
 									class="aio-auth__input"
-									placeholder="Mínimo 8 caracteres"
+									:placeholder="$t('signup.placeholderPassword')"
 									autocomplete="new-password"
 								>
 								<button
 									type="button"
 									class="aio-auth__toggle-pass"
-									:aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+									:aria-label="showPassword ? $t('auth.hidePassword') : $t('auth.showPassword')"
 									@click="showPassword = !showPassword"
 								>
 									<v-icon size="20">{{ showPassword ? 'visibility_off' : 'visibility' }}</v-icon>
@@ -112,20 +112,20 @@
 						</label>
 
 						<label class="aio-auth__field">
-							<span class="aio-auth__label">Confirmar contraseña</span>
+							<span class="aio-auth__label">{{ $t('signup.confirmPassword') }}</span>
 							<div class="aio-auth__input-wrap">
 								<v-icon size="20" class="aio-auth__field-icon">lock_outline</v-icon>
 								<input
 									v-model="formData.confirm_password"
 									:type="showConfirmPassword ? 'text' : 'password'"
 									class="aio-auth__input"
-									placeholder="Repite tu contraseña"
+									:placeholder="$t('signup.placeholderConfirmPassword')"
 									autocomplete="new-password"
 								>
 								<button
 									type="button"
 									class="aio-auth__toggle-pass"
-									:aria-label="showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+									:aria-label="showConfirmPassword ? $t('auth.hidePassword') : $t('auth.showPassword')"
 									@click="showConfirmPassword = !showConfirmPassword"
 								>
 									<v-icon size="20">{{ showConfirmPassword ? 'visibility_off' : 'visibility' }}</v-icon>
@@ -135,17 +135,17 @@
 						</label>
 
 						<div class="aio-auth__legal">
-							<p class="aio-auth__legal-title">Documentos legales</p>
+							<p class="aio-auth__legal-title">{{ $t('signup.legalTitle') }}</p>
 
 							<div v-if="loadingDocuments" class="aio-auth__legal-status">
 								<v-progress-circular indeterminate size="20" width="2" color="#A96DFA"></v-progress-circular>
-								Cargando documentos legales...
+								{{ $t('signup.loadingDocs') }}
 							</div>
 							<div v-else-if="documentsError" class="aio-auth__legal-status aio-auth__legal-status--error">
-								No se pudieron cargar los documentos legales. Refresca la página o contacta soporte.
+								{{ $t('signup.docsLoadError') }}
 							</div>
 							<div v-else-if="!legalDocuments.length" class="aio-auth__legal-status aio-auth__legal-status--error">
-								No hay documentos legales configurados. El registro está bloqueado hasta que se carguen.
+								{{ $t('signup.noDocsConfigured') }}
 							</div>
 
 							<label
@@ -164,7 +164,7 @@
 									<v-icon v-if="acceptedConsents.includes(doc.document_key)" size="14" color="white">check</v-icon>
 								</span>
 								<span class="aio-auth__consent-text">
-									He leído y acepto la
+									{{ $t('signup.consentPrefix') }}
 									<a
 										:href="buildPdfUrl(doc.file_path)"
 										target="_blank"
@@ -179,14 +179,14 @@
 						</div>
 
 						<button type="submit" class="aio-auth__submit" :disabled="!canSubmit || loading">
-							<span v-if="loading">Registrando...</span>
-							<span v-else>Crear cuenta</span>
+							<span v-if="loading">{{ $t('signup.registering') }}</span>
+							<span v-else>{{ $t('signup.submit') }}</span>
 						</button>
 					</form>
 
 					<p class="aio-auth__footer">
-						¿Ya tienes cuenta?
-						<router-link to="/client/login">Inicia sesión</router-link>
+						{{ $t('signup.hasAccount') }}
+						<router-link to="/client/login">{{ $t('signup.signIn') }}</router-link>
 					</p>
 				</div>
 			</section>
@@ -219,22 +219,36 @@ export default {
 			acceptedConsents: [],
 			loadingDocuments: true,
 			documentsError: false,
-			emailRules: [
-				(v) => !!v || 'El email es requerido',
-				(v) => /.+@.+/.test(v) || 'El email ingresado es incorrecto',
-			],
-			passwordRules: [
-				(v) => !!v || 'La contraseña es requerida',
-				(v) => !(v?.length < 8) || 'La contraseña debe tener más de 8 caracteres',
-			],
-			basicTextRules: [(v) => !!v || 'El campo es requerido'],
-			identificationNumberRules: [
-				(v) => !!v || 'El número de identificación es requerido',
-				(v) => (v?.length === 10 || v?.length === 13) || 'El número de identificación debe tener 10 o 13 caracteres',
-			],
 		};
 	},
 	computed: {
+		emailRules() {
+			return [
+				(v) => !!v || this.$t('signup.emailRequired'),
+				(v) => /.+@.+/.test(v) || this.$t('signup.emailInvalid'),
+			];
+		},
+		passwordRules() {
+			return [
+				(v) => !!v || this.$t('signup.passwordRequired'),
+				(v) => !(v?.length < 8) || this.$t('signup.passwordMinLength'),
+			];
+		},
+		basicTextRules() {
+			return [(v) => !!v || this.$t('signup.fieldRequired')];
+		},
+		identificationNumberRules() {
+			return [
+				(v) => !!v || this.$t('signup.idRequired'),
+				(v) => (v?.length === 10 || v?.length === 13) || this.$t('signup.idInvalid'),
+			];
+		},
+		confirmPasswordRules() {
+			return [
+				(v) => !!v || this.$t('signup.passwordRequired'),
+				(v) => this.formData.password === v || this.$t('signup.passwordMismatch'),
+			];
+		},
 		canSubmit() {
 			if (this.loadingDocuments || this.documentsError) return false;
 			if (!this.legalDocuments.length) return false;
@@ -246,7 +260,7 @@ export default {
 		consentError() {
 			if (!this.submitted) return '';
 			if (this.canSubmit) return '';
-			return 'Debes aceptar los documentos obligatorios para continuar';
+			return this.$t('signup.consentRequired');
 		},
 	},
 	mounted() {
@@ -260,10 +274,7 @@ export default {
 				identification_number: this.identificationNumberRules,
 				email: this.emailRules,
 				password: this.passwordRules,
-				confirm_password: [
-					(v) => !!v || 'La contraseña es requerida',
-					(v) => this.formData.password === v || 'La confirmación debe coincidir con la contraseña',
-				],
+				confirm_password: this.confirmPasswordRules,
 			};
 			return rulesMap[field] || [];
 		},
@@ -298,7 +309,7 @@ export default {
 				});
 		},
 		handleApiError(err) {
-			const defaultErrorMessage = err?.response?.data?.error?.message || 'Ocurrió un error inesperado';
+			const defaultErrorMessage = err?.response?.data?.error?.message || this.$t('signup.unexpectedError');
 			const validationObject = err?.response?.data?.error?.validationObject;
 
 			if (validationObject && Object.keys(validationObject).length > 0) {
@@ -330,7 +341,7 @@ export default {
 				.map((d) => d.document_key);
 			const missing = requiredKeys.filter((k) => !this.acceptedConsents.includes(k));
 			if (missing.length > 0) {
-				this.$snotify.error('Debes aceptar la política y el consentimiento de tratamiento de datos para continuar', {
+				this.$snotify.error(this.$t('signup.consentPolicyRequired'), {
 					closeOnClick: false,
 					pauseOnHover: false,
 					timeout: 2500,
@@ -349,7 +360,7 @@ export default {
 
 			api.post('/api/users/register', payload)
 				.then(() => {
-					this.$snotify.success('Registro exitoso', {
+					this.$snotify.success(this.$t('signup.success'), {
 						closeOnClick: false,
 						pauseOnHover: false,
 						timeout: 2000,

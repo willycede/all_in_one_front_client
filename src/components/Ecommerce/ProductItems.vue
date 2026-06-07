@@ -20,15 +20,15 @@
 			<span class="aio-shop-grid__state-icon">
 				<v-icon size="32" color="#A96DFA">inventory_2</v-icon>
 			</span>
-			<h3>Sin productos</h3>
-			<p>No encontramos productos con los filtros seleccionados.</p>
+			<h3>{{ $t('productsPage.noProducts') }}</h3>
+			<p>{{ $t('productsPage.noProductsFiltered') }}</p>
 		</div>
 
 		<div v-else class="aio-shop-grid__content">
 			<div v-if="isRefreshing || isPageLoading" class="aio-shop-grid__overlay" aria-hidden="true">
 				<div class="aio-shop-grid__overlay-inner">
 					<v-progress-circular indeterminate color="#A96DFA" size="28" width="2"></v-progress-circular>
-					<span>Actualizando...</span>
+					<span>{{ $t('productsPage.refreshing') }}</span>
 				</div>
 			</div>
 
@@ -43,10 +43,10 @@
 			<div v-if="pagination.total > 0" class="aio-account-orders__pagination-wrap">
 				<div class="aio-account-orders__pagination-toolbar">
 					<p class="aio-account-orders__pagination-info">
-						Mostrando {{ rangeStart }}–{{ rangeEnd }} de {{ pagination.total }} productos
+						{{ $t('productsPage.showingProducts', { start: rangeStart, end: rangeEnd, total: pagination.total }) }}
 					</p>
 					<div class="aio-account-orders__page-size">
-						<span class="aio-account-orders__page-size-label">Por página</span>
+						<span class="aio-account-orders__page-size-label">{{ $t('orders.perPage') }}</span>
 						<button
 							v-for="size in pageSizeOptions"
 							:key="size"
@@ -65,13 +65,13 @@
 				<nav
 					v-if="pagination.totalPages > 1"
 					class="aio-account-orders__pagination"
-					aria-label="Paginación del catálogo"
+					:aria-label="$t('productsPage.catalogPagination')"
 				>
 					<button
 						type="button"
 						class="aio-account-orders__page-btn aio-account-orders__page-btn--nav"
 						:disabled="!pagination.hasPrevPage || isPageLoading || isRefreshing"
-						aria-label="Página anterior"
+						:aria-label="$t('orders.pagePrev')"
 						@click="goToPage(pagination.page - 1)"
 					>
 						<v-icon size="20">chevron_left</v-icon>
@@ -102,7 +102,7 @@
 						type="button"
 						class="aio-account-orders__page-btn aio-account-orders__page-btn--nav"
 						:disabled="!pagination.hasNextPage || isPageLoading || isRefreshing"
-						aria-label="Página siguiente"
+						:aria-label="$t('orders.pageNext')"
 						@click="goToPage(pagination.page + 1)"
 					>
 						<v-icon size="20">chevron_right</v-icon>

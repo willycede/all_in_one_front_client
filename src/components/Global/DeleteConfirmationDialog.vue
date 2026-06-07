@@ -7,7 +7,7 @@
 	>
 		<div class="aio-modal aio-modal--confirm" role="dialog" aria-modal="true">
 			<div class="aio-modal__icon aio-modal__icon--danger">
-				<v-icon size="28">delete_outline</v-icon>
+				<v-icon size="28">{{ icon }}</v-icon>
 			</div>
 			<h3 class="aio-modal__title">{{ title }}</h3>
 			<p class="aio-modal__message">{{ message }}</p>
@@ -41,6 +41,10 @@ export default {
 		cancelLabel: {
 			type: String,
 			default: 'Cancelar',
+		},
+		icon: {
+			type: String,
+			default: 'delete_outline',
 		},
 	},
 	data() {

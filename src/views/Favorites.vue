@@ -2,14 +2,14 @@
 	<div class="aio-favorites-page">
 		<div class="aio-favorites-page__hero">
 			<v-container>
-				<nav class="aio-favorites-page__breadcrumb" aria-label="Ruta">
-					<router-link to="/mainPage">Inicio</router-link>
+				<nav class="aio-favorites-page__breadcrumb" aria-label="Breadcrumb">
+					<router-link to="/mainPage">{{ $t('nav.home') }}</router-link>
 					<v-icon size="14">chevron_right</v-icon>
-					<span>Mis favoritos</span>
+					<span>{{ $t('favorites.title') }}</span>
 				</nav>
-				<h1 class="aio-favorites-page__title">Mis favoritos</h1>
+				<h1 class="aio-favorites-page__title">{{ $t('favorites.title') }}</h1>
 				<p class="aio-favorites-page__subtitle">
-					Productos que guardaste para revisar o comprar después.
+					{{ $t('favorites.subtitle') }}
 				</p>
 			</v-container>
 		</div>
@@ -18,27 +18,27 @@
 			<v-container>
 				<div v-if="isLoading" class="aio-favorites-page__loading">
 					<v-progress-circular indeterminate color="#A96DFA" size="40" width="3"></v-progress-circular>
-					<p>Cargando favoritos...</p>
+					<p>{{ $t('favorites.loading') }}</p>
 				</div>
 
 				<div v-else-if="!wishlist.length" class="aio-favorites-page__empty">
 					<div class="aio-favorites-page__empty-icon">
 						<v-icon size="48">favorite_border</v-icon>
 					</div>
-					<h2>Sin favoritos aún</h2>
-					<p>Explora el catálogo y guarda los productos que te interesen.</p>
+					<h2>{{ $t('favorites.empty') }}</h2>
+					<p>{{ $t('favorites.emptyHint') }}</p>
 					<router-link to="/products" class="aio-favorites-page__btn">
 						<v-icon size="18">storefront</v-icon>
-						Explorar productos
+						{{ $t('favorites.explore') }}
 					</router-link>
 				</div>
 
 				<div v-else>
 					<div class="aio-favorites-page__toolbar">
-						<span>{{ wishlist.length }} {{ wishlist.length === 1 ? 'producto' : 'productos' }}</span>
+						<span>{{ wishlist.length }} {{ wishlist.length === 1 ? $t('productsPage.productSingular') : $t('productsPage.productPlural') }}</span>
 						<button type="button" class="aio-favorites-page__btn aio-favorites-page__btn--ghost" @click="addAllToCart">
 							<v-icon size="18">add_shopping_cart</v-icon>
-							Agregar todo al carrito
+							{{ $t('favorites.addAllToCart') }}
 						</button>
 					</div>
 
@@ -56,10 +56,10 @@
 								</p>
 							</div>
 							<div class="aio-favorites-page__actions">
-								<button type="button" class="aio-favorites-page__icon-btn" title="Agregar al carrito" @click="addToCart(item)">
+								<button type="button" class="aio-favorites-page__icon-btn" :title="$t('favorites.addToCart')" @click="addToCart(item)">
 									<v-icon size="20">add_shopping_cart</v-icon>
 								</button>
-								<button type="button" class="aio-favorites-page__icon-btn aio-favorites-page__icon-btn--danger" title="Quitar" @click="removeItem(item)">
+								<button type="button" class="aio-favorites-page__icon-btn aio-favorites-page__icon-btn--danger" :title="$t('favorites.remove')" @click="removeItem(item)">
 									<v-icon size="20">close</v-icon>
 								</button>
 							</div>
@@ -88,7 +88,7 @@ export default {
 		try {
 			await this.$store.dispatch('fetchWishlist');
 		} catch (error) {
-			this.$snotify.error('No se pudieron cargar los favoritos', { timeout: 2500 });
+			this.$snotify.error(this.$t('favorites.loadError'), { timeout: 2500 });
 		} finally {
 			this.isLoading = false;
 		}
@@ -120,23 +120,23 @@ export default {
 				required_documents_array: [],
 				uploaded_documents: {},
 			}).then(() => {
-				this.$snotify.success('Producto agregado al carrito', { timeout: 1500 });
+				this.$snotify.success(this.$t('productsPage.addedToCart'), { timeout: 1500 });
 			});
 		},
 		addAllToCart() {
 			this.$store.dispatch('addAllWishlistItemToCart')
 				.then(() => {
-					this.$snotify.success('Favoritos agregados al carrito', { timeout: 2000 });
+					this.$snotify.success(this.$t('favorites.addAllSuccess'), { timeout: 2000 });
 					this.$router.push('/cart');
 				})
 				.catch(() => {
-					this.$snotify.error('No se pudieron agregar todos los productos', { timeout: 2500 });
+					this.$snotify.error(this.$t('favorites.addAllError'), { timeout: 2500 });
 				});
 		},
 		removeItem(item) {
 			this.$store.dispatch('onDeleteProductFromWishlist', item)
 				.then(() => {
-					this.$snotify.success('Eliminado de favoritos', { timeout: 1500 });
+					this.$snotify.success(this.$t('productsPage.removedFromFavorites'), { timeout: 1500 });
 				});
 		},
 	},

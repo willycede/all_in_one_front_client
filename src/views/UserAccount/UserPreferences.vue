@@ -9,64 +9,110 @@
 
 		<div v-if="isLoading" class="aio-account-panel__loading">
 			<v-progress-circular indeterminate color="#A96DFA" size="36" width="3"></v-progress-circular>
+			<p>{{ $t('common.loading') }}</p>
 		</div>
 
 		<form v-else class="aio-account-preferences__form" @submit.prevent="save">
-			<section class="aio-account-preferences__section">
-				<h3>{{ $t('account.languageCurrency') }}</h3>
-				<v-select
-					v-model="form.locale"
-					:items="localeOptions"
-					item-text="label"
-					item-value="value"
-					:label="$t('account.language')"
-					outlined
-					dense
-				></v-select>
-				<v-select
-					v-model="form.currency"
-					:items="currencyOptions"
-					item-text="label"
-					item-value="value"
-					:label="$t('account.currency')"
-					outlined
-					dense
-				></v-select>
+			<section class="aio-account-preferences__card">
+				<header class="aio-account-preferences__card-head">
+					<span class="aio-account-preferences__card-icon">
+						<v-icon size="22">language</v-icon>
+					</span>
+					<div>
+						<h3>{{ $t('account.languageCurrency') }}</h3>
+						<p>{{ $t('account.languageCurrencyHint') }}</p>
+					</div>
+				</header>
+
+				<div class="aio-account-preferences__grid aio-account-preferences__grid--2">
+					<div class="aio-account-preferences__field">
+						<v-select
+							v-model="form.locale"
+							:items="localeOptions"
+							item-text="label"
+							item-value="value"
+							:label="$t('account.language')"
+							outlined
+							dense
+							hide-details
+							class="aio-account-preferences__select"
+						></v-select>
+					</div>
+					<div class="aio-account-preferences__field">
+						<v-select
+							v-model="form.currency"
+							:items="currencyOptions"
+							item-text="label"
+							item-value="value"
+							:label="$t('account.currency')"
+							outlined
+							dense
+							hide-details
+							class="aio-account-preferences__select"
+						></v-select>
+					</div>
+				</div>
 			</section>
 
-			<section class="aio-account-preferences__section">
-				<h3>{{ $t('account.deliveryDefaults') }}</h3>
-				<v-switch
-					v-model="form.use_delivery_on_orders"
-					:label="$t('account.useDeliveryByDefault')"
-					color="#A96DFA"
-					hide-details
-				></v-switch>
-				<v-text-field
-					v-model="form.default_delivery_recipient"
-					:label="$t('account.recipientName')"
-					outlined
-					dense
-				></v-text-field>
-				<v-text-field
-					v-model="form.default_delivery_phone"
-					:label="$t('account.recipientPhone')"
-					outlined
-					dense
-				></v-text-field>
-				<v-textarea
-					v-model="form.default_delivery_address"
-					:label="$t('account.deliveryAddress')"
-					outlined
-					dense
-					rows="3"
-				></v-textarea>
+			<section class="aio-account-preferences__card">
+				<header class="aio-account-preferences__card-head">
+					<span class="aio-account-preferences__card-icon">
+						<v-icon size="22">local_shipping</v-icon>
+					</span>
+					<div>
+						<h3>{{ $t('account.deliveryDefaults') }}</h3>
+						<p>{{ $t('account.deliveryDefaultsHint') }}</p>
+					</div>
+				</header>
+
+				<div class="aio-account-preferences__switch-row">
+					<v-switch
+						v-model="form.use_delivery_on_orders"
+						:label="$t('account.useDeliveryByDefault')"
+						color="#A96DFA"
+						hide-details
+						class="aio-account-preferences__switch"
+					></v-switch>
+				</div>
+
+				<div
+					v-if="form.use_delivery_on_orders"
+					class="aio-account-preferences__grid aio-account-preferences__grid--delivery"
+				>
+					<v-text-field
+						v-model="form.default_delivery_recipient"
+						:label="$t('account.recipientName')"
+						outlined
+						dense
+						hide-details
+						class="aio-account-preferences__input"
+					></v-text-field>
+					<v-text-field
+						v-model="form.default_delivery_phone"
+						:label="$t('account.recipientPhone')"
+						outlined
+						dense
+						hide-details
+						class="aio-account-preferences__input"
+					></v-text-field>
+					<v-textarea
+						v-model="form.default_delivery_address"
+						:label="$t('account.deliveryAddress')"
+						outlined
+						dense
+						rows="3"
+						hide-details
+						class="aio-account-preferences__input aio-account-preferences__input--full"
+					></v-textarea>
+				</div>
 			</section>
 
-			<button type="submit" class="aio-account-panel__edit-btn" :disabled="isSaving">
-				<v-icon size="18">save</v-icon>
-				{{ isSaving ? $t('account.saving') : $t('account.savePreferences') }}
-			</button>
+			<div class="aio-account-preferences__actions">
+				<button type="submit" class="aio-account-panel__btn aio-account-panel__btn--primary" :disabled="isSaving">
+					<v-icon size="18">save</v-icon>
+					{{ isSaving ? $t('account.saving') : $t('account.savePreferences') }}
+				</button>
+			</div>
 		</form>
 	</div>
 </template>
@@ -125,7 +171,7 @@ export default {
 					};
 				}
 			} catch (error) {
-				this.$snotify.error(getApiErrorMessage(error, 'No se pudieron cargar las preferencias'));
+				this.$snotify.error(getApiErrorMessage(error, this.$t('account.preferencesLoadError')));
 			} finally {
 				this.isLoading = false;
 			}
@@ -142,7 +188,7 @@ export default {
 				applyPreferencesToApp(this.$store, this.$i18n, saved);
 				this.$snotify.success(this.$t('account.preferencesSaved'));
 			} catch (error) {
-				this.$snotify.error(getApiErrorMessage(error, 'No se pudieron guardar las preferencias'));
+				this.$snotify.error(getApiErrorMessage(error, this.$t('account.preferencesSaveError')));
 			} finally {
 				this.isSaving = false;
 			}
@@ -150,22 +196,3 @@ export default {
 	},
 };
 </script>
-
-<style scoped>
-.aio-account-preferences__form {
-	display: grid;
-	gap: 24px;
-}
-.aio-account-preferences__section {
-	background: #fff;
-	border: 1px solid #E8E0F5;
-	border-radius: 16px;
-	padding: 20px;
-	display: grid;
-	gap: 12px;
-}
-.aio-account-preferences__section h3 {
-	margin: 0 0 4px;
-	font-size: 16px;
-}
-</style>

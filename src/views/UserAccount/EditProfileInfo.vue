@@ -2,23 +2,21 @@
 	<div class="aio-account-panel aio-account-form editInfo-wrap">
 		<div class="aio-account-panel__header">
 			<div>
-				<h2 class="aio-account-panel__title">Editar información</h2>
-				<p class="aio-account-panel__subtitle">Actualiza tus datos de contacto y facturación</p>
+				<h2 class="aio-account-panel__title">{{ $t('account.editInfoTitle') }}</h2>
+				<p class="aio-account-panel__subtitle">{{ $t('account.editInfoSubtitle') }}</p>
 			</div>
 		</div>
 
 		<div class="aio-account-panel__notice">
 			<v-icon size="20">info</v-icon>
-			<p>
-				Nombre e identificación no se pueden modificar aquí. Si necesitas cambiarlos, contacta con soporte.
-			</p>
+			<p>{{ $t('account.editInfoNotice') }}</p>
 		</div>
 
 		<v-form ref="form" v-model="valid">
 			<v-layout row wrap>
 				<v-flex xs12 sm6 py-1>
 					<v-text-field
-						label="Identificación (Cédula / RUC)"
+						:label="$t('account.idFieldLabel')"
 						v-model="identification_number"
 						outlined
 						dense
@@ -28,7 +26,7 @@
 				</v-flex>
 				<v-flex xs12 sm6 py-1>
 					<v-text-field
-						label="Nombres / Razón social"
+						:label="$t('account.nameFieldLabel')"
 						v-model="name_user"
 						outlined
 						dense
@@ -38,7 +36,7 @@
 				</v-flex>
 				<v-flex xs12 sm6 py-1>
 					<v-text-field
-						label="Apellidos / Nombre comercial"
+						:label="$t('account.lastNameFieldLabel')"
 						v-model="last_name_user"
 						outlined
 						dense
@@ -48,7 +46,7 @@
 				</v-flex>
 				<v-flex xs12 sm6 py-1>
 					<v-text-field
-						label="Email"
+						:label="$t('account.emailLabel')"
 						:rules="emailRules"
 						v-model="email"
 						outlined
@@ -58,7 +56,7 @@
 				</v-flex>
 				<v-flex xs12 py-1>
 					<v-text-field
-						label="Dirección (Provincia - Ciudad - Dirección)"
+						:label="$t('account.fullAddressLabel')"
 						:rules="addressRules"
 						v-model="address"
 						outlined
@@ -69,7 +67,7 @@
 				<v-flex xs12 py-1>
 					<v-text-field
 						type="password"
-						label="Contraseña (solo si deseas cambiarla)"
+						:label="$t('account.passwordOptional')"
 						:rules="passwordRules"
 						v-model="password"
 						outlined
@@ -79,10 +77,10 @@
 				</v-flex>
 				<v-flex xs12 class="aio-account-panel__actions">
 					<button type="button" class="aio-account-panel__btn aio-account-panel__btn--ghost" @click="goBack">
-						Cancelar
+						{{ $t('common.cancel') }}
 					</button>
 					<button type="button" class="aio-account-panel__btn aio-account-panel__btn--primary" @click.stop.prevent="edit">
-						Guardar cambios
+						{{ $t('account.saveChanges') }}
 					</button>
 				</v-flex>
 			</v-layout>
@@ -97,13 +95,6 @@ export default {
 	data() {
 		return {
 			valid: false,
-			emailRules: [
-				v => !!v || 'El email es requerido',
-				v => /.+@.+/.test(v) || 'El email debe ser válido',
-			],
-			addressRules: [
-				v => !!v || 'La dirección es requerida',
-			],
 			identification_number: '',
 			name_user: '',
 			last_name_user: '',
@@ -113,9 +104,20 @@ export default {
 		};
 	},
 	computed: {
+		emailRules() {
+			return [
+				(v) => !!v || this.$t('account.emailRequired'),
+				(v) => /.+@.+/.test(v) || this.$t('account.emailInvalid'),
+			];
+		},
+		addressRules() {
+			return [
+				(v) => !!v || this.$t('account.addressRequired'),
+			];
+		},
 		passwordRules() {
 			return [
-				v => !v || v.length >= 8 || 'La contraseña debe tener al menos 8 caracteres',
+				(v) => !v || v.length >= 8 || this.$t('account.passwordMinLength'),
 			];
 		},
 	},
@@ -157,7 +159,7 @@ export default {
 					localStorage.setItem('email', user.email);
 				}
 
-				this.$snotify.success('Información actualizada con éxito', {
+				this.$snotify.success(this.$t('account.profileUpdated'), {
 					closeOnClick: false,
 					pauseOnHover: false,
 					timeout: 2000,
@@ -167,7 +169,7 @@ export default {
 					this.$router.push({ path: '/account/profile' });
 				}, 50);
 			} catch (error) {
-				this.$snotify.error('Ocurrió un error inesperado', {
+				this.$snotify.error(this.$t('account.profileUpdateError'), {
 					closeOnClick: false,
 					pauseOnHover: false,
 					timeout: 2000,

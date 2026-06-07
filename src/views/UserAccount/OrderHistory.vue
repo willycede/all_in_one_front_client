@@ -2,37 +2,35 @@
 	<div class="aio-account-panel aio-account-orders order-history-wrap">
 		<div v-if="isLoading" class="aio-account-panel__loading">
 			<v-progress-circular indeterminate color="#A96DFA" size="36" width="3"></v-progress-circular>
-			<p>Cargando tus pedidos...</p>
+			<p>{{ $t('orders.loading') }}</p>
 		</div>
 
 		<template v-else>
 			<div class="aio-account-panel__header">
 				<div>
-					<h2 class="aio-account-panel__title">Historial de pedidos</h2>
+					<h2 class="aio-account-panel__title">{{ $t('orders.title') }}</h2>
 					<p class="aio-account-panel__subtitle">
-						{{ pagination.total }}
-						{{ pagination.total === 1 ? 'pedido registrado' : 'pedidos registrados' }}
+						{{ pagination.total === 1
+							? $t('orders.subtitleOne')
+							: $t('orders.subtitle', { count: pagination.total }) }}
 					</p>
 				</div>
 			</div>
 
 			<div class="aio-account-panel__notice">
 				<v-icon size="20">info</v-icon>
-				<p>
-					Si ya realizaste el pago y la factura no se procesó automáticamente,
-					usa el botón <strong>Reprocesar</strong> en el pedido correspondiente.
-				</p>
+				<p>{{ $t('orders.invoiceNotice') }}</p>
 			</div>
 
 			<div v-if="!tableData.length" class="aio-account-orders__empty">
 				<div class="aio-account-orders__empty-icon">
 					<v-icon size="40">receipt_long</v-icon>
 				</div>
-				<h3>Sin pedidos aún</h3>
-				<p>Cuando compres en la tienda, tus órdenes aparecerán aquí.</p>
+				<h3>{{ $t('orders.empty') }}</h3>
+				<p>{{ $t('orders.emptyHint') }}</p>
 				<router-link to="/products" class="aio-account-panel__edit-btn">
 					<v-icon size="18">storefront</v-icon>
-					Ir a la tienda
+					{{ $t('orders.goToShop') }}
 				</router-link>
 			</div>
 
@@ -45,7 +43,7 @@
 					>
 						<div class="aio-account-orders__card-top">
 							<div>
-								<span class="aio-account-orders__order-id">Orden #{{ item.id_shopping_car }}</span>
+								<span class="aio-account-orders__order-id">{{ $t('orders.orderId', { id: item.id_shopping_car }) }}</span>
 								<span class="aio-account-orders__date">
 									<v-icon size="14">event</v-icon>
 									{{ formatDate(item.created_at) }}
@@ -74,42 +72,42 @@
 								v-if="item.status == 2"
 								type="button"
 								class="aio-account-orders__action aio-account-orders__action--primary"
-								title="Generar nuevo link de pago"
+								:title="$t('orders.payLinkTitle')"
 								@click="openPayment(item)"
 							>
 								<v-icon size="18">payment</v-icon>
-								Pagar
+								{{ $t('orders.pay') }}
 							</button>
 							<button
 								v-if="item.status == 2"
 								type="button"
 								class="aio-account-orders__action aio-account-orders__action--danger"
-								title="Cancelar orden"
+								:title="$t('orders.cancelTitle')"
 								@click="cancelOrder(item)"
 							>
 								<v-icon size="18">cancel</v-icon>
-								Cancelar
+								{{ $t('orders.cancel') }}
 							</button>
 							<button
 								v-if="item.status === 3"
 								type="button"
 								class="aio-account-orders__action aio-account-orders__action--secondary"
-								title="Agregar productos al carrito"
+								:title="$t('orders.repeatTitle')"
 								:disabled="isPageLoading"
 								@click="repeatOrder(item)"
 							>
 								<v-icon size="18">replay</v-icon>
-								Repetir pedido
+								{{ $t('orders.repeat') }}
 							</button>
 							<button
 								v-if="item.status === 3 && item.status_invoice === 0"
 								type="button"
 								class="aio-account-orders__action aio-account-orders__action--secondary"
-								title="Procesar factura"
+								:title="$t('orders.reprocessTitle')"
 								@click="reprocessInvoice(item)"
 							>
 								<v-icon size="18">published_with_changes</v-icon>
-								Reprocesar
+								{{ $t('orders.reprocess') }}
 							</button>
 						</div>
 					</article>
@@ -118,11 +116,11 @@
 				<div class="aio-account-orders__pagination-wrap">
 					<div class="aio-account-orders__pagination-toolbar">
 						<p class="aio-account-orders__pagination-info">
-							Mostrando {{ rangeStart }}–{{ rangeEnd }} de {{ pagination.total }} pedidos
+							{{ $t('orders.showing', { start: rangeStart, end: rangeEnd, total: pagination.total }) }}
 						</p>
 
-						<div class="aio-account-orders__page-size" role="group" aria-label="Pedidos por página">
-							<span class="aio-account-orders__page-size-label">Por página</span>
+						<div class="aio-account-orders__page-size" role="group" :aria-label="$t('orders.perPage')">
+							<span class="aio-account-orders__page-size-label">{{ $t('orders.perPage') }}</span>
 							<button
 								v-for="size in pageSizeOptions"
 								:key="size"
@@ -141,13 +139,13 @@
 					<nav
 						v-if="pagination.totalPages > 1"
 						class="aio-account-orders__pagination"
-						aria-label="Paginación de pedidos"
+						:aria-label="$t('orders.paginationLabel')"
 					>
 						<button
 							type="button"
 							class="aio-account-orders__page-btn aio-account-orders__page-btn--nav"
 							:disabled="!pagination.hasPrevPage || isPageLoading"
-							aria-label="Página anterior"
+							:aria-label="$t('orders.pagePrev')"
 							@click="goToPage(pagination.page - 1)"
 						>
 							<v-icon size="20">chevron_left</v-icon>
@@ -177,7 +175,7 @@
 							type="button"
 							class="aio-account-orders__page-btn aio-account-orders__page-btn--nav"
 							:disabled="!pagination.hasNextPage || isPageLoading"
-							aria-label="Página siguiente"
+							:aria-label="$t('orders.pageNext')"
 							@click="goToPage(pagination.page + 1)"
 						>
 							<v-icon size="20">chevron_right</v-icon>
@@ -186,6 +184,16 @@
 				</div>
 			</template>
 		</template>
+
+		<emb-delete-confirmation
+			ref="cancelOrderDialog"
+			icon="cancel"
+			:title="$t('orders.cancelTitle')"
+			:message="pendingCancelMessage"
+			:confirm-label="$t('orders.cancelConfirmYes')"
+			:cancel-label="$t('common.cancel')"
+			@onConfirm="executeCancelOrder"
+		></emb-delete-confirmation>
 	</div>
 </template>
 
@@ -217,6 +225,7 @@ export default {
 			tableData: [],
 			pagination: emptyPagination(),
 			pageSizeOptions: PAGE_SIZE_OPTIONS,
+			pendingCancelItem: null,
 		};
 	},
 	computed: {
@@ -226,6 +235,10 @@ export default {
 		},
 		rangeEnd() {
 			return Math.min(this.pagination.page * this.pagination.limit, this.pagination.total);
+		},
+		pendingCancelMessage() {
+			if (!this.pendingCancelItem) return '';
+			return this.$t('orders.cancelConfirm', { id: this.pendingCancelItem.id_shopping_car });
 		},
 		pageItems() {
 			const total = this.pagination.totalPages;
@@ -404,20 +417,19 @@ export default {
 				const result = response && response.data && response.data.data;
 				await this.$store.dispatch('syncActiveCart');
 
-				let message = 'Productos agregados al carrito';
+				let message = this.$t('orders.repeatSuccess');
 				if (result && result.itemsAdded) {
-					message = `${result.itemsAdded} producto(s) agregados al carrito`;
+					message = this.$t('orders.repeatSuccessCount', { count: result.itemsAdded });
 				}
 				if (result && result.skipped && result.skipped.length) {
-					message += `. ${result.skipped.length} no disponible(s)`;
+					message += `. ${this.$t('orders.repeatSkipped', { count: result.skipped.length })}`;
 				}
 
 				this.$snotify.success(message, { timeout: 3500 });
 				this.$router.push('/cart');
 			} catch (error) {
 				logApiError('order-history:repeat-order', error);
-				const message = getApiErrorMessage(error, 'No se pudo repetir el pedido');
-				this.$snotify.error(message, { timeout: 4000 });
+				this.$snotify.error(getApiErrorMessage(error, this.$t('orders.repeatError')), { timeout: 4000 });
 			} finally {
 				this.isPageLoading = false;
 			}
@@ -438,21 +450,18 @@ export default {
 					item.url_payphone = response.data.url;
 					await this.$store.dispatch('syncActiveCart');
 					window.open(payUrl, '_blank');
-					this.$snotify.success('Link de pago generado. Se abrió en una nueva pestaña.', {
-						timeout: 3500,
-					});
+					this.$snotify.success(this.$t('orders.payLinkSuccess'), { timeout: 3500 });
 					return;
 				}
 
 				const message = getApiErrorMessage(
 					{ response: { data: response.data } },
-					'No se pudo generar el link de pago'
+					this.$t('orders.payLinkError')
 				);
 				this.$snotify.error(message, { timeout: 7000 });
 			} catch (error) {
 				logApiError('order-history:regenerate-payphone', error);
-				const message = getApiErrorMessage(error, 'No se pudo generar el link de pago');
-				this.$snotify.error(message, { timeout: 7000 });
+				this.$snotify.error(getApiErrorMessage(error, this.$t('orders.payLinkError')), { timeout: 7000 });
 			} finally {
 				this.isPageLoading = false;
 			}
@@ -461,12 +470,12 @@ export default {
 			return `$ ${parseFloat(value || 0).toFixed(2)}`;
 		},
 		formatEstatus(value) {
-			if (value === 2) return 'En pago';
-			if (value === 4) return 'Cancelado';
-			return 'Pagado';
+			if (value === 2) return this.$t('orders.statusPending');
+			if (value === 4) return this.$t('orders.statusCancelled');
+			return this.$t('orders.statusPaid');
 		},
 		formatFacturado(value) {
-			return value === 0 ? 'Sin facturar' : 'Facturado';
+			return value === 0 ? this.$t('orders.invoicePending') : this.$t('orders.invoiceDone');
 		},
 		orderStatusClass(status) {
 			if (status === 2) return 'aio-account-orders__badge--pending';
@@ -478,11 +487,15 @@ export default {
 				? 'aio-account-orders__badge--invoice-pending'
 				: 'aio-account-orders__badge--invoice-done';
 		},
-		async cancelOrder(item) {
-			const confirmed = window.confirm(
-				`¿Cancelar la orden #${item.id_shopping_car}? El enlace de pago dejará de funcionar y recibirás un correo de confirmación.`
-			);
-			if (!confirmed) return;
+		cancelOrder(item) {
+			this.pendingCancelItem = item;
+			this.$refs.cancelOrderDialog.openDialog();
+		},
+		async executeCancelOrder() {
+			this.$refs.cancelOrderDialog.close();
+			const item = this.pendingCancelItem;
+			this.pendingCancelItem = null;
+			if (!item) return;
 
 			this.isPageLoading = true;
 			const params = this.getRequestParams();
@@ -494,7 +507,7 @@ export default {
 				);
 				this.applyOrderResponse(historyDetails && historyDetails.data && historyDetails.data.data);
 				await this.$store.dispatch('syncActiveCart');
-				this.$snotify.success('Orden cancelada. Te enviamos un correo de confirmación.', { timeout: 3500 });
+				this.$snotify.success(this.$t('orders.cancelled'), { timeout: 3500 });
 
 				if (this.tableData.length === 0 && this.pagination.page > 1) {
 					await this.syncRouteQuery(this.pagination.page - 1, this.pagination.limit);
@@ -502,7 +515,7 @@ export default {
 				}
 			} catch (error) {
 				const message = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)
-					|| 'No se pudo cancelar la orden';
+					|| this.$t('orders.cancelError');
 				this.$snotify.error(message, { timeout: 3000 });
 			} finally {
 				this.isPageLoading = false;
@@ -519,10 +532,10 @@ export default {
 					{ params }
 				);
 				this.applyOrderResponse(historyDetails && historyDetails.data && historyDetails.data.data);
-				this.$snotify.success('Factura reprocesada correctamente', { timeout: 2500 });
+				this.$snotify.success(this.$t('orders.reprocessSuccess'), { timeout: 2500 });
 			} catch (error) {
 				const message = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)
-					|| 'No se pudo reprocesar la factura';
+					|| this.$t('orders.reprocessError');
 				this.$snotify.error(message, { timeout: 3000 });
 			} finally {
 				this.isPageLoading = false;

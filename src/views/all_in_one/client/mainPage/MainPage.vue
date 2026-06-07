@@ -22,7 +22,7 @@
 
 		<div class="aio-page-section">
 			<v-container>
-				<emb-product-list secTitle="Productos destacados"></emb-product-list>
+				<emb-product-list :sec-title="$t('homePage.featuredTitle')"></emb-product-list>
 			</v-container>
 		</div>
 	</div>
@@ -38,19 +38,19 @@ export default {
 		embProductList: ProductList,
 		embGeneralCategoriesBanner: GeneralCategoriesBanner,
 	},
-	data() {
-		return {
-			features: [
-				{ icon: 'local_shipping', title: 'Envío disponible', desc: 'Entrega en pedidos seleccionados' },
-				{ icon: 'support_agent', title: 'Soporte', desc: 'Atención al cliente dedicada' },
-				{ icon: 'payment', title: 'Pagos seguros', desc: 'Múltiples métodos de pago' },
-				{ icon: 'verified_user', title: 'Confianza', desc: 'Empresas verificadas en la plataforma' },
-			],
-		};
+	computed: {
+		features() {
+			return [
+				{ icon: 'local_shipping', title: this.$t('homePage.featureShipping'), desc: this.$t('homePage.featureShippingDesc') },
+				{ icon: 'support_agent', title: this.$t('homePage.featureSupport'), desc: this.$t('homePage.featureSupportDesc') },
+				{ icon: 'payment', title: this.$t('homePage.featurePayments'), desc: this.$t('homePage.featurePaymentsDesc') },
+				{ icon: 'verified_user', title: this.$t('homePage.featureTrust'), desc: this.$t('homePage.featureTrustDesc') },
+			];
+		},
 	},
 	async created() {
 		if (this.$route.query.denied === 'admin') {
-			this.$snotify.warning('No tienes permisos de administrador. Usa el login admin.', { timeout: 4000 });
+			this.$snotify.warning(this.$t('homePage.adminDenied'), { timeout: 4000 });
 		}
 		await this.getCompanies();
 		await this.getRandomProducts();

@@ -4,13 +4,13 @@
 			<v-container>
 				<div class="aio-shop__hero-inner">
 					<div>
-						<span class="aio-shop__eyebrow">Catálogo</span>
+						<span class="aio-shop__eyebrow">{{ $t('productsPage.catalogEyebrow') }}</span>
 						<h1 class="aio-shop__title">{{ pageTitle }}</h1>
 						<p class="aio-shop__subtitle">{{ pageSubtitle }}</p>
 					</div>
 					<div v-if="productCount !== null" class="aio-shop__count">
 						<span class="aio-shop__count-num">{{ productCount }}</span>
-						<span class="aio-shop__count-label">{{ productCount === 1 ? 'producto' : 'productos' }}</span>
+						<span class="aio-shop__count-label">{{ productCount === 1 ? $t('productsPage.productSingular') : $t('productsPage.productPlural') }}</span>
 					</div>
 				</div>
 			</v-container>
@@ -62,7 +62,7 @@ export default {
 				);
 				if (match) return match.name;
 			}
-			return 'Todos los productos';
+			return this.$t('productsPage.allProducts');
 		},
 		pageSubtitle() {
 			const parts = [];
@@ -76,12 +76,12 @@ export default {
 				if (match) parts.push(match.name);
 			}
 			if (parts.length) {
-				return `Resultados para ${parts.join(' · ')}`;
+				return this.$t('productsPage.resultsFor', { query: parts.join(' · ') });
 			}
 			if (this.activeCategoryId) {
-				return 'Explora los productos de esta categoría';
+				return this.$t('productsPage.exploreCategory');
 			}
-			return 'Encuentra lo que necesitas en nuestro marketplace';
+			return this.$t('productsPage.marketplaceSubtitle');
 		},
 		productCount() {
 			if (!this.productPagination) return null;
