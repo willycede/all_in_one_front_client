@@ -177,15 +177,13 @@ export default {
           expireIn: 0,
         };
         let detallefinal = "";
-        /*Recorremos detalle para crear plantilla del detalle para modelo de correo */
         for (const item of this.cart) {
-          let totaldetalle = item.details_quantity * item.details_price;
+          const totaldetalle = item.details_quantity * item.details_price;
           detallefinal += HtmlElement.htmldetalle
             .replace("@nombre", item.name)
             .replace("@cantidad", item.details_quantity)
-            .replace("@totaldetalle", "$ " + totaldetalle);
+            .replace("@totaldetalle", "$ " + parseFloat(totaldetalle).toFixed(2));
         }
-        /*fin recorrido*/
 
         console.log(arr_pay);
 
@@ -196,24 +194,20 @@ export default {
         );
         /*validamos si el link de pago se genero correctamente */
         if (urlPayphone.data.errorCode === 200) {
-          /*Remplazamos las variables del formato html para envio de correo */
-
-        this.aesEncrypt(urlPayphone.data.url)
-
-          let html = HtmlElement.html_body
-            .replace("@url_payphone", AppConfig.urlSite+"botonpagomail?urlPago="+urlPayphone.data.url)
-            .replace("@detalle", detallefinal)
-            .replace(
-              "@fecha",
-              new Date().toLocaleDateString() +
-                " " +
-                new Date().toLocaleTimeString()
-            )
-            .replace("@numeroorden", localStorage.id_orden)
-            .replace("@totalcantidad", this.cart.length)
-            .replace("@subtotal", subtotal / 100)
-            .replace("@impuesto", impuesto / 100)
-            .replaceAll("@total", total / 100);
+          const html = HtmlElement.buildOrderPaymentEmail({
+            payUrl: urlPayphone.data.url,
+            siteUrl: AppConfig.siteUrl,
+            logoUrl: AppConfig.emailLogoUrl,
+            customerName: `${localStorage.name_user} ${localStorage.last_name_user}`.trim(),
+            orderNumber: localStorage.id_orden,
+            date: `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`,
+            itemsHtml: detallefinal,
+            itemCount: this.cart.length,
+            subtotal: (subtotal / 100).toFixed(2),
+            tax: (impuesto / 100).toFixed(2),
+            discount: (couponCents / 100).toFixed(2),
+            total: (total / 100).toFixed(2),
+          });
 
             const data_send_mail = {
               html: html,

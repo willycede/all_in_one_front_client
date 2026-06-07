@@ -1,4 +1,15 @@
 //=======================| App Configuration |========================//
+
+const normalizeSiteUrl = (value, fallback) => {
+	const base = (value || fallback || 'http://localhost:8080').replace(/\/+$/, '');
+	return `${base}/`;
+};
+
+const siteUrl = normalizeSiteUrl(
+	process.env.VUE_APP_SITE,
+	process.env.VUE_APP_NODE_ENV === 'production' ? 'https://aioecuador.com' : 'http://localhost:8080'
+);
+
 export default {
 	appLogo: '/static/images/logo/AIO_LOGO_NAME_BLACK&COLOR.png',
 	appLogoFooter: '/static/images/logo/AIO_LOGO_NAME_ALL_WHITE.png',
@@ -21,7 +32,9 @@ export default {
 	},
 	apiUrl: process.env.VUE_APP_NODE_ENV == 'production' ? process.env.VUE_APP_API :  'http://localhost:3500',
 	algoliaApiKey: '6be0576ff61c053d5f9a3225e2a90f76',
-	urlSite: process.env.VUE_APP_NODE_ENV == 'production' ? 'http://localhost:8080/' :  'http://localhost:8080/',
+	siteUrl,
+	urlSite: siteUrl,
+	emailLogoUrl: `${siteUrl}static/images/logo/AIO_LOGO_NAME_ALL_WHITE.png`,
 
 	//configuracion correo
 	FROM_NAME:'',
