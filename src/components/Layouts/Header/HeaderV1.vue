@@ -5,16 +5,16 @@
 			<div class="onsus-topbar">
 				<v-container>
 					<div class="onsus-topbar__inner">
-						<span>Envío disponible en pedidos seleccionados</span>
+						<span>{{ $t('header.topbarShipping') }}</span>
 						<div class="onsus-topbar__links">
 							<template v-if="isLoggedIn">
-								<router-link to="/account/profile">Mi cuenta</router-link>
-								<router-link to="/account/order-history">Mis pedidos</router-link>
-								<button type="button" class="onsus-topbar__logout" @click="onLogout">Cerrar sesión</button>
+								<router-link to="/account/profile">{{ $t('nav.myAccount') }}</router-link>
+								<router-link to="/account/order-history">{{ $t('nav.myOrders') }}</router-link>
+								<button type="button" class="onsus-topbar__logout" @click="onLogout">{{ $t('nav.logout') }}</button>
 							</template>
 							<template v-else>
-								<router-link to="/client/login">Iniciar sesión</router-link>
-								<router-link to="/client/register">Registrarse</router-link>
+								<router-link to="/client/login">{{ $t('nav.login') }}</router-link>
+								<router-link to="/client/register">{{ $t('nav.register') }}</router-link>
 							</template>
 						</div>
 					</div>
@@ -90,29 +90,28 @@ export default {
 				height: AppConfig.logo.height,
 				maxWidth: AppConfig.logo.maxWidth,
 			},
-			userLinks: [
+		};
+	},
+	computed: {
+		userLinks() {
+			return [
 				{
-					icon: 'account_circle',
-					title: 'Perfil Usuario',
+					icon: 'person_outline',
+					title: this.$t('account.profile'),
 					path: '/account/profile',
 				},
 				{
 					icon: 'settings',
-					title: 'Configuración',
+					title: this.$t('account.preferences'),
 					path: '/account/profile',
 				},
 				{
 					icon: 'history',
-					title: 'Historial',
+					title: this.$t('account.orderHistory'),
 					path: '/account/order-history',
 				},
-				{
-					icon: 'power_settings_new',
-					title: 'Salir',
-					path: '/client/login',
-				},
-			],
-		};
+			];
+		},
 	},
 	watch: {
 		$route() {

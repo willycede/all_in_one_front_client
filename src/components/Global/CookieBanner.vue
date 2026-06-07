@@ -6,16 +6,15 @@
                     <v-icon color="white" size="22">cookie</v-icon>
                 </div>
                 <p class="aio-consent__text">
-                    Usamos cookies para mantener tu sesión, recordar tu carrito y mejorar tu experiencia.
-                    Consulta nuestra
-                    <a :href="policyUrl" target="_blank" rel="noopener">política de tratamiento de datos</a>.
+                    {{ $t('cookies.message') }}
+                    <a :href="policyUrl" target="_blank" rel="noopener">{{ $t('cookies.policyLink') }}</a>.
                 </p>
                 <div class="aio-consent__actions">
                     <button type="button" class="aio-consent__btn aio-consent__btn--ghost" @click="reject">
-                        Rechazar
+                        {{ $t('cookies.reject') }}
                     </button>
                     <button type="button" class="aio-consent__btn aio-consent__btn--primary" @click="accept">
-                        Aceptar
+                        {{ $t('cookies.accept') }}
                     </button>
                 </div>
             </div>

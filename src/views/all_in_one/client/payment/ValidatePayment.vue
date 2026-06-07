@@ -21,7 +21,6 @@
 					<h1 class="aio-payment-validate__title">{{ $t('paymentPage.verifying') }}</h1>
 					<p class="aio-payment-validate__text">
 						{{ $t('paymentPage.verifyingHint') }}
-						{{ $t('paymentPage.verifyingHintRedirect') }}
 					</p>
 
 					<ul class="aio-payment-validate__steps">
@@ -29,11 +28,11 @@
 							<span class="aio-payment-validate__step-dot"></span>
 							<span>{{ $t('paymentPage.stepValidating') }}</span>
 						</li>
-						<li class="aio-payment-validate__step">
+						<li class="aio-payment-validate__step" :class="{ 'aio-payment-validate__step--active': confirmingPayment }">
 							<span class="aio-payment-validate__step-dot"></span>
 							<span>{{ $t('paymentPage.stepConfirming') }}</span>
 						</li>
-						<li class="aio-payment-validate__step">
+						<li class="aio-payment-validate__step" :class="{ 'aio-payment-validate__step--active': processingInvoice }">
 							<span class="aio-payment-validate__step-dot"></span>
 							<span>{{ $t('paymentPage.stepReceipt') }}</span>
 						</li>
@@ -49,9 +48,7 @@
 
 					<span class="aio-payment-validate__eyebrow aio-payment-validate__eyebrow--success">{{ $t('paymentPage.paymentConfirmed') }}</span>
 					<h1 class="aio-payment-validate__title">{{ $t('paymentPage.success') }}</h1>
-					<p class="aio-payment-validate__text">
-						{{ $t('paymentPage.successHintRedirect') }}
-					</p>
+					<p class="aio-payment-validate__text">{{ successMessage }}</p>
 
 					<ul class="aio-payment-validate__steps">
 						<li class="aio-payment-validate__step aio-payment-validate__step--done">
@@ -66,9 +63,11 @@
 							</span>
 							<span>{{ $t('paymentPage.stepOrderConfirmed') }}</span>
 						</li>
-						<li class="aio-payment-validate__step aio-payment-validate__step--active">
-							<span class="aio-payment-validate__step-dot"></span>
-							<span>{{ $t('paymentPage.stepReceipt') }}</span>
+						<li class="aio-payment-validate__step" :class="invoiceStepClass">
+							<span class="aio-payment-validate__step-dot">
+								<v-icon v-if="invoiceDone" size="12">check</v-icon>
+							</span>
+							<span>{{ invoiceStepLabel }}</span>
 						</li>
 					</ul>
 				</div>
@@ -100,7 +99,6 @@
 
 <script>
 import api from 'Api';
-import HtmlElement from 'Constants/HtmlMailComprobante';
 import { getApiErrorMessage } from 'Helpers/apiError';
 
 export default {
@@ -109,10 +107,28 @@ export default {
 			cobro: true,
 			pago_exitoso: false,
 			pago_error: false,
+			confirmingPayment: false,
+			processingInvoice: false,
+			invoiceDone: false,
+			invoiceSkipped: false,
+			successMessage: '',
 			errorMessage: '',
 			id: '',
 			clientTransactionId: '',
+			orderId: '',
 		};
+	},
+	computed: {
+		invoiceStepClass() {
+			if (this.invoiceDone) return 'aio-payment-validate__step--done';
+			if (this.invoiceSkipped) return 'aio-payment-validate__step--active';
+			return '';
+		},
+		invoiceStepLabel() {
+			if (this.invoiceDone) return this.$t('paymentPage.stepReceiptDone');
+			if (this.invoiceSkipped) return this.$t('paymentPage.stepReceiptPending');
+			return this.$t('paymentPage.stepReceipt');
+		},
 	},
 	async mounted() {
 		if (this.$route.query && this.$route.query.clientTransactionId) {
@@ -123,14 +139,8 @@ export default {
 			this.id = this.$route.query.id;
 		}
 
-		const orden = this.clientTransactionId.split('@')[0];
-		this.onConfirmaPagoPayphone(this.id, this.clientTransactionId, orden);
-	},
-	watch: {
-		$route(to) {
-			this.clientTransactionId = to.params.clientTransactionId;
-			this.id = to.params.id;
-		},
+		this.orderId = this.clientTransactionId.split('@')[0];
+		this.onConfirmaPagoPayphone(this.id, this.clientTransactionId, this.orderId);
 	},
 	methods: {
 		showPaymentError(message) {
@@ -142,96 +152,57 @@ export default {
 		retryValidation() {
 			this.pago_error = false;
 			this.cobro = true;
-			const orden = this.clientTransactionId.split('@')[0];
-			this.onConfirmaPagoPayphone(this.id, this.clientTransactionId, orden);
+			this.confirmingPayment = false;
+			this.processingInvoice = false;
+			this.onConfirmaPagoPayphone(this.id, this.clientTransactionId, this.orderId);
+		},
+		resolveSuccessMessage(invoice) {
+			if (invoice && invoice.success && !invoice.skipped) {
+				return this.$t('paymentPage.successHintComplete');
+			}
+			if (invoice && invoice.skipped) {
+				return this.$t('paymentPage.successHintInvoicePending');
+			}
+			if (invoice && invoice.success === false) {
+				return this.$t('paymentPage.successHintInvoicePending');
+			}
+			return this.$t('paymentPage.successHintRedirect');
 		},
 		async onConfirmaPagoPayphone(id, clientTxId, orden) {
 			try {
-				const arr_pay_confir = {
-					id: id,
+				this.confirmingPayment = true;
+				const urlPayphone = await api.post('/api/shoppingcar/payphone/confirm', {
+					id,
 					clientId: clientTxId,
-					orden: orden,
-				};
+					orden,
+				});
 
-				const urlPayphone = await api.post(
-					'/api/shoppingcar/payphone/confirm',
-					arr_pay_confir
-				);
-
-				if (urlPayphone.data && urlPayphone.data.errorCode === 200 && urlPayphone.data.success !== false) {
-					await this.$store.dispatch('syncActiveCart');
-					setTimeout(() => {
-						this.cobro = false;
-						this.pago_exitoso = true;
-						this.onProcesarFacturacion(orden);
-					}, 3000);
-				} else {
+				if (!(urlPayphone.data && urlPayphone.data.errorCode === 200 && urlPayphone.data.success !== false)) {
 					const message = (urlPayphone.data && urlPayphone.data.message)
 						|| 'La pasarela no confirmó el pago';
 					this.showPaymentError(message);
+					return;
 				}
+
+				await this.$store.dispatch('syncActiveCart');
+				this.processingInvoice = true;
+
+				const invoice = urlPayphone.data.invoice || null;
+				this.invoiceDone = !!(invoice && invoice.success && !invoice.skipped);
+				this.invoiceSkipped = !!(invoice && (invoice.skipped || invoice.success === false));
+
+				this.cobro = false;
+				this.pago_exitoso = true;
+				this.successMessage = this.resolveSuccessMessage(invoice);
+
+				setTimeout(async () => {
+					await this.$store.dispatch('syncActiveCart');
+					this.$router.push('/account/order-history');
+				}, 3500);
 			} catch (e) {
 				const message = getApiErrorMessage(e, 'Error de conexión al verificar el pago');
 				this.showPaymentError(message);
 			}
-		},
-
-		async onProcesarFacturacion(orden) {
-			let html = '';
-
-			const shopCartFelec = await api.get(
-				'/api/shoppingcar/get_comprobante_electronico/' + localStorage.id_orden
-			);
-
-			const clave = shopCartFelec.data.claveAcceso;
-			const pathpdf = shopCartFelec.data.pathPdf;
-			const pathxml = shopCartFelec.data.pathXml;
-
-			const response = await api.get(`/api/users/${localStorage.id_users}`);
-			if (response && response.data && response.data.data) {
-				const shopCart = await api.get(
-					'/api/shoppingcar/get_shop_by_id/' + localStorage.id_orden
-				);
-
-				const comprobante = shopCart.data.data;
-				const user = response.data.data;
-
-				html = HtmlElement.html_body
-					.replace('@nombre_cliente', user.name_user + ' ' + user.last_name_user)
-					.replace('@valor', comprobante[0].shopping_car_total)
-					.replace('@documento', '001-001-' + ('000000000' + localStorage.id_orden).slice(-9))
-					.replace('@clave', clave)
-					.replace(
-						'@fecha',
-						new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
-					);
-			}
-
-			const arr_invoice = {
-				orden: orden,
-			};
-
-			await api.post(
-				'/api/shoppingcar/payphone/invoice/state',
-				arr_invoice
-			);
-
-			const data_send_mail = {
-				html: html,
-				email: localStorage.email,
-				pathPdf: pathpdf,
-				pathXml: pathxml,
-			};
-
-			api.post(
-				'/api/shoppingcar/sendmail_factura',
-				data_send_mail
-			);
-
-			setTimeout(async () => {
-				await this.$store.dispatch('syncActiveCart');
-				this.$router.push('/account/order-history');
-			}, 3000);
 		},
 	},
 };

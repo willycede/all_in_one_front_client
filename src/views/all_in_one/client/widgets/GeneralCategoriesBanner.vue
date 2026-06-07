@@ -16,9 +16,9 @@
 						<div class="aio-hero__container">
 							<div class="aio-hero__content">
 								<span class="aio-hero__eyebrow">{{ $t('hero.exploreCategories') }}</span>
-								<h2 class="aio-hero__title">{{ activeCategory.name }}</h2>
+								<h2 class="aio-hero__title">{{ localizedCategoryName(activeCategory.name) }}</h2>
 								<p class="aio-hero__desc">
-									{{ $t('hero.categoryDesc', { name: activeCategory.name.toLowerCase() }) }}
+									{{ $t('hero.categoryDesc', { name: localizedCategoryNameLower(activeCategory.name) }) }}
 								</p>
 								<button
 									type="button"
@@ -47,7 +47,7 @@
 					type="button"
 					class="aio-hero__dot"
 					:class="{ 'aio-hero__dot--active': index === activeIndex }"
-					:aria-label="$t('hero.goToCategory', { name: category.name })"
+					:aria-label="$t('hero.goToCategory', { name: localizedCategoryName(category.name) })"
 					@click="goTo(index)"
 				></button>
 			</div>
@@ -62,8 +62,8 @@
 				:class="{ 'aio-hero__thumb--active': index === activeIndex }"
 				@click="goTo(index)"
 			>
-				<img :src="slideImage(category)" :alt="category.name">
-				<span>{{ category.name }}</span>
+				<img :src="slideImage(category)" :alt="localizedCategoryName(category.name)">
+				<span>{{ localizedCategoryName(category.name) }}</span>
 			</button>
 		</div>
 	</div>
@@ -71,6 +71,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
+import { localizedCategoryName, localizedCategoryNameLower } from 'Helpers/localizedCategory';
 
 export default {
 	data() {
@@ -96,6 +97,12 @@ export default {
 	},
 	methods: {
 		...mapActions(['getGeneralCategories']),
+		localizedCategoryName(name) {
+			return localizedCategoryName(this.$i18n, name);
+		},
+		localizedCategoryNameLower(name) {
+			return localizedCategoryNameLower(this.$i18n, name);
+		},
 		slideImage(category) {
 			return `/static/images/generalCategories/${category.name}.jpg`;
 		},

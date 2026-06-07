@@ -79,8 +79,8 @@
 							<span class="aio-admin-badge" :class="statusClass(item.status)">{{ item.statusLabel }}</span>
 						</td>
 						<td>
-							<span class="aio-admin-badge" :class="item.status_invoice === 1 ? 'aio-admin-badge--success' : 'aio-admin-badge--warning'">
-								{{ item.status_invoice === 1 ? $t('adminOrders.invoiceDone') : $t('adminOrders.invoicePending') }}
+							<span class="aio-admin-badge" :class="isOrderInvoicePending(item.status_invoice) ? 'aio-admin-badge--warning' : 'aio-admin-badge--success'">
+								{{ isOrderInvoicePending(item.status_invoice) ? $t('adminOrders.invoicePending') : $t('adminOrders.invoiceDone') }}
 							</span>
 						</td>
 						<td>
@@ -102,7 +102,7 @@
 								{{ $t('adminOrders.cancel') }}
 							</v-btn>
 							<v-btn
-								v-if="item.status === 3 && item.status_invoice === 0"
+								v-if="item.status === 3 && isOrderInvoicePending(item.status_invoice)"
 								small
 								depressed
 								color="primary"
@@ -111,6 +111,27 @@
 							>
 								{{ $t('adminOrders.reprocess') }}
 							</v-btn>
+							<template v-if="item.status === 3 && !isOrderInvoicePending(item.status_invoice)">
+								<v-btn
+									v-if="item.has_invoice_pdf"
+									small
+									depressed
+									class="mr-1"
+									:loading="downloadingKey === `${item.id_shopping_car}-pdf`"
+									@click="downloadInvoice(item, 'pdf')"
+								>
+									{{ $t('adminOrders.downloadPdf') }}
+								</v-btn>
+								<v-btn
+									v-if="item.has_invoice_xml"
+									small
+									depressed
+									:loading="downloadingKey === `${item.id_shopping_car}-xml`"
+									@click="downloadInvoice(item, 'xml')"
+								>
+									{{ $t('adminOrders.downloadXml') }}
+								</v-btn>
+							</template>
 						</td>
 					</tr>
 				</tbody>
@@ -144,6 +165,8 @@
 <script>
 import api from 'Api';
 import { getApiErrorMessage } from 'Helpers/apiError';
+import { isInvoicePending as isOrderInvoicePending } from 'Helpers/invoiceStatus';
+import { downloadAdminInvoice } from 'Helpers/downloadInvoiceFile';
 
 export default {
 	data() {
@@ -156,6 +179,7 @@ export default {
 			orders: [],
 			reprocessingId: null,
 			cancellingId: null,
+			downloadingKey: null,
 			pendingCancelItem: null,
 			pagination: {
 				page: 1,
@@ -177,6 +201,7 @@ export default {
 		this.loadOrders();
 	},
 	methods: {
+		isOrderInvoicePending,
 		statusClass(status) {
 			if (status === 2) return 'aio-admin-badge--warning';
 			if (status === 4) return 'aio-admin-badge--error';
@@ -238,6 +263,16 @@ export default {
 		cancelOrder(item) {
 			this.pendingCancelItem = item;
 			this.$refs.cancelOrderDialog.openDialog();
+		},
+		async downloadInvoice(item, type) {
+			this.downloadingKey = `${item.id_shopping_car}-${type}`;
+			try {
+				await downloadAdminInvoice(item.id_shopping_car, type);
+			} catch (error) {
+				this.$snotify.error(this.$t('adminOrders.downloadError'), { timeout: 4000 });
+			} finally {
+				this.downloadingKey = null;
+			}
 		},
 		async executeCancelOrder() {
 			this.$refs.cancelOrderDialog.close();

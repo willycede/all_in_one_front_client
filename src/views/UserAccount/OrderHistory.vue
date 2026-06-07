@@ -100,7 +100,7 @@
 								{{ $t('orders.repeat') }}
 							</button>
 							<button
-								v-if="item.status === 3 && item.status_invoice === 0"
+								v-if="item.status === 3 && isInvoicePending(item.status_invoice)"
 								type="button"
 								class="aio-account-orders__action aio-account-orders__action--secondary"
 								:title="$t('orders.reprocessTitle')"
@@ -108,6 +108,26 @@
 							>
 								<v-icon size="18">published_with_changes</v-icon>
 								{{ $t('orders.reprocess') }}
+							</button>
+							<button
+								v-if="item.status === 3 && !isInvoicePending(item.status_invoice) && item.has_invoice_pdf"
+								type="button"
+								class="aio-account-orders__action aio-account-orders__action--secondary"
+								:disabled="isPageLoading"
+								@click="downloadInvoice(item, 'pdf')"
+							>
+								<v-icon size="18">picture_as_pdf</v-icon>
+								{{ $t('orders.downloadPdf') }}
+							</button>
+							<button
+								v-if="item.status === 3 && !isInvoicePending(item.status_invoice) && item.has_invoice_xml"
+								type="button"
+								class="aio-account-orders__action aio-account-orders__action--secondary"
+								:disabled="isPageLoading"
+								@click="downloadInvoice(item, 'xml')"
+							>
+								<v-icon size="18">code</v-icon>
+								{{ $t('orders.downloadXml') }}
 							</button>
 						</div>
 					</article>
@@ -201,7 +221,9 @@
 import api from 'Api';
 import moment from 'moment';
 import AppConfig from 'Constants/AppConfig';
+import { isInvoicePending as isOrderInvoicePending } from 'Helpers/invoiceStatus';
 import { getApiErrorMessage, logApiError } from 'Helpers/apiError';
+import { downloadUserInvoice } from 'Helpers/downloadInvoiceFile';
 
 const DEFAULT_PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
@@ -298,6 +320,7 @@ export default {
 		await this.loadOrders(page);
 	},
 	methods: {
+		isInvoicePending: isOrderInvoicePending,
 		parsePage(value) {
 			const page = parseInt(value, 10);
 			return Number.isFinite(page) && page > 0 ? page : 1;
@@ -402,9 +425,7 @@ export default {
 			await this.loadOrders(1, { silent: true });
 		},
 		hasActions(item) {
-			return item.status == 2
-				|| item.status === 3
-				|| (item.status === 3 && item.status_invoice === 0);
+			return item.status == 2 || item.status === 3;
 		},
 		async repeatOrder(item) {
 			this.isPageLoading = true;
@@ -475,7 +496,7 @@ export default {
 			return this.$t('orders.statusPaid');
 		},
 		formatFacturado(value) {
-			return value === 0 ? this.$t('orders.invoicePending') : this.$t('orders.invoiceDone');
+			return isOrderInvoicePending(value) ? this.$t('orders.invoicePending') : this.$t('orders.invoiceDone');
 		},
 		orderStatusClass(status) {
 			if (status === 2) return 'aio-account-orders__badge--pending';
@@ -483,7 +504,7 @@ export default {
 			return 'aio-account-orders__badge--paid';
 		},
 		invoiceStatusClass(statusInvoice) {
-			return statusInvoice === 0
+			return isOrderInvoicePending(statusInvoice)
 				? 'aio-account-orders__badge--invoice-pending'
 				: 'aio-account-orders__badge--invoice-done';
 		},
@@ -537,6 +558,16 @@ export default {
 				const message = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)
 					|| this.$t('orders.reprocessError');
 				this.$snotify.error(message, { timeout: 3000 });
+			} finally {
+				this.isPageLoading = false;
+			}
+		},
+		async downloadInvoice(item, type) {
+			this.isPageLoading = true;
+			try {
+				await downloadUserInvoice(item.id_shopping_car, localStorage.id_users, type);
+			} catch (error) {
+				this.$snotify.error(this.$t('orders.downloadError'), { timeout: 4000 });
 			} finally {
 				this.isPageLoading = false;
 			}

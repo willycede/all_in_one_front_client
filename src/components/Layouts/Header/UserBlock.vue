@@ -39,7 +39,7 @@
 						<span class="aio-user-menu__item-icon">
 							<v-icon size="18">{{ userLink.icon }}</v-icon>
 						</span>
-						<span class="aio-user-menu__item-text">{{ userLink.title }}</span>
+						<span class="aio-user-menu__item-text">{{ resolveLinkTitle(userLink) }}</span>
 						<v-icon size="16" class="aio-user-menu__item-arrow">chevron_right</v-icon>
 					</router-link>
 
@@ -106,6 +106,21 @@ export default {
 		this.refreshAuthState();
 	},
 	methods: {
+		resolveLinkTitle(link) {
+			if (link.titleKey) {
+				return this.$t(link.titleKey);
+			}
+			const byIcon = {
+				person_outline: 'account.profile',
+				account_circle: 'account.profile',
+				settings: 'account.preferences',
+				history: 'account.orderHistory',
+				favorite_border: 'nav.favorites',
+				admin_panel_settings: 'admin.panel',
+			};
+			const key = byIcon[link.icon];
+			return key ? this.$t(key) : link.title;
+		},
 		refreshAuthState() {
 			this.isLoggedIn = isUserLoggedIn();
 			this.isAdmin = isAdminUser();

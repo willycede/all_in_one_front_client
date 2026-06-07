@@ -13,6 +13,7 @@ const AdminProductsAdd = () => import('Views/AdminPanel/ProductsAdd.vue');
 const AdminProductsEdit = () => import('Views/AdminPanel/ProductsEdit.vue');
 const DocumentReview = () => import('Views/AdminPanel/DocumentReview.vue');
 const AdminCoupons = () => import('Views/AdminPanel/Coupons.vue');
+const BillingSettings = () => import('Views/AdminPanel/BillingSettings.vue');
 const PrivacyPolicy = () => import('Views/PrivacyPolicy');
 
 export default {
@@ -50,6 +51,11 @@ export default {
 			path: 'coupons',
 			component: AdminCoupons,
 			name: 'AdminCoupons',
+		},
+		{
+			path: 'billing-settings',
+			component: BillingSettings,
+			name: 'AdminBillingSettings',
 		},
 		{
 			path: 'documents',

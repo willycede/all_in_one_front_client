@@ -63,29 +63,28 @@ export default {
 	data (){
 	   return{
 			appLogo: AppConfig.appLogo,
-			userLinks: [
-				{
-					icon:'account_circle',
-					title: 'Perfil Usuario',
-					path:"/account/profile"
-				},
-				{
-					icon:'settings',
-					title:'Configuración',
-					path:"/account/profile"
-				},
-				{
-					icon:'history',
-					title:'Historial',
-					path:"/account/order-history"
-				},
-				{	
-					icon:'power_settings_new',
-					title: 'Salir',
-					path:"/client/login"
-				}
-			],
 		}
+	},
+	computed: {
+		userLinks() {
+			return [
+				{
+					icon: 'person_outline',
+					title: this.$t('account.profile'),
+					path: '/account/profile',
+				},
+				{
+					icon: 'settings',
+					title: this.$t('account.preferences'),
+					path: '/account/profile',
+				},
+				{
+					icon: 'history',
+					title: this.$t('account.orderHistory'),
+					path: '/account/order-history',
+				},
+			];
+		},
 	},
 	components: {
 		embMenu: Menu,

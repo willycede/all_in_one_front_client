@@ -73,14 +73,37 @@
 						<td>
 							<span
 								class="aio-admin-badge"
-								:class="item.status_invoice === 1 ? 'aio-admin-badge--success' : 'aio-admin-badge--warning'"
+								:class="isOrderInvoicePending(item.status_invoice) ? 'aio-admin-badge--warning' : 'aio-admin-badge--success'"
 							>
-								{{ item.status_invoice === 1 ? $t('adminInvoices.invoicedStatus') : $t('adminInvoices.pendingStatus') }}
+								{{ isOrderInvoicePending(item.status_invoice) ? $t('adminInvoices.pendingStatus') : $t('adminInvoices.invoicedStatus') }}
 							</span>
 						</td>
 						<td class="aio-admin-invoices__actions">
+							<template v-if="!isOrderInvoicePending(item.status_invoice)">
+								<v-btn
+									v-if="item.has_invoice_pdf"
+									small
+									depressed
+									class="mr-1"
+									:loading="downloadingKey === `${item.id_shopping_car}-pdf`"
+									@click="downloadInvoice(item, 'pdf')"
+								>
+									<v-icon left small>picture_as_pdf</v-icon>
+									{{ $t('adminInvoices.downloadPdf') }}
+								</v-btn>
+								<v-btn
+									v-if="item.has_invoice_xml"
+									small
+									depressed
+									:loading="downloadingKey === `${item.id_shopping_car}-xml`"
+									@click="downloadInvoice(item, 'xml')"
+								>
+									<v-icon left small>code</v-icon>
+									{{ $t('adminInvoices.downloadXml') }}
+								</v-btn>
+							</template>
 							<v-btn
-								v-if="item.status_invoice === 0"
+								v-if="isOrderInvoicePending(item.status_invoice)"
 								small
 								depressed
 								color="primary"
@@ -112,6 +135,8 @@
 
 <script>
 import api from 'Api';
+import { isInvoicePending as isOrderInvoicePending } from 'Helpers/invoiceStatus';
+import { downloadAdminInvoice } from 'Helpers/downloadInvoiceFile';
 
 export default {
 	data() {
@@ -122,6 +147,7 @@ export default {
 			statusFilter: 'all',
 			invoices: [],
 			reprocessingId: null,
+			downloadingKey: null,
 			pagination: {
 				page: 1,
 				limit: 10,
@@ -136,6 +162,7 @@ export default {
 		this.loadInvoices();
 	},
 	methods: {
+		isOrderInvoicePending,
 		formatMoney(value) {
 			return (parseFloat(value) || 0).toLocaleString('es-EC', {
 				minimumFractionDigits: 2,
@@ -201,6 +228,16 @@ export default {
 				this.$snotify.error(message, { timeout: 4000 });
 			} finally {
 				this.reprocessingId = null;
+			}
+		},
+		async downloadInvoice(item, type) {
+			this.downloadingKey = `${item.id_shopping_car}-${type}`;
+			try {
+				await downloadAdminInvoice(item.id_shopping_car, type);
+			} catch (error) {
+				this.$snotify.error(this.$t('adminInvoices.downloadError'), { timeout: 4000 });
+			} finally {
+				this.downloadingKey = null;
 			}
 		},
 	},

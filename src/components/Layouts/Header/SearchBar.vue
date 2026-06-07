@@ -33,7 +33,7 @@
 							:aria-selected="!selectedCategory"
 							@click="selectCategory('')"
 						>
-							<span>Todas las categorías</span>
+							<span>{{ $t('header.allCategories') }}</span>
 							<v-icon v-if="!selectedCategory" size="16">check</v-icon>
 						</button>
 						<button
@@ -46,7 +46,7 @@
 							:aria-selected="selectedCategory === String(cat.idgeneral_categories)"
 							@click="selectCategory(String(cat.idgeneral_categories))"
 						>
-							<span>{{ cat.name }}</span>
+							<span>{{ localizedCategoryName(cat.name) }}</span>
 							<v-icon
 								v-if="selectedCategory === String(cat.idgeneral_categories)"
 								size="16"
@@ -60,11 +60,11 @@
 				v-model="query"
 				class="aio-search__input"
 				type="search"
-				placeholder="¿Qué estás buscando?"
-				aria-label="Buscar productos"
+				:placeholder="$t('header.searchPlaceholder')"
+				:aria-label="$t('header.searchProductsAria')"
 			/>
 
-			<button type="submit" class="aio-search__btn" aria-label="Buscar">
+			<button type="submit" class="aio-search__btn" :aria-label="$t('common.search')">
 				<v-icon size="20" color="white">search</v-icon>
 			</button>
 		</div>
@@ -74,6 +74,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { buildCatalogQuery } from 'Helpers/catalogQuery';
+import { localizedCategoryName } from 'Helpers/localizedCategory';
 
 export default {
 	data() {
@@ -86,12 +87,12 @@ export default {
 		...mapGetters(['generalCategories']),
 		selectedCategoryLabel() {
 			if (!this.selectedCategory) {
-				return 'Todas las categorías';
+				return this.$t('header.allCategories');
 			}
 			const match = (this.generalCategories || []).find(
 				(cat) => String(cat.idgeneral_categories) === this.selectedCategory
 			);
-			return match ? match.name : 'Todas las categorías';
+			return match ? this.localizedCategoryName(match.name) : this.$t('header.allCategories');
 		},
 	},
 	async created() {
@@ -100,6 +101,9 @@ export default {
 		}
 	},
 	methods: {
+		localizedCategoryName(name) {
+			return localizedCategoryName(this.$i18n, name);
+		},
 		selectCategory(value) {
 			this.selectedCategory = value;
 		},

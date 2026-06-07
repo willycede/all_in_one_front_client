@@ -224,13 +224,16 @@ export default {
         );
         /*validamos si el link de pago se genero correctamente */
         if (urlPayphone.data.errorCode === 200) {
+          const locale = this.$i18n.locale;
+          const dateTag = String(locale).toLowerCase().startsWith('en') ? 'en-US' : 'es-EC';
           const html = HtmlElement.buildOrderPaymentEmail({
+            locale,
             payUrl: AppConfig.buildOrderPaymentLinkUrl(localStorage.id_orden),
             siteUrl: AppConfig.siteUrl,
             logoUrl: AppConfig.emailLogoUrl,
             customerName: `${localStorage.name_user} ${localStorage.last_name_user}`.trim(),
             orderNumber: localStorage.id_orden,
-            date: `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`,
+            date: new Date().toLocaleString(dateTag),
             itemsHtml: detallefinal,
             itemCount: this.cart.length,
             subtotal: centsToDisplay(payphoneAmounts.amountWithTax + toCents(this.couponDiscount)),
@@ -244,7 +247,7 @@ export default {
               email: localStorage.email,
               name: `${localStorage.name_user} ${localStorage.last_name_user}`,
               order_number: localStorage.id_orden,
-              subject: `ALL IN ONE - Pedido #${localStorage.id_orden}`,
+              subject: HtmlElement.buildOrderPaymentEmailSubject(locale, localStorage.id_orden),
             };
 
             try {

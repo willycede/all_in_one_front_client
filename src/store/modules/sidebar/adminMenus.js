@@ -19,6 +19,12 @@ export const adminPanelMenus = [
 		children: null,
 	},
 	{
+		path: '/admin-panel/billing-settings',
+		labelKey: 'admin.nav.billing',
+		icon: 'settings_suggest',
+		children: null,
+	},
+	{
 		path: '/admin-panel/documents',
 		labelKey: 'admin.nav.documents',
 		icon: 'description',
