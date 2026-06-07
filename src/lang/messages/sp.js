@@ -748,10 +748,16 @@ export default {
 		invoiceAlertAction: 'Ver facturas',
 	},
 	publicPages: {
+		loading: 'Cargando contenido...',
+		loadError: 'No se pudo cargar la información. Intenta de nuevo más tarde.',
+		empty: 'No hay contenido disponible por el momento.',
 		contact: {
 			title: 'Contáctanos',
 			subtitle: 'Comparte tus comentarios con nosotros.',
 			infoTitle: 'Información de contacto',
+			legalName: 'Razón social',
+			ruc: 'RUC',
+			dataProtection: 'Tratamiento de datos',
 			call: 'Teléfono',
 			mail: 'Correo',
 			address: 'Dirección',
@@ -777,7 +783,15 @@ export default {
 		},
 		privacy: {
 			title: 'Política de privacidad',
-			subtitle: 'Tu información está protegida con nosotros.',
+			subtitle: 'Tu información está protegida conforme a la LOPDP de Ecuador.',
+			officialDocsTitle: 'Documentos oficiales en PDF',
+			officialDocsLead: 'Estos son los mismos documentos que aceptas al registrarte en la plataforma.',
+			viewPdf: 'Ver documento PDF',
+			requiredDoc: 'Obligatorio en el registro',
+			companyRuc: 'RUC',
+			companyLegalName: 'Razón social',
+			companyAddress: 'Domicilio legal',
+			dataProtectionEmail: 'Tratamiento de datos',
 		},
 		terms: {
 			title: 'Términos y condiciones',

@@ -2,15 +2,15 @@
 	<div>
 		<gmap-map
 			:center="center"
-			:zoom="7"
-			style="width:100%;  height: 400px;"
-			>
+			:zoom="zoom"
+			style="width:100%; height: 400px;"
+		>
 			<gmap-marker
-				:key="index"
 				v-for="(m, index) in markers"
+				:key="index"
 				:position="m.position"
 				:clickable="true"
-				:draggable="true"
+				:draggable="false"
 			>
 			</gmap-marker>
 		</gmap-map>
@@ -18,18 +18,30 @@
 </template>
 
 <script>
-	export default {
-		name: "GoogleMap",
-		data() {
-			return {
-				center: { lat: 43.039660, lng: -75.085080 },
-				markers: [
-					{
-						label: "Cemetery Street",
-						position: {lat: 43.039660, lng: -75.085080}
-					}, 
-				]	
-			};
-		}
-	}
+const DEFAULT_CENTER = { lat: -0.180653, lng: -78.467838 };
+
+export default {
+	name: 'GoogleMap',
+	props: {
+		mapCenter: {
+			type: Object,
+			default: null,
+		},
+		mapZoom: {
+			type: Number,
+			default: 12,
+		},
+	},
+	computed: {
+		center() {
+			return this.mapCenter || DEFAULT_CENTER;
+		},
+		zoom() {
+			return this.mapZoom || 12;
+		},
+		markers() {
+			return [{ position: this.center }];
+		},
+	},
+};
 </script>

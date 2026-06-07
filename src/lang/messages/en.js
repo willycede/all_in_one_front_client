@@ -748,10 +748,16 @@ export default {
 		invoiceAlertAction: 'View invoices',
 	},
 	publicPages: {
+		loading: 'Loading content...',
+		loadError: 'Could not load the information. Please try again later.',
+		empty: 'No content available at the moment.',
 		contact: {
 			title: 'Contact us',
 			subtitle: 'Share your feedback with us.',
 			infoTitle: 'Contact info',
+			legalName: 'Legal name',
+			ruc: 'Tax ID (RUC)',
+			dataProtection: 'Data protection',
 			call: 'Phone',
 			mail: 'Email',
 			address: 'Address',
@@ -777,7 +783,15 @@ export default {
 		},
 		privacy: {
 			title: 'Privacy policy',
-			subtitle: 'Your information is secure with us.',
+			subtitle: 'Your information is protected under Ecuador\'s LOPDP.',
+			officialDocsTitle: 'Official PDF documents',
+			officialDocsLead: 'These are the same documents you accept when registering on the platform.',
+			viewPdf: 'View PDF document',
+			requiredDoc: 'Required at registration',
+			companyRuc: 'Tax ID (RUC)',
+			companyLegalName: 'Legal name',
+			companyAddress: 'Legal address',
+			dataProtectionEmail: 'Data protection',
 		},
 		terms: {
 			title: 'Terms and conditions',

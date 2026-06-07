@@ -61,9 +61,9 @@ export default {
 	},
 	methods: {
 		getFaq() {
-			api.get('faq.json')
+			api.get('/api/public/faq')
 				.then((response) => {
-					this.faq = (response.data && response.data.faqs) || [];
+					this.faq = (response?.data?.data && response.data.data.faqs) || [];
 				})
 				.catch(() => {
 					this.faq = [];

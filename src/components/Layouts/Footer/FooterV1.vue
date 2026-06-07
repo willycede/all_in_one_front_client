@@ -39,7 +39,7 @@
 					<ul class="aio-footer__contact-list">
 						<li>
 							<span class="aio-footer__contact-icon"><v-icon size="18">location_on</v-icon></span>
-							<span>Ecuador</span>
+							<span>Calle Tercera N.° 116 y Calle E, Ciudadela Nueva, Ecuador</span>
 						</li>
 						<li>
 							<span class="aio-footer__contact-icon"><v-icon size="18">phone</v-icon></span>
