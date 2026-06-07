@@ -2469,29 +2469,61 @@
 	}
 }
 
-// Fixed header
+// Fixed header — barra clara al scroll (iconos y logo visibles)
 .fixed-header-wrap {
-	.header-wrap {
-		background: linear-gradient(90deg, #08080c 0%, #101018 100%) !important;
-		box-shadow: 0 4px 24px rgba($primary, 0.2);
+	.header-wrap.onsus-navbar {
+		background: rgba($base, 0.97) !important;
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+		box-shadow: 0 8px 32px rgba($primary, 0.12);
+		border-bottom: 1px solid rgba($primary, 0.14);
+		min-height: 64px;
+		padding: 0.35rem 0;
+	}
+
+	.onsus-action-btn {
+		&__icon .v-icon {
+			color: $font-color !important;
+		}
+
+		&__label {
+			color: $onsus-text-muted;
+		}
+
+		&:hover &__icon {
+			background: rgba($primary, 0.12);
+		}
+	}
+
+	.onsus-fixed-header__toggle {
+		color: $font-color !important;
+
+		.material-icons {
+			color: $font-color;
+		}
 	}
 
 	.app-nav-list > li {
 		> a,
 		> a.router-link-active,
 		> a.router-link-exact-active {
-			color: rgba($base, 0.9) !important;
+			color: $font-color !important;
 			background: transparent !important;
+			line-height: 48px !important;
 
 			&:hover,
 			&.router-link-exact-active {
-				color: $base !important;
+				color: $primary !important;
+			}
+
+			&:after {
+				border-bottom-color: $accent;
 			}
 		}
 
 		&:last-child > a {
 			background: transparent !important;
-			color: rgba($base, 0.9) !important;
+			color: $font-color !important;
 		}
 	}
 }
@@ -5300,6 +5332,43 @@
 		background: transparent;
 		color: $primary;
 		border: 1px solid rgba($primary, 0.2);
+	}
+}
+
+// ---- Payment redirect (botonpagomail) ----
+.aio-payment-redirect {
+	.aio-payment-validate__card {
+		max-width: 560px;
+	}
+
+	&__brands {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		margin-bottom: 1.75rem;
+		flex-wrap: wrap;
+	}
+
+	&__logo {
+		height: 40px;
+		width: auto;
+		max-width: 160px;
+		object-fit: contain;
+	}
+
+	&__payphone {
+		height: 28px;
+		width: auto;
+		max-width: 120px;
+		object-fit: contain;
+		opacity: 0.9;
+	}
+
+	&__divider {
+		width: 1px;
+		height: 32px;
+		background: linear-gradient(180deg, transparent, rgba($primary, 0.35), transparent);
 	}
 }
 

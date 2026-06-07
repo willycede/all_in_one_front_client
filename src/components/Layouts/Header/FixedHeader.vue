@@ -26,7 +26,7 @@
 							<emb-menu></emb-menu>
 						</div>
 						<div class="layout align-left responsive-menu">
-							<v-btn icon dark @click="toggleMobileSidebar" class="toggle-btn">
+							<v-btn icon class="onsus-fixed-header__toggle toggle-btn" @click="toggleMobileSidebar">
 								<i class="material-icons">menu</i>
 							</v-btn>
 						</div>
@@ -45,9 +45,9 @@ import Cart from './Cart';
 import AppConfig from 'Constants/AppConfig';
 
 export default {
-	data() {
+		data() {
 		return {
-			appLogo: AppConfig.appLogoDark,
+			appLogo: AppConfig.appLogo,
 			logoSize: {
 				height: AppConfig.logo.heightCompact,
 				maxWidth: AppConfig.logo.maxWidthCompact,
