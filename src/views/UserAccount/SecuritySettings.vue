@@ -18,6 +18,19 @@
 				<p>{{ $t('account.securityInfo') }}</p>
 			</div>
 
+			<div class="aio-account-security__card aio-account-security__card--password">
+				<div class="aio-account-security__status">
+					<div>
+						<h3>{{ $t('account.passwordSectionTitle') }}</h3>
+						<p>{{ $t('account.passwordSectionHint') }}</p>
+					</div>
+				</div>
+				<router-link to="/account/change-password" class="aio-account-panel__edit-btn">
+					<v-icon size="18">lock</v-icon>
+					{{ $t('account.changePasswordAction') }}
+				</router-link>
+			</div>
+
 			<div class="aio-account-security__card">
 				<div class="aio-account-security__status">
 					<div>
@@ -172,4 +185,10 @@ export default {
 	},
 };
 </script>
+
+<style scoped>
+.aio-account-security__card--password {
+	margin-bottom: 1rem;
+}
+</style>
 

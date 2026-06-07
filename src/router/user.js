@@ -14,6 +14,7 @@ const EditProfile = () => import ('Views/UserAccount/EditProfile.vue');
 const EditAddress = () => import ('Views/UserAccount/EditAddress.vue');
 const EditProfileInfo = () => import('Views/UserAccount/EditProfileInfo.vue');
 const SecuritySettings = () => import('Views/UserAccount/SecuritySettings.vue');
+const ChangePassword = () => import('Views/UserAccount/ChangePassword.vue');
 const UserPreferences = () => import('Views/UserAccount/UserPreferences.vue');
 const BlogDetail = () => import('Views/Blogs/BlogDetails');
 const ContactUs = () => import('Views/Contact');
@@ -139,6 +140,9 @@ export default {
 				},
 				{
 					path: '/account/security', name: 'SecuritySettings', component: SecuritySettings,
+				},
+				{
+					path: '/account/change-password', name: 'ChangePassword', component: ChangePassword,
 				},
 				{
 					path: '/account/preferences', name: 'UserPreferences', component: UserPreferences,

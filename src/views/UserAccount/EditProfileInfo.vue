@@ -64,16 +64,11 @@
 						hide-details="auto"
 					></v-text-field>
 				</v-flex>
-				<v-flex xs12 py-1>
-					<v-text-field
-						type="password"
-						:label="$t('account.passwordOptional')"
-						:rules="passwordRules"
-						v-model="password"
-						outlined
-						dense
-						hide-details="auto"
-					></v-text-field>
+				<v-flex xs12 class="aio-account-panel__password-link">
+					<router-link to="/account/change-password" class="aio-account-panel__edit-btn">
+						<v-icon size="18">lock</v-icon>
+						{{ $t('account.changePasswordLink') }}
+					</router-link>
 				</v-flex>
 				<v-flex xs12 class="aio-account-panel__actions">
 					<button type="button" class="aio-account-panel__btn aio-account-panel__btn--ghost" @click="goBack">
@@ -100,7 +95,6 @@ export default {
 			last_name_user: '',
 			email: '',
 			address: '',
-			password: '',
 		};
 	},
 	computed: {
@@ -113,11 +107,6 @@ export default {
 		addressRules() {
 			return [
 				(v) => !!v || this.$t('account.addressRequired'),
-			];
-		},
-		passwordRules() {
-			return [
-				(v) => !v || v.length >= 8 || this.$t('account.passwordMinLength'),
 			];
 		},
 	},
@@ -149,9 +138,6 @@ export default {
 					email: this.email,
 					id_users: localStorage.id_users,
 				};
-				if (this.password) {
-					payload.password = this.password;
-				}
 
 				const response = await api.post('/api/users/update', payload);
 				const user = response?.data?.data;
