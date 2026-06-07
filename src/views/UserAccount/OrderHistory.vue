@@ -182,6 +182,7 @@
 import api from 'Api';
 import moment from 'moment';
 import AppConfig from 'Constants/AppConfig';
+import { getApiErrorMessage, logApiError } from 'Helpers/apiError';
 
 const DEFAULT_PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
@@ -394,13 +395,15 @@ export default {
 					return;
 				}
 
-				const message = (response.data && response.data.error && response.data.error.message)
-					|| 'No se pudo generar el link de pago';
-				this.$snotify.error(message, { timeout: 4000 });
+				const message = getApiErrorMessage(
+					{ response: { data: response.data } },
+					'No se pudo generar el link de pago'
+				);
+				this.$snotify.error(message, { timeout: 7000 });
 			} catch (error) {
-				const message = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)
-					|| 'No se pudo generar el link de pago';
-				this.$snotify.error(message, { timeout: 4000 });
+				logApiError('order-history:regenerate-payphone', error);
+				const message = getApiErrorMessage(error, 'No se pudo generar el link de pago');
+				this.$snotify.error(message, { timeout: 7000 });
 			} finally {
 				this.isPageLoading = false;
 			}

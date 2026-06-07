@@ -7,6 +7,7 @@ import HtmlElement from "../constants/HtmlBodyMail";
 import CartDocumentsModal from "../components/Cart/CartDocumentsModal.vue";
 import CartCoupon from "../components/Cart/CartCoupon.vue";
 import { parseRequiredDocuments, formatDocumentName as formatDocLabel } from 'Helpers/documents';
+import { getApiErrorMessage, logApiError } from 'Helpers/apiError';
 
 const key = '82f2ceed4c503896c8a291e560bd4325' // change to your key
 const iv = 'sinasinasisinaaa' // change to your iv
@@ -234,15 +235,17 @@ export default {
             
         } else {
           this.$refs.loadComponent.close();
-          const message = (urlPayphone.data && urlPayphone.data.error && urlPayphone.data.error.message)
-            || 'No se pudo generar el link de pago';
-          this.$snotify.error(message, { timeout: 4000 });
+          const message = getApiErrorMessage(
+            { response: { data: urlPayphone.data } },
+            'No se pudo generar el link de pago'
+          );
+          this.$snotify.error(message, { timeout: 7000 });
         }
       } catch (e) {
         this.$refs.loadComponent.close();
-        const message = (e.response && e.response.data && e.response.data.error && e.response.data.error.message)
-          || 'Error al procesar la orden';
-        this.$snotify.error(message, { timeout: 4000 });
+        logApiError('cart:payphone', e);
+        const message = getApiErrorMessage(e, 'Error al procesar la orden');
+        this.$snotify.error(message, { timeout: 7000 });
       }
     },
     deleteProductFromCart(product) {
