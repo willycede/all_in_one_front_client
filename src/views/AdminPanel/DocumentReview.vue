@@ -4,9 +4,9 @@
 			<div></div>
 			<div class="aio-admin-docs__filters">
 				<v-btn-toggle v-model="statusFilter" mandatory dense @change="onFilterChange">
-					<v-btn value="pending" small>Pendientes</v-btn>
-					<v-btn value="verified" small>Verificados</v-btn>
-					<v-btn value="all" small>Todos</v-btn>
+					<v-btn value="pending" small>{{ $t('adminDocumentReview.filterPending') }}</v-btn>
+					<v-btn value="verified" small>{{ $t('adminDocumentReview.filterVerified') }}</v-btn>
+					<v-btn value="all" small>{{ $t('adminDocumentReview.filterAll') }}</v-btn>
 				</v-btn-toggle>
 			</div>
 		</div>
@@ -18,13 +18,13 @@
 
 		<div v-if="isLoading" class="aio-admin-page__loading aio-admin-card">
 			<v-progress-circular indeterminate color="primary"></v-progress-circular>
-			<span>Cargando documentos...</span>
+			<span>{{ $t('adminDocumentReview.loading') }}</span>
 		</div>
 
 		<div v-else-if="!documents.length" class="aio-admin-page__empty aio-admin-card">
 			<v-icon size="40" color="#A96DFA">description</v-icon>
-			<h3>Sin documentos</h3>
-			<p>No hay documentos en esta categoría.</p>
+			<h3>{{ $t('adminDocumentReview.emptyTitle') }}</h3>
+			<p>{{ $t('adminDocumentReview.emptyHint') }}</p>
 		</div>
 
 		<div v-else class="aio-admin-docs__list">
@@ -39,11 +39,14 @@
 							class="aio-admin-badge"
 							:class="doc.verified ? 'aio-admin-badge--success' : 'aio-admin-badge--warning'"
 						>
-							{{ doc.verified ? 'Verificado' : 'Pendiente' }}
+							{{ doc.verified ? $t('adminDocumentReview.verified') : $t('adminDocumentReview.pending') }}
 						</span>
 						<h3 class="aio-admin-docs__doc-type">{{ formatDocumentName(doc.document_type) }}</h3>
 						<p class="aio-admin-docs__meta">
-							Pedido #{{ doc.id_shopping_car }} · {{ doc.product_name }}
+							{{ $t('adminDocumentReview.orderMeta', {
+								order: doc.id_shopping_car,
+								product: doc.product_name,
+							}) }}
 						</p>
 						<p class="aio-admin-docs__meta">
 							{{ doc.name_user }} {{ doc.last_name_user }} · {{ doc.email }}
@@ -62,7 +65,7 @@
 							rel="noopener noreferrer"
 						>
 							<v-icon left small>open_in_new</v-icon>
-							Ver archivo
+							{{ $t('adminDocumentReview.viewFile') }}
 						</v-btn>
 						<v-btn
 							v-if="!doc.verified"
@@ -71,7 +74,7 @@
 							:loading="processingId === doc.id"
 							@click="verifyDocument(doc, true)"
 						>
-							Aprobar
+							{{ $t('adminDocumentReview.approve') }}
 						</v-btn>
 						<v-btn
 							v-if="!doc.verified"
@@ -81,21 +84,25 @@
 							:loading="processingId === doc.id"
 							@click="openRejectDialog(doc)"
 						>
-							Rechazar
+							{{ $t('adminDocumentReview.reject') }}
 						</v-btn>
 					</div>
 				</div>
 
 				<p v-if="doc.notes" class="aio-admin-docs__notes">
-					<strong>Notas:</strong> {{ doc.notes }}
+					<strong>{{ $t('adminDocumentReview.notesLabel') }}</strong> {{ doc.notes }}
 				</p>
 			</article>
 
 			<div v-if="pagination.totalPages > 1" class="aio-account-orders__pagination-wrap">
 				<p class="aio-account-orders__pagination-info">
-					Página {{ pagination.page }} de {{ pagination.totalPages }} ({{ pagination.total }} documentos)
+					{{ $t('adminDocumentReview.pagination', {
+						page: pagination.page,
+						totalPages: pagination.totalPages,
+						total: pagination.total,
+					}) }}
 				</p>
-				<nav class="aio-account-orders__pagination" aria-label="Paginación documentos">
+				<nav class="aio-account-orders__pagination" :aria-label="$t('adminDocumentReview.paginationLabel')">
 					<button
 						type="button"
 						class="aio-account-orders__page-btn aio-account-orders__page-btn--nav"
@@ -118,12 +125,12 @@
 
 		<v-dialog v-model="rejectDialog" max-width="480">
 			<v-card>
-				<v-card-title>Rechazar documento</v-card-title>
+				<v-card-title>{{ $t('adminDocumentReview.rejectTitle') }}</v-card-title>
 				<v-card-text>
-					<p class="mb-3">Indica el motivo para que el cliente pueda corregirlo.</p>
+					<p class="mb-3">{{ $t('adminDocumentReview.rejectHint') }}</p>
 					<v-textarea
 						v-model="rejectNotes"
-						label="Motivo del rechazo"
+						:label="$t('adminDocumentReview.rejectReasonLabel')"
 						outlined
 						rows="3"
 						hide-details
@@ -131,9 +138,9 @@
 				</v-card-text>
 				<v-card-actions>
 					<v-spacer></v-spacer>
-					<v-btn text @click="rejectDialog = false">Cancelar</v-btn>
+					<v-btn text @click="rejectDialog = false">{{ $t('adminDocumentReview.cancel') }}</v-btn>
 					<v-btn color="error" depressed :loading="processingId !== null" @click="confirmReject">
-						Rechazar
+						{{ $t('adminDocumentReview.reject') }}
 					</v-btn>
 				</v-card-actions>
 			</v-card>
@@ -210,7 +217,7 @@ export default {
 				this.documents = [];
 				this.pagination = emptyPagination();
 				this.errorMessage = error?.response?.data?.error?.message
-					|| 'No se pudieron cargar los documentos. Verifica que tengas sesión de administrador.';
+					|| this.$t('adminDocumentReview.loadError');
 			} finally {
 				this.isLoading = false;
 				this.isPageLoading = false;
@@ -224,12 +231,17 @@ export default {
 			try {
 				await api.put(`/api/product_documents/${doc.id}/verify`, {
 					verified: approved,
-					notes: approved ? 'Documento aprobado' : this.rejectNotes,
+					notes: approved ? this.$t('adminDocumentReview.approvedNote') : this.rejectNotes,
 				});
-				this.$snotify.success(approved ? 'Documento aprobado' : 'Documento rechazado');
+				this.$snotify.success(
+					approved
+						? this.$t('adminDocumentReview.approveSuccess')
+						: this.$t('adminDocumentReview.rejectSuccess')
+				);
 				await this.loadDocuments(this.pagination.page);
 			} catch (error) {
-				const message = error?.response?.data?.error?.message || 'No se pudo actualizar el documento';
+				const message = error?.response?.data?.error?.message
+					|| this.$t('adminDocumentReview.updateError');
 				this.$snotify.error(message);
 			} finally {
 				this.processingId = null;
@@ -246,7 +258,7 @@ export default {
 		confirmReject() {
 			if (!this.selectedDoc) return;
 			if (!this.rejectNotes.trim()) {
-				this.$snotify.warning('Escribe un motivo de rechazo');
+				this.$snotify.warning(this.$t('adminDocumentReview.rejectReasonRequired'));
 				return;
 			}
 			this.verifyDocument(this.selectedDoc, false);

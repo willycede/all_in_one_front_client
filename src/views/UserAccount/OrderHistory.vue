@@ -67,6 +67,20 @@
 							</span>
 						</div>
 
+						<div
+							v-if="item.status === 3 && (item.invoice_number || item.invoice_access_key)"
+							class="aio-account-orders__invoice-info"
+						>
+							<p v-if="item.invoice_number" class="aio-account-orders__invoice-line">
+								<span class="aio-account-orders__invoice-label">{{ $t('orders.invoiceNumber') }}:</span>
+								{{ item.invoice_number }}
+							</p>
+							<p v-if="item.invoice_access_key" class="aio-account-orders__invoice-line">
+								<span class="aio-account-orders__invoice-label">{{ $t('orders.invoiceAccessKey') }}:</span>
+								<code class="aio-account-orders__invoice-key">{{ item.invoice_access_key }}</code>
+							</p>
+						</div>
+
 						<div v-if="hasActions(item)" class="aio-account-orders__actions">
 							<button
 								v-if="item.status == 2"
@@ -575,3 +589,39 @@ export default {
 	},
 };
 </script>
+
+<style scoped>
+.aio-account-orders__invoice-info {
+	margin-top: 0.75rem;
+	padding: 0.75rem 0.875rem;
+	border-radius: 10px;
+	background: rgba(169, 109, 250, 0.06);
+	border: 1px solid rgba(169, 109, 250, 0.12);
+}
+
+.aio-account-orders__invoice-line {
+	margin: 0;
+	font-size: 0.8125rem;
+	color: #374151;
+	line-height: 1.5;
+}
+
+.aio-account-orders__invoice-line + .aio-account-orders__invoice-line {
+	margin-top: 0.35rem;
+}
+
+.aio-account-orders__invoice-label {
+	font-weight: 600;
+	color: #111827;
+}
+
+.aio-account-orders__invoice-key {
+	display: inline-block;
+	margin-top: 0.15rem;
+	padding: 0.15rem 0.35rem;
+	border-radius: 4px;
+	background: rgba(17, 24, 39, 0.06);
+	font-size: 0.75rem;
+	word-break: break-all;
+}
+</style>

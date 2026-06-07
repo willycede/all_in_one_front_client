@@ -3,13 +3,12 @@
 		<div class="aio-admin-product-form__intro">
 			<router-link to="/admin-panel/products" class="aio-admin-product-form__back">
 				<v-icon size="18">arrow_back</v-icon>
-				Volver al listado
+				{{ $t('adminProducts.backToList') }}
 			</router-link>
 			<div class="aio-admin-product-form__intro-text">
-				<span class="aio-admin-product-form__eyebrow">Catálogo · Alta de producto</span>
+				<span class="aio-admin-product-form__eyebrow">{{ $t('adminProducts.addEyebrow') }}</span>
 				<p class="aio-admin-page__subtitle aio-admin-product-form__lead">
-					Completa la información para publicar un producto en la tienda.
-					Los campos marcados con <strong>*</strong> son obligatorios.
+					{{ $t('adminProducts.addLead', { required: '*' }) }}
 				</p>
 			</div>
 		</div>
@@ -27,16 +26,16 @@
 							<v-icon size="20">inventory_2</v-icon>
 						</span>
 						<div>
-							<h3>Información del producto</h3>
-							<p>Nombre, código y descripción que verán los clientes.</p>
+							<h3>{{ $t('adminProducts.sectionInfoTitle') }}</h3>
+							<p>{{ $t('adminProducts.sectionInfoHint') }}</p>
 						</div>
 					</header>
 
 					<div class="aio-admin-product-form__fields">
 						<v-text-field
 							v-model="form.name"
-							label="Nombre del producto *"
-							placeholder="Ej. Seguro vehicular premium"
+							:label="$t('adminProducts.nameLabel')"
+							:placeholder="$t('adminProducts.namePlaceholder')"
 							outlined
 							dense
 							hide-details="auto"
@@ -45,26 +44,26 @@
 
 						<v-text-field
 							v-model="form.cod_products"
-							label="Código / SKU *"
-							placeholder="Ej. PROD-001"
+							:label="$t('adminProducts.skuLabel')"
+							:placeholder="$t('adminProducts.skuPlaceholder')"
 							outlined
 							dense
 							hide-details="auto"
-							hint="Identificador único en el sistema"
+							:hint="$t('adminProducts.skuHint')"
 							persistent-hint
 							:error-messages="fieldErrors.cod_products"
 						></v-text-field>
 
 						<v-textarea
 							v-model="form.description"
-							label="Descripción"
-							placeholder="Describe beneficios, cobertura o características principales..."
+							:label="$t('adminProducts.descriptionLabel')"
+							:placeholder="$t('adminProducts.descriptionPlaceholder')"
 							outlined
 							dense
 							rows="4"
 							hide-details="auto"
 							counter="500"
-							:rules="[v => !v || v.length <= 500 || 'Máximo 500 caracteres']"
+							:rules="[v => !v || v.length <= 500 || $t('adminProducts.descriptionMax')]"
 						></v-textarea>
 					</div>
 				</section>
@@ -75,15 +74,15 @@
 							<v-icon size="20">payments</v-icon>
 						</span>
 						<div>
-							<h3>Precio y descuento</h3>
-							<p>Define el valor de venta y un descuento opcional.</p>
+							<h3>{{ $t('adminProducts.sectionPriceTitle') }}</h3>
+							<p>{{ $t('adminProducts.sectionPriceHint') }}</p>
 						</div>
 					</header>
 
 					<div class="aio-admin-product-form__fields aio-admin-product-form__fields--row">
 						<v-text-field
 							v-model="form.price"
-							label="Precio (USD) *"
+							:label="$t('adminProducts.priceLabel')"
 							type="number"
 							min="0"
 							step="0.01"
@@ -96,7 +95,7 @@
 
 						<v-text-field
 							v-model="form.discount"
-							label="Descuento (USD)"
+							:label="$t('adminProducts.discountLabel')"
 							type="number"
 							min="0"
 							step="0.01"
@@ -104,14 +103,14 @@
 							outlined
 							dense
 							hide-details="auto"
-							hint="Opcional. Debe ser menor al precio."
+							:hint="$t('adminProducts.discountHint')"
 							persistent-hint
 							:error-messages="fieldErrors.discount"
 						></v-text-field>
 					</div>
 
 					<p v-if="previewFinalPrice !== null" class="aio-admin-product-form__price-hint">
-						Precio final en tienda:
+						{{ $t('adminProducts.finalPrice') }}
 						<strong>${{ previewFinalPrice }}</strong>
 					</p>
 				</section>
@@ -122,8 +121,8 @@
 							<v-icon size="20">category</v-icon>
 						</span>
 						<div>
-							<h3>Clasificación en la tienda</h3>
-							<p>Ubica el producto en catálogo y categoría para que aparezca en el marketplace.</p>
+							<h3>{{ $t('adminProducts.sectionClassTitle') }}</h3>
+							<p>{{ $t('adminProducts.sectionClassHint') }}</p>
 						</div>
 					</header>
 
@@ -133,13 +132,13 @@
 							:items="catalogs"
 							item-text="name_catalog"
 							item-value="id_catalog"
-							label="Catálogo *"
-							placeholder="Selecciona un catálogo"
+							:label="$t('adminProducts.catalogLabel')"
+							:placeholder="$t('adminProducts.catalogPlaceholder')"
 							outlined
 							dense
 							hide-details="auto"
 							:loading="loadingOptions"
-							:no-data-text="loadingOptions ? 'Cargando...' : 'Sin catálogos'"
+							:no-data-text="loadingOptions ? $t('adminProducts.loadingOptions') : $t('adminProducts.noCatalogs')"
 							:error-messages="fieldErrors.id_cod_catalog"
 						></v-select>
 
@@ -148,13 +147,13 @@
 							:items="categories"
 							item-text="name"
 							item-value="id_category"
-							label="Categoría *"
-							placeholder="Selecciona una categoría"
+							:label="$t('adminProducts.categoryLabel')"
+							:placeholder="$t('adminProducts.categoryPlaceholder')"
 							outlined
 							dense
 							hide-details="auto"
 							:loading="loadingOptions"
-							:no-data-text="loadingOptions ? 'Cargando...' : 'Sin categorías'"
+							:no-data-text="loadingOptions ? $t('adminProducts.loadingOptions') : $t('adminProducts.noCategories')"
 							:error-messages="fieldErrors.id_category"
 						></v-select>
 					</div>
@@ -166,15 +165,15 @@
 							<v-icon size="20">link</v-icon>
 						</span>
 						<div>
-							<h3>Integración externa</h3>
-							<p>Opcional. ID del producto en un sistema externo (ERP, aseguradora, etc.).</p>
+							<h3>{{ $t('adminProducts.sectionExternalTitle') }}</h3>
+							<p>{{ $t('adminProducts.sectionExternalHint') }}</p>
 						</div>
 					</header>
 
 					<v-text-field
 						v-model="form.external_product_id"
-						label="ID externo"
-						placeholder="Ej. EXT-12345"
+						:label="$t('adminProducts.externalIdLabel')"
+						:placeholder="$t('adminProducts.externalIdPlaceholder')"
 						outlined
 						dense
 						hide-details="auto"
@@ -198,7 +197,7 @@
 						:disabled="isSubmitting"
 						@click="discardChanges"
 					>
-						Descartar
+						{{ $t('adminProducts.discard') }}
 					</v-btn>
 					<v-btn
 						type="submit"
@@ -208,26 +207,26 @@
 						:disabled="!canSubmit"
 					>
 						<v-icon left>publish</v-icon>
-						Publicar producto
+						{{ $t('adminProducts.publish') }}
 					</v-btn>
 				</div>
 			</div>
 
 			<aside class="aio-admin-product-form__aside">
 				<div class="aio-admin-card aio-admin-product-form__preview">
-					<span class="aio-admin-product-form__preview-label">Vista previa en tienda</span>
+					<span class="aio-admin-product-form__preview-label">{{ $t('adminProducts.previewLabel') }}</span>
 
 					<div class="aio-admin-product-form__preview-card">
 						<div class="aio-admin-product-form__preview-image">
-							<img v-if="coverPreview" :src="coverPreview" alt="Vista previa" class="aio-admin-product-form__preview-img">
+							<img v-if="coverPreview" :src="coverPreview" alt="" class="aio-admin-product-form__preview-img">
 							<v-icon v-else size="48" color="#A96DFA">image</v-icon>
 						</div>
 						<div class="aio-admin-product-form__preview-body">
 							<p class="aio-admin-product-form__preview-name">
-								{{ form.name || 'Nombre del producto' }}
+								{{ form.name || $t('adminProducts.previewNameFallback') }}
 							</p>
 							<p class="aio-admin-product-form__preview-category">
-								{{ selectedCategoryName || 'Categoría' }}
+								{{ selectedCategoryName || $t('adminProducts.previewCategoryFallback') }}
 							</p>
 							<p class="aio-admin-product-form__preview-price">
 								${{ previewFinalPrice !== null ? previewFinalPrice : '0.00' }}
@@ -236,32 +235,32 @@
 					</div>
 
 					<p class="aio-admin-product-form__preview-note">
-						Así se verá la tarjeta en el catálogo público.
+						{{ $t('adminProducts.previewNote') }}
 					</p>
 				</div>
 
 				<div class="aio-admin-card aio-admin-product-form__checklist">
-					<h4>Checklist de publicación</h4>
+					<h4>{{ $t('adminProducts.checklistTitle') }}</h4>
 					<ul>
 						<li :class="{ 'aio-admin-product-form__check--done': !!form.name }">
 							<v-icon size="16">{{ form.name ? 'check_circle' : 'radio_button_unchecked' }}</v-icon>
-							Nombre definido
+							{{ $t('adminProducts.checkName') }}
 						</li>
 						<li :class="{ 'aio-admin-product-form__check--done': !!form.cod_products }">
 							<v-icon size="16">{{ form.cod_products ? 'check_circle' : 'radio_button_unchecked' }}</v-icon>
-							Código / SKU
+							{{ $t('adminProducts.checkSku') }}
 						</li>
 						<li :class="{ 'aio-admin-product-form__check--done': isPriceValid }">
 							<v-icon size="16">{{ isPriceValid ? 'check_circle' : 'radio_button_unchecked' }}</v-icon>
-							Precio válido
+							{{ $t('adminProducts.checkPrice') }}
 						</li>
 						<li :class="{ 'aio-admin-product-form__check--done': !!form.id_cod_catalog }">
 							<v-icon size="16">{{ form.id_cod_catalog ? 'check_circle' : 'radio_button_unchecked' }}</v-icon>
-							Catálogo asignado
+							{{ $t('adminProducts.checkCatalog') }}
 						</li>
 						<li :class="{ 'aio-admin-product-form__check--done': !!form.id_category }">
 							<v-icon size="16">{{ form.id_category ? 'check_circle' : 'radio_button_unchecked' }}</v-icon>
-							Categoría asignada
+							{{ $t('adminProducts.checkCategory') }}
 						</li>
 					</ul>
 				</div>
@@ -349,7 +348,7 @@ export default {
 				this.categories = (categoryRes.data && categoryRes.data.data) || [];
 			} catch (error) {
 				this.loadError = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)
-					|| 'No se pudieron cargar catálogos y categorías.';
+					|| this.$t('adminProducts.optionsLoadError');
 			} finally {
 				this.loadingOptions = false;
 			}
@@ -357,24 +356,24 @@ export default {
 		validateClientSide() {
 			const errors = {};
 			if (!this.form.name || !String(this.form.name).trim()) {
-				errors.name = 'El nombre es obligatorio';
+				errors.name = this.$t('adminProducts.errors.nameRequired');
 			}
 			if (!this.form.cod_products || !String(this.form.cod_products).trim()) {
-				errors.cod_products = 'El código es obligatorio';
+				errors.cod_products = this.$t('adminProducts.errors.skuRequired');
 			}
 			if (!this.form.id_cod_catalog) {
-				errors.id_cod_catalog = 'Selecciona un catálogo';
+				errors.id_cod_catalog = this.$t('adminProducts.errors.catalogRequired');
 			}
 			if (!this.form.id_category) {
-				errors.id_category = 'Selecciona una categoría';
+				errors.id_category = this.$t('adminProducts.errors.categoryRequired');
 			}
 			const price = parseFloat(this.form.price);
 			const discount = parseFloat(this.form.discount) || 0;
 			if (!Number.isFinite(price) || price <= 0) {
-				errors.price = 'El precio debe ser mayor a 0';
+				errors.price = this.$t('adminProducts.errors.priceInvalid');
 			}
 			if (Number.isFinite(price) && discount >= price) {
-				errors.discount = 'El descuento debe ser menor al precio';
+				errors.discount = this.$t('adminProducts.errors.discountInvalid');
 			}
 			this.fieldErrors = errors;
 			return Object.keys(errors).length === 0;
@@ -395,7 +394,7 @@ export default {
 		},
 		async submitProduct() {
 			if (!this.validateClientSide()) {
-				this.$snotify.warning('Revisa los campos marcados antes de continuar.', { timeout: 3000 });
+				this.$snotify.warning(this.$t('adminProducts.validationReview'), { timeout: 3000 });
 				return;
 			}
 
@@ -407,11 +406,11 @@ export default {
 				if (productId && this.$refs.imagesSection) {
 					await this.$refs.imagesSection.uploadPending(productId);
 				}
-				this.$snotify.success('Producto publicado correctamente', { timeout: 2500 });
+				this.$snotify.success(this.$t('adminProducts.createSuccess'), { timeout: 2500 });
 				this.$router.push('/admin-panel/products');
 			} catch (error) {
 				const message = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)
-					|| 'No se pudo crear el producto';
+					|| this.$t('adminProducts.createError');
 				this.$snotify.error(message, { timeout: 4000 });
 			} finally {
 				this.isSubmitting = false;
@@ -515,14 +514,6 @@ export default {
 
 .aio-admin-product-form__section-icon .v-icon {
 	color: #A96DFA !important;
-}
-
-.aio-admin-product-form__section-icon--muted {
-	background: rgba(107, 114, 128, 0.1);
-}
-
-.aio-admin-product-form__section-icon--muted .v-icon {
-	color: #6b7280 !important;
 }
 
 .aio-admin-product-form__fields {

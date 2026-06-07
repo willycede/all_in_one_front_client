@@ -5,6 +5,17 @@
 			{{ loadError }}
 		</div>
 
+		<div v-if="invoiceAlertCount > 0" class="aio-admin-alert-banner mb-4">
+			<v-icon color="warning" class="mr-2">warning_amber</v-icon>
+			<div>
+				<strong>{{ $t('adminReports.invoiceAlertTitle', { count: invoiceAlertCount }) }}</strong>
+				<p>{{ $t('adminReports.invoiceAlertHint') }}</p>
+			</div>
+			<v-btn small outlined color="primary" to="/admin-panel/invoices">
+				{{ $t('adminReports.invoiceAlertAction') }}
+			</v-btn>
+		</div>
+
 		<div class="aio-admin-stats">
 			<div v-for="stat in stats" :key="stat.label" class="aio-admin-card aio-admin-stat">
 				<div class="aio-admin-stat__icon">
@@ -21,6 +32,13 @@
 		</div>
 
 		<template v-else>
+			<div class="aio-admin-reports-toolbar mb-4">
+				<v-btn outlined color="primary" depressed @click="exportCsv">
+					<v-icon left small>download</v-icon>
+					{{ $t('adminReports.exportCsv') }}
+				</v-btn>
+			</div>
+
 			<div class="aio-admin-reports-grid">
 				<div class="aio-admin-card pa-4">
 					<div class="aio-admin-page__header" style="margin-bottom: 1rem;">
@@ -186,6 +204,7 @@ export default {
 			weeklyTrend: [],
 			categorySales: [],
 			restockSuggestions: [],
+			invoiceAlertCount: 0,
 		};
 	},
 	async mounted() {
@@ -251,11 +270,91 @@ export default {
 					...row,
 					total: this.formatMoney(row.revenue),
 				}));
+
+				this.invoiceAlertCount = Number(data.invoiceAlertCount || data.invoiceErrors || 0);
 			} catch (error) {
 				this.loadError = this.$t('adminReports.loadError');
 			} finally {
 				this.isLoading = false;
 			}
+		},
+		csvEscape(value) {
+			const text = value == null ? '' : String(value);
+			if (/[",\n]/.test(text)) {
+				return `"${text.replace(/"/g, '""')}"`;
+			}
+			return text;
+		},
+		exportCsv() {
+			const lines = [];
+			const pushSection = (title, headers, rows) => {
+				lines.push(this.csvEscape(title));
+				lines.push(headers.map((header) => this.csvEscape(header)).join(','));
+				rows.forEach((row) => {
+					lines.push(row.map((cell) => this.csvEscape(cell)).join(','));
+				});
+				lines.push('');
+			};
+
+			pushSection(
+				this.$t('adminReports.exportSummary'),
+				[this.$t('adminReports.exportMetric'), this.$t('adminReports.exportValue')],
+				this.stats.map((stat) => [stat.label, stat.value])
+			);
+
+			pushSection(
+				this.$t('adminReports.topProductsTitle'),
+				[
+					this.$t('adminReports.productColumn'),
+					this.$t('adminReports.unitsColumn'),
+					this.$t('adminReports.revenueColumn'),
+				],
+				this.topProducts.map((row) => [row.name, row.units_sold, row.total])
+			);
+
+			pushSection(
+				this.$t('adminReports.trendsTitle'),
+				[
+					this.$t('adminReports.weekColumn'),
+					this.$t('adminReports.ordersColumn'),
+					this.$t('adminReports.revenueColumn'),
+				],
+				this.weeklyTrend.map((row) => [row.week_key, row.orders_count, row.total])
+			);
+
+			pushSection(
+				this.$t('adminReports.categoriesTitle'),
+				[
+					this.$t('adminReports.categoryColumn'),
+					this.$t('adminReports.unitsColumn'),
+					this.$t('adminReports.revenueColumn'),
+				],
+				this.categorySales.map((row) => [row.category_name, row.units_sold, row.total])
+			);
+
+			pushSection(
+				this.$t('adminReports.recentOrdersTitle'),
+				[
+					this.$t('adminReports.orderColumn'),
+					this.$t('adminReports.customerColumn'),
+					this.$t('adminReports.totalColumn'),
+					this.$t('adminReports.dateColumn'),
+				],
+				this.recentOrders.map((row) => [
+					`#${row.id_shopping_car}`,
+					row.customerName,
+					row.total,
+					row.dateLabel,
+				])
+			);
+
+			const blob = new Blob([`\uFEFF${lines.join('\n')}`], { type: 'text/csv;charset=utf-8;' });
+			const url = URL.createObjectURL(blob);
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = `reportes-${new Date().toISOString().slice(0, 10)}.csv`;
+			link.click();
+			URL.revokeObjectURL(url);
 		},
 	},
 };
@@ -266,6 +365,33 @@ export default {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 1rem;
+}
+
+.aio-admin-reports-toolbar {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+}
+
+.aio-admin-alert-banner {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+	padding: 1rem 1.25rem;
+	border-radius: 12px;
+	background: rgba(245, 158, 11, 0.1);
+	border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.aio-admin-alert-banner p {
+	margin: 0.25rem 0 0;
+	font-size: 0.875rem;
+	color: #6b7280;
+}
+
+.aio-admin-alert-banner .v-btn {
+	margin-left: auto;
+	flex-shrink: 0;
 }
 
 .aio-admin-restock-list {

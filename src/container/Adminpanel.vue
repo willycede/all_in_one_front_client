@@ -49,6 +49,10 @@
 							<v-icon>{{ item.icon }}</v-icon>
 						</span>
 						<span>{{ $t(item.labelKey) }}</span>
+						<span
+							v-if="item.path === '/admin-panel/invoices' && invoiceAlertCount > 0"
+							class="aio-admin__nav-badge"
+						>{{ invoiceAlertCount > 99 ? '99+' : invoiceAlertCount }}</span>
 					</router-link>
 				</template>
 			</nav>
@@ -80,6 +84,22 @@
 			</header>
 
 			<main class="aio-admin__content">
+				<div
+					v-if="invoiceAlertCount > 0 && showGlobalInvoiceAlert"
+					class="aio-admin__global-alert"
+				>
+					<v-icon color="warning" size="20">warning_amber</v-icon>
+					<div>
+						<strong>{{ $t('adminReports.invoiceAlertTitle', { count: invoiceAlertCount }) }}</strong>
+						<p>{{ $t('adminReports.invoiceAlertHint') }}</p>
+					</div>
+					<router-link to="/admin-panel/invoices" class="aio-admin__global-alert-link">
+						{{ $t('adminReports.invoiceAlertAction') }}
+					</router-link>
+					<button type="button" class="aio-admin__global-alert-close" @click="dismissInvoiceAlert">
+						<v-icon size="18">close</v-icon>
+					</button>
+				</div>
 				<router-view></router-view>
 			</main>
 		</div>
@@ -91,6 +111,7 @@
 <script>
 import UserBlock from 'Components/Layouts/Header/UserBlock';
 import AppConfig from 'Constants/AppConfig';
+import api from 'Api';
 import { mapGetters } from 'vuex';
 import { clearUserSession } from 'Helpers/auth';
 
@@ -112,6 +133,8 @@ export default {
 		return {
 			appLogoFooter: AppConfig.appLogoFooter,
 			sidebarOpen: false,
+			invoiceAlertCount: 0,
+			showGlobalInvoiceAlert: true,
 		};
 	},
 	computed: {
@@ -154,7 +177,22 @@ export default {
 			return this.currentPageMeta.subtitle;
 		},
 	},
+	mounted() {
+		this.loadInvoiceAlerts();
+	},
 	methods: {
+		async loadInvoiceAlerts() {
+			try {
+				const response = await api.get('/api/admin/invoices/alerts');
+				const data = response.data && response.data.data;
+				this.invoiceAlertCount = Number((data && data.count) || 0);
+			} catch (error) {
+				this.invoiceAlertCount = 0;
+			}
+		},
+		dismissInvoiceAlert() {
+			this.showGlobalInvoiceAlert = false;
+		},
 		toggleSidebar() {
 			this.sidebarOpen = !this.sidebarOpen;
 		},

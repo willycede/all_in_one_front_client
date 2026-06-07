@@ -199,6 +199,57 @@
 	padding: 1.5rem;
 }
 
+.aio-admin__global-alert {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+	margin-bottom: 1rem;
+	padding: 0.875rem 1rem;
+	border-radius: 12px;
+	background: rgba(245, 158, 11, 0.12);
+	border: 1px solid rgba(245, 158, 11, 0.28);
+}
+
+.aio-admin__global-alert p {
+	margin: 0.2rem 0 0;
+	font-size: 0.8125rem;
+	color: #6b7280;
+}
+
+.aio-admin__global-alert-link {
+	margin-left: auto;
+	font-size: 0.8125rem;
+	font-weight: 700;
+	color: #A96DFA;
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.aio-admin__global-alert-close {
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+	padding: 0;
+	color: #6b7280;
+}
+
+.aio-admin__nav-item {
+	position: relative;
+}
+
+.aio-admin__nav-badge {
+	margin-left: auto;
+	min-width: 1.25rem;
+	padding: 0.1rem 0.4rem;
+	border-radius: 999px;
+	background: #ef4444;
+	color: #fff;
+	font-size: 0.6875rem;
+	font-weight: 700;
+	line-height: 1.2;
+	text-align: center;
+}
+
 .aio-admin__overlay {
 	display: none;
 	position: fixed;
