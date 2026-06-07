@@ -159,6 +159,7 @@ export default {
 				);
 
 				if (urlPayphone.data && urlPayphone.data.errorCode === 200 && urlPayphone.data.success !== false) {
+					await this.$store.dispatch('syncActiveCart');
 					setTimeout(() => {
 						this.cobro = false;
 						this.pago_exitoso = true;
@@ -228,7 +229,8 @@ export default {
 				data_send_mail
 			);
 
-			setTimeout(() => {
+			setTimeout(async () => {
+				await this.$store.dispatch('syncActiveCart');
 				this.$router.push('/account/order-history');
 			}, 3000);
 		},

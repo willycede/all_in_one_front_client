@@ -2469,37 +2469,35 @@
 	}
 }
 
-// Fixed header — barra clara al scroll (iconos y logo visibles)
+// Fixed header — barra oscura al scroll, iconos y menú en claro
 .fixed-header-wrap {
 	.header-wrap.onsus-navbar {
-		background: rgba($base, 0.97) !important;
-		backdrop-filter: blur(14px);
-		-webkit-backdrop-filter: blur(14px);
-		box-shadow: 0 8px 32px rgba($primary, 0.12);
-		border-bottom: 1px solid rgba($primary, 0.14);
+		background: linear-gradient(90deg, #08080c 0%, #101018 70%, rgba($primary, 0.12) 100%) !important;
+		box-shadow: 0 4px 24px rgba($primary, 0.2);
+		border-bottom: 1px solid rgba($primary, 0.15);
 		min-height: 64px;
 		padding: 0.35rem 0;
 	}
 
 	.onsus-action-btn {
 		&__icon .v-icon {
-			color: $font-color !important;
+			color: rgba($base, 0.92) !important;
 		}
 
 		&__label {
-			color: $onsus-text-muted;
+			color: rgba($base, 0.72);
 		}
 
 		&:hover &__icon {
-			background: rgba($primary, 0.12);
+			background: rgba($primary, 0.22);
 		}
 	}
 
 	.onsus-fixed-header__toggle {
-		color: $font-color !important;
+		color: rgba($base, 0.92) !important;
 
 		.material-icons {
-			color: $font-color;
+			color: rgba($base, 0.92);
 		}
 	}
 
@@ -2507,13 +2505,13 @@
 		> a,
 		> a.router-link-active,
 		> a.router-link-exact-active {
-			color: $font-color !important;
+			color: rgba($base, 0.9) !important;
 			background: transparent !important;
 			line-height: 48px !important;
 
 			&:hover,
 			&.router-link-exact-active {
-				color: $primary !important;
+				color: $base !important;
 			}
 
 			&:after {
@@ -2523,7 +2521,7 @@
 
 		&:last-child > a {
 			background: transparent !important;
-			color: $font-color !important;
+			color: rgba($base, 0.9) !important;
 		}
 	}
 }

@@ -91,6 +91,17 @@
 								Cancelar
 							</button>
 							<button
+								v-if="item.status === 3"
+								type="button"
+								class="aio-account-orders__action aio-account-orders__action--secondary"
+								title="Agregar productos al carrito"
+								:disabled="isPageLoading"
+								@click="repeatOrder(item)"
+							>
+								<v-icon size="18">replay</v-icon>
+								Repetir pedido
+							</button>
+							<button
 								v-if="item.status === 3 && item.status_invoice === 0"
 								type="button"
 								class="aio-account-orders__action aio-account-orders__action--secondary"
@@ -261,6 +272,12 @@ export default {
 		},
 	},
 	async mounted() {
+		if (localStorage.id_users) {
+			this.$store.dispatch('syncActiveCart').catch(() => {
+				this.$store.dispatch('addSetToCart', []);
+			});
+		}
+
 		const page = this.parsePage(this.$route.query.page);
 		const limit = this.parseLimit(this.$route.query.limit);
 		this.pagination.limit = limit;
@@ -372,7 +389,38 @@ export default {
 			await this.loadOrders(1, { silent: true });
 		},
 		hasActions(item) {
-			return item.status == 2 || (item.status === 3 && item.status_invoice === 0);
+			return item.status == 2
+				|| item.status === 3
+				|| (item.status === 3 && item.status_invoice === 0);
+		},
+		async repeatOrder(item) {
+			this.isPageLoading = true;
+
+			try {
+				const response = await api.post(
+					`/api/order_history/repeat_order/${item.id_shopping_car}/${localStorage.id_users}`
+				);
+
+				const result = response && response.data && response.data.data;
+				await this.$store.dispatch('syncActiveCart');
+
+				let message = 'Productos agregados al carrito';
+				if (result && result.itemsAdded) {
+					message = `${result.itemsAdded} producto(s) agregados al carrito`;
+				}
+				if (result && result.skipped && result.skipped.length) {
+					message += `. ${result.skipped.length} no disponible(s)`;
+				}
+
+				this.$snotify.success(message, { timeout: 3500 });
+				this.$router.push('/cart');
+			} catch (error) {
+				logApiError('order-history:repeat-order', error);
+				const message = getApiErrorMessage(error, 'No se pudo repetir el pedido');
+				this.$snotify.error(message, { timeout: 4000 });
+			} finally {
+				this.isPageLoading = false;
+			}
 		},
 		formatDate(value) {
 			return value ? moment(value).format(this.dateFormat) : '—';
@@ -388,6 +436,7 @@ export default {
 				if (response.data && response.data.errorCode === 200 && response.data.url) {
 					const payUrl = AppConfig.buildPayphoneRedirectUrl(response.data.url);
 					item.url_payphone = response.data.url;
+					await this.$store.dispatch('syncActiveCart');
 					window.open(payUrl, '_blank');
 					this.$snotify.success('Link de pago generado. Se abrió en una nueva pestaña.', {
 						timeout: 3500,

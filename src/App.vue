@@ -29,6 +29,12 @@ export default {
 			this.$vuetify.rtl = this.rtlLayout;
 		}
 		this.$store.dispatch('loadMenus');
+
+		if (localStorage.id_users) {
+			this.$store.dispatch('syncActiveCart').catch(() => {
+				this.$store.dispatch('addSetToCart', []);
+			});
+		}
 	},
 	methods: {
 		/**

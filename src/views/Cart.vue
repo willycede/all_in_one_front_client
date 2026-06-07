@@ -228,6 +228,7 @@ export default {
             }
 
             this.$refs.loadComponent.close();
+            await this.$store.dispatch('syncActiveCart');
             this.$router.push('/account/order-history');
             
         } else {

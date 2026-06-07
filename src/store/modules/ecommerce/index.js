@@ -6,6 +6,7 @@ import moment from 'moment';
 import api from 'Api';
 import { mapFavoriteFromApi, getProductIdFromPayload } from 'Helpers/favorites';
 import AppConfig from 'Constants/AppConfig';
+import { syncActiveCartToStore } from 'Helpers/cartSync';
 
 
 
@@ -183,7 +184,10 @@ const actions = {
       },
       makePayment(context, payload) {
             context.commit('makePayment', payload);
-      }
+      },
+      syncActiveCart(context) {
+            return syncActiveCartToStore(context);
+      },
 }
 
 // mutations

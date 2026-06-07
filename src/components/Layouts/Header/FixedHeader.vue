@@ -47,7 +47,7 @@ import AppConfig from 'Constants/AppConfig';
 export default {
 		data() {
 		return {
-			appLogo: AppConfig.appLogo,
+			appLogo: AppConfig.appLogoDark,
 			logoSize: {
 				height: AppConfig.logo.heightCompact,
 				maxWidth: AppConfig.logo.maxWidthCompact,

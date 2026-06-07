@@ -108,7 +108,6 @@
 <script>
 import { mapGetters } from 'vuex';
 import VuePerfectScrollbar from 'vue-perfect-scrollbar';
-import api from 'Api';
 
 export default {
 	components: {
@@ -133,22 +132,15 @@ export default {
 		},
 	},
 	async mounted() {
-		if (!localStorage.id_users) return;
+		if (!localStorage.id_users) {
+			this.$store.dispatch('addSetToCart', []);
+			return;
+		}
 
 		try {
-			const shopCart = await api.get(`/api/shoppingcar/get_shop/${localStorage.id_users}`);
-			const carts = shopCart?.data?.data;
-			if (!carts?.length) return;
-
-			const shopCartDetails = await api.get(
-				`/api/shoppingcar/get_shopDetails/${carts[0].id_shopping_car}`
-			);
-			const cartDetail = shopCartDetails?.data?.data;
-			if (cartDetail) {
-				this.$store.dispatch('addSetToCart', cartDetail);
-			}
+			await this.$store.dispatch('syncActiveCart');
 		} catch (error) {
-			// Sin carrito activo o sesión inválida
+			this.$store.dispatch('addSetToCart', []);
 		}
 	},
 	methods: {
