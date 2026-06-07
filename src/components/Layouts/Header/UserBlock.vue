@@ -14,7 +14,7 @@
 					<span class="onsus-action-btn__icon">
 						<v-icon>person_outline</v-icon>
 					</span>
-					<span class="onsus-action-btn__label">Cuenta</span>
+					<span class="onsus-action-btn__label">{{ $t('nav.account') }}</span>
 				</button>
 			</template>
 
@@ -24,8 +24,8 @@
 						<v-icon size="22">person</v-icon>
 					</span>
 					<div>
-						<p class="aio-user-menu__title">Mi cuenta</p>
-						<p class="aio-user-menu__subtitle">Hola, {{ userDisplayName }}</p>
+						<p class="aio-user-menu__title">{{ $t('nav.myAccount') }}</p>
+						<p class="aio-user-menu__subtitle">{{ $t('nav.hello', { name: userDisplayName }) }}</p>
 					</div>
 				</div>
 
@@ -47,7 +47,7 @@
 						<span class="aio-user-menu__item-icon aio-user-menu__item-icon--danger">
 							<v-icon size="18">power_settings_new</v-icon>
 						</span>
-						<span class="aio-user-menu__item-text">Salir</span>
+						<span class="aio-user-menu__item-text">{{ $t('nav.logout') }}</span>
 						<v-icon size="16" class="aio-user-menu__item-arrow">chevron_right</v-icon>
 					</button>
 				</nav>
@@ -58,7 +58,7 @@
 			<span class="onsus-action-btn__icon">
 				<v-icon>login</v-icon>
 			</span>
-			<span class="onsus-action-btn__label">Iniciar sesión</span>
+			<span class="onsus-action-btn__label">{{ $t('nav.login') }}</span>
 		</router-link>
 	</div>
 </template>
@@ -78,17 +78,23 @@ export default {
 	computed: {
 		accountLinks() {
 			const links = (this.data || []).filter((link) => link.icon !== 'power_settings_new');
+			const base = links.length ? links : [
+				{ icon: 'person_outline', title: this.$t('account.profile'), path: '/account/profile' },
+				{ icon: 'history', title: this.$t('account.orderHistory'), path: '/account/order-history' },
+				{ icon: 'favorite_border', title: this.$t('nav.favorites'), path: '/favorites' },
+			];
+
 			if (this.isAdmin) {
 				return [
 					{
 						icon: 'admin_panel_settings',
-						title: 'Administración',
+						title: this.$t('admin.panel'),
 						path: '/admin-panel/reports',
 					},
-					...links,
+					...base,
 				];
 			}
-			return links;
+			return base;
 		},
 	},
 	watch: {

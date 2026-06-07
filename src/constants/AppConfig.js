@@ -14,6 +14,10 @@ const buildPayphoneRedirectUrl = (payphoneUrl) => (
 	`${siteUrl}botonpagomail?urlPago=${encodeURIComponent(payphoneUrl)}`
 );
 
+const buildOrderPaymentLinkUrl = (orderId) => (
+	`${siteUrl}botonpagomail?orden=${encodeURIComponent(orderId)}`
+);
+
 export default {
 	appLogo: '/static/images/logo/AIO_LOGO_NAME_BLACK&COLOR.png',
 	appLogoFooter: '/static/images/logo/AIO_LOGO_NAME_ALL_WHITE.png',
@@ -40,6 +44,7 @@ export default {
 	urlSite: siteUrl,
 	emailLogoUrl: `${siteUrl}static/images/logo/AIO_LOGO_NAME_ALL_WHITE.png`,
 	buildPayphoneRedirectUrl,
+	buildOrderPaymentLinkUrl,
 
 	//configuracion correo
 	FROM_NAME:'',

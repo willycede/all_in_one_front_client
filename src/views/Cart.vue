@@ -30,6 +30,10 @@ export default {
       couponCode: '',
       couponDescription: '',
       couponDiscount: 0,
+      useDeliveryAddress: false,
+      deliveryAddress: '',
+      deliveryRecipientName: '',
+      deliveryRecipientPhone: '',
       uploadedDocuments: {}, // { id_details: { docType: file } }
       uploadingDocuments: {},
       quantityTimers: {},
@@ -89,6 +93,21 @@ export default {
       this.$store.dispatch('addSetToCart', []);
     } finally {
       this.isLoading = false;
+    }
+
+    if (localStorage.id_users) {
+      try {
+        const prefsRes = await api.get(`/api/users/preferences/${localStorage.id_users}`);
+        const prefs = prefsRes && prefsRes.data && prefsRes.data.data;
+        if (prefs && prefs.use_delivery_on_orders) {
+          this.useDeliveryAddress = true;
+          this.deliveryAddress = prefs.default_delivery_address || '';
+          this.deliveryRecipientName = prefs.default_delivery_recipient || '';
+          this.deliveryRecipientPhone = prefs.default_delivery_phone || '';
+        }
+      } catch (prefsError) {
+        // preferencias opcionales
+      }
     }
   },
   computed: {
@@ -152,6 +171,13 @@ export default {
         });
         return;
       }
+
+      if (this.useDeliveryAddress) {
+        if (!this.deliveryRecipientName || !this.deliveryAddress) {
+          this.$snotify.error(this.$t('cartPage.deliveryIncomplete'), { timeout: 4000 });
+          return;
+        }
+      }
       
       this.$refs.confirmationDialog.openDialog();
     },
@@ -173,6 +199,12 @@ export default {
           reference: "PAGO ORDEN DE PAGO #" + localStorage.id_orden,
           oneTime: false,
           expireIn: 0,
+          delivery: {
+            use_delivery_address: this.useDeliveryAddress,
+            delivery_address: this.useDeliveryAddress ? this.deliveryAddress : null,
+            delivery_recipient_name: this.useDeliveryAddress ? this.deliveryRecipientName : null,
+            delivery_recipient_phone: this.useDeliveryAddress ? this.deliveryRecipientPhone : null,
+          },
         };
         let detallefinal = "";
         for (const item of this.cart) {
@@ -193,7 +225,7 @@ export default {
         /*validamos si el link de pago se genero correctamente */
         if (urlPayphone.data.errorCode === 200) {
           const html = HtmlElement.buildOrderPaymentEmail({
-            payUrl: AppConfig.buildPayphoneRedirectUrl(urlPayphone.data.url),
+            payUrl: AppConfig.buildOrderPaymentLinkUrl(localStorage.id_orden),
             siteUrl: AppConfig.siteUrl,
             logoUrl: AppConfig.emailLogoUrl,
             customerName: `${localStorage.name_user} ${localStorage.last_name_user}`.trim(),
@@ -505,11 +537,11 @@ export default {
 		<div class="aio-cart-page__hero">
 			<v-container>
 				<nav class="aio-cart-page__breadcrumb" aria-label="Ruta">
-					<router-link to="/">Inicio</router-link>
+					<router-link to="/">{{ $t('nav.home') }}</router-link>
 					<v-icon size="14">chevron_right</v-icon>
-					<span>Carrito</span>
+					<span>{{ $t('cartPage.title') }}</span>
 				</nav>
-				<h1 class="aio-cart-page__title">Carrito de compras</h1>
+				<h1 class="aio-cart-page__title">{{ $t('cartPage.title') }}</h1>
 				<p class="aio-cart-page__subtitle">
 					Revisa tus productos y confirma tu pedido cuando estés listo.
 				</p>
@@ -520,18 +552,18 @@ export default {
 			<v-container grid-list-xl py-0>
 				<div v-if="isLoading" class="aio-cart-page__loading">
 					<v-progress-circular indeterminate color="#A96DFA" size="40" width="3"></v-progress-circular>
-					<p>Cargando tu carrito...</p>
+					<p>{{ $t('common.loading') }}</p>
 				</div>
 
 				<div v-else-if="!cart || !cart.length" class="aio-cart-page__empty">
 					<div class="aio-cart-page__empty-icon">
 						<v-icon size="48">shopping_bag</v-icon>
 					</div>
-					<h2>Tu carrito está vacío</h2>
-					<p>Aún no has agregado productos. Explora el catálogo y encuentra lo que necesitas.</p>
+					<h2>{{ $t('cartPage.empty') }}</h2>
+					<p>{{ $t('cartPage.emptyHint') }}</p>
 					<router-link to="/products" class="aio-cart-page__empty-btn">
 						<v-icon size="18">storefront</v-icon>
-						Ver productos
+						{{ $t('cartPage.goToShop') }}
 					</router-link>
 				</div>
 
@@ -562,7 +594,7 @@ export default {
 								</div>
 
 								<div class="aio-cart-page__qty">
-									<label>Cantidad</label>
+									<label>{{ $t('common.quantity') }}</label>
 									<v-text-field
 										v-model.number="item.details_quantity"
 										type="number"
@@ -577,14 +609,14 @@ export default {
 								</div>
 
 								<div class="aio-cart-page__unit-price">
-									<label>Precio</label>
+									<label>{{ $t('common.price') }}</label>
 									<span>
 										<emb-currency-sign></emb-currency-sign>{{ formatNumber(item.details_price) }}
 									</span>
 								</div>
 
 								<div class="aio-cart-page__line-total">
-									<label>Total</label>
+									<label>{{ $t('common.total') }}</label>
 									<strong>
 										<emb-currency-sign></emb-currency-sign>{{ formatNumber(item.details_quantity * item.details_price) }}
 									</strong>
@@ -639,7 +671,7 @@ export default {
 
 					<aside class="aio-cart-page__summary">
 						<div class="aio-cart-page__summary-card">
-							<h2 class="aio-cart-page__summary-title">Resumen del pedido</h2>
+							<h2 class="aio-cart-page__summary-title">{{ $t('cartPage.summary') }}</h2>
 
 							<cart-coupon
 								v-if="cartId"
@@ -651,7 +683,7 @@ export default {
 							></cart-coupon>
 
 							<div class="aio-cart-page__summary-row">
-								<span>Subtotal</span>
+								<span>{{ $t('common.subtotal') }}</span>
 								<span>
 									<emb-currency-sign></emb-currency-sign>{{ itemTotal }}
 								</span>
@@ -663,13 +695,13 @@ export default {
 								</span>
 							</div>
 							<div class="aio-cart-page__summary-row">
-								<span>Envío</span>
+								<span>{{ $t('common.shipping') }}</span>
 								<span>
 									<emb-currency-sign></emb-currency-sign>{{ shipping }}
 								</span>
 							</div>
 							<div class="aio-cart-page__summary-row">
-								<span>Impuesto</span>
+								<span>{{ $t('common.tax') }}</span>
 								<span>
 									<emb-currency-sign></emb-currency-sign>{{ tax }}
 								</span>
@@ -678,10 +710,46 @@ export default {
 							<div class="aio-cart-page__summary-divider"></div>
 
 							<div class="aio-cart-page__summary-row aio-cart-page__summary-row--total">
-								<span>Total</span>
+								<span>{{ $t('common.total') }}</span>
 								<strong>
 									<emb-currency-sign></emb-currency-sign>{{ getTotalPrice }}
 								</strong>
+							</div>
+
+							<div class="aio-cart-page__delivery">
+								<v-switch
+									v-model="useDeliveryAddress"
+									:label="$t('cartPage.useDelivery')"
+									color="#A96DFA"
+									hide-details
+									class="mb-2"
+								></v-switch>
+								<template v-if="useDeliveryAddress">
+									<v-text-field
+										v-model="deliveryRecipientName"
+										:label="$t('account.recipientName')"
+										outlined
+										dense
+										hide-details
+										class="mb-2"
+									></v-text-field>
+									<v-text-field
+										v-model="deliveryRecipientPhone"
+										:label="$t('account.recipientPhone')"
+										outlined
+										dense
+										hide-details
+										class="mb-2"
+									></v-text-field>
+									<v-textarea
+										v-model="deliveryAddress"
+										:label="$t('account.deliveryAddress')"
+										outlined
+										dense
+										rows="2"
+										hide-details
+									></v-textarea>
+								</template>
 							</div>
 
 							<button
@@ -690,12 +758,12 @@ export default {
 								@click="registraConfirmaShop"
 							>
 								<v-icon size="20">lock</v-icon>
-								Confirmar compra
+								{{ $t('cartPage.confirmPurchase') }}
 							</button>
 
 							<router-link to="/products" class="aio-cart-page__continue-link">
 								<v-icon size="16">arrow_back</v-icon>
-								Seguir comprando
+								{{ $t('common.continueShopping') }}
 							</router-link>
 						</div>
 					</aside>
@@ -704,18 +772,18 @@ export default {
 				<vue-snotify></vue-snotify>
 				<emb-confirmation-component
 					ref="confirmationDialog"
-					title="¿Confirmar orden?"
-					message="Revisa que tu carrito y la documentación requerida estén completos antes de finalizar la compra."
-					confirm-label="Sí, confirmar"
-					cancel-label="Cancelar"
+					:title="$t('cartPage.confirmTitle')"
+					:message="$t('cartPage.confirmMessage')"
+					:confirm-label="$t('cartPage.confirmYes')"
+					:cancel-label="$t('common.cancel')"
 					@onConfirm="onRegisterShop"
 				></emb-confirmation-component>
 				<emb-delete-confirmation
 					ref="deleteConfirmationDialog"
-					title="Eliminar producto"
-					message="¿Desea eliminar este producto del carrito? Esta acción no se puede deshacer."
-					confirm-label="Sí, eliminar"
-					cancel-label="Cancelar"
+					:title="$t('cartPage.deleteTitle')"
+					:message="$t('cartPage.deleteMessage')"
+					:confirm-label="$t('cartPage.deleteYes')"
+					:cancel-label="$t('common.cancel')"
 					@onConfirm="onDeleteProductFromCart"
 				></emb-delete-confirmation>
 				<cart-documents-modal
@@ -727,9 +795,9 @@ export default {
 				></cart-documents-modal>
 				<emb-load-component
 					ref="loadComponent"
-					eyebrow="Procesando orden"
-					message="Registrando tu orden"
-					subtitle="Estamos preparando el enlace de pago. Por favor no cierres esta ventana."
+					:eyebrow="$t('cartPage.processing')"
+					:message="$t('cartPage.processingMessage')"
+					:subtitle="$t('cartPage.processingSubtitle')"
 				></emb-load-component>
 			</v-container>
 		</div>

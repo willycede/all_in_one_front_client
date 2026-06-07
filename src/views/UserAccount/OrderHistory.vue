@@ -434,7 +434,7 @@ export default {
 				});
 
 				if (response.data && response.data.errorCode === 200 && response.data.url) {
-					const payUrl = AppConfig.buildPayphoneRedirectUrl(response.data.url);
+					const payUrl = AppConfig.buildOrderPaymentLinkUrl(item.id_shopping_car);
 					item.url_payphone = response.data.url;
 					await this.$store.dispatch('syncActiveCart');
 					window.open(payUrl, '_blank');
@@ -479,6 +479,11 @@ export default {
 				: 'aio-account-orders__badge--invoice-done';
 		},
 		async cancelOrder(item) {
+			const confirmed = window.confirm(
+				`¿Cancelar la orden #${item.id_shopping_car}? El enlace de pago dejará de funcionar y recibirás un correo de confirmación.`
+			);
+			if (!confirmed) return;
+
 			this.isPageLoading = true;
 			const params = this.getRequestParams();
 
@@ -488,7 +493,8 @@ export default {
 					{ params }
 				);
 				this.applyOrderResponse(historyDetails && historyDetails.data && historyDetails.data.data);
-				this.$snotify.success('Orden cancelada', { timeout: 2000 });
+				await this.$store.dispatch('syncActiveCart');
+				this.$snotify.success('Orden cancelada. Te enviamos un correo de confirmación.', { timeout: 3500 });
 
 				if (this.tableData.length === 0 && this.pagination.page > 1) {
 					await this.syncRouteQuery(this.pagination.page - 1, this.pagination.limit);

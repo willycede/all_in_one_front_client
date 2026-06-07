@@ -116,6 +116,7 @@ router.afterEach((to, from) => {
 // creating a instance of vue localisation module
 const i18n = new VueI18n({
 	locale: store.getters.selectedLocale.locale,
+	fallbackLocale: 'en',
 	messages,
 })
 

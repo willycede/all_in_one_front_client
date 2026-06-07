@@ -45,19 +45,23 @@ import Cart from './Cart';
 import AppConfig from 'Constants/AppConfig';
 
 export default {
-		data() {
+	data() {
 		return {
 			appLogo: AppConfig.appLogoDark,
 			logoSize: {
 				height: AppConfig.logo.heightCompact,
 				maxWidth: AppConfig.logo.maxWidthCompact,
 			},
-			userLinks: [
-				{ title: 'Mi cuenta', path: '/account/profile' },
-				{ title: 'Mis pedidos', path: '/account/order-history' },
-				{ title: 'Favoritos', path: '/favorites' },
-			],
 		};
+	},
+	computed: {
+		userLinks() {
+			return [
+				{ title: this.$t('nav.myAccount'), path: '/account/profile' },
+				{ title: this.$t('nav.myOrders'), path: '/account/order-history' },
+				{ title: this.$t('nav.favorites'), path: '/favorites' },
+			];
+		},
 	},
 	components: {
 		embMenu: Menu,

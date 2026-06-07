@@ -39,7 +39,29 @@ const actions = {
 	},
 	changeRtlLayout(context){
 		context.commit('rtlLayoutHandler');
-	}
+	},
+	loadUserPreferences(context) {
+		const idUser = localStorage.getItem('id_users');
+		if (!idUser) return Promise.resolve(null);
+
+		return import('Helpers/userPreferences').then(({ fetchUserPreferences, getStoredPreferences, LOCALE_MAP, CURRENCY_MAP }) => {
+			const applyToStore = (prefs) => {
+				if (!prefs) return prefs;
+				localStorage.setItem('aio_user_prefs', JSON.stringify(prefs));
+				if (prefs.locale && LOCALE_MAP[prefs.locale]) {
+					context.commit('changeLanguageHandler', LOCALE_MAP[prefs.locale]);
+				}
+				if (prefs.currency && CURRENCY_MAP[prefs.currency]) {
+					context.commit('changeCurrency', CURRENCY_MAP[prefs.currency]);
+				}
+				return prefs;
+			};
+
+			return fetchUserPreferences(idUser)
+				.then((prefs) => applyToStore(prefs || getStoredPreferences()))
+				.catch(() => applyToStore(getStoredPreferences()));
+		});
+	},
 }
 
 // mutations

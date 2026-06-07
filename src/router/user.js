@@ -12,7 +12,9 @@ const Address = () => import('Views/UserAccount/Address.vue');
 const Cards = () => import ('Views/UserAccount/Cards.vue');
 const EditProfile = () => import ('Views/UserAccount/EditProfile.vue');
 const EditAddress = () => import ('Views/UserAccount/EditAddress.vue');
-const EditProfileInfo = () => import ('Views/UserAccount/EditProfileInfo.vue');
+const EditProfileInfo = () => import('Views/UserAccount/EditProfileInfo.vue');
+const SecuritySettings = () => import('Views/UserAccount/SecuritySettings.vue');
+const UserPreferences = () => import('Views/UserAccount/UserPreferences.vue');
 const BlogDetail = () => import('Views/Blogs/BlogDetails');
 const ContactUs = () => import('Views/Contact');
 const PrivacyPolicy = () => import('Views/PrivacyPolicy');
@@ -132,8 +134,14 @@ export default {
 			name:'Account',
 			meta: { requiresAuth: true },
 			children: [
-            {
+				{
 					path: '/account/order-history',name:'OrderHistory',component: OrderHistory,
+				},
+				{
+					path: '/account/security', name: 'SecuritySettings', component: SecuritySettings,
+				},
+				{
+					path: '/account/preferences', name: 'UserPreferences', component: UserPreferences,
 				},
 				{
 					path: '/account/profile',name:'Profile',component: Profile,

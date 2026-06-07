@@ -1,15 +1,15 @@
 export const languages = [
    {
+      name: "Español",
+      locale: "sp"
+   },
+   {
       name: "English",
       locale: "en"
    },
    {
       name: "French",
       locale: "fr"
-   },
-   {
-      name: "Spanish",
-      locale: "sp"
    },
    {
       name: " Japanese",

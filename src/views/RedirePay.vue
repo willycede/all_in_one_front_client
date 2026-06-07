@@ -74,9 +74,9 @@
 						</div>
 					</div>
 					<span class="aio-payment-validate__eyebrow aio-payment-validate__eyebrow--error">Enlace no válido</span>
-					<h1 class="aio-payment-validate__title">No pudimos abrir el pago</h1>
+					<h1 class="aio-payment-validate__title">{{ errorTitle }}</h1>
 					<p class="aio-payment-validate__text">
-						El enlace de pago no está disponible o ha expirado. Genera uno nuevo desde tus pedidos.
+						{{ errorMessage }}
 					</p>
 					<div class="aio-payment-validate__actions">
 						<router-link to="/account/order-history" class="aio-payment-validate__btn">
@@ -93,7 +93,9 @@
 </template>
 
 <script>
+import api from 'Api';
 import AppConfig from 'Constants/AppConfig';
+import { getApiErrorMessage } from 'Helpers/apiError';
 
 export default {
 	data() {
@@ -104,41 +106,89 @@ export default {
 			activeStep: 1,
 			stepTimer: null,
 			redirectTimer: null,
+			errorTitle: 'No pudimos abrir el pago',
+			errorMessage: 'El enlace de pago no está disponible o ha expirado. Genera uno nuevo desde tus pedidos.',
 		};
 	},
-	mounted() {
+	async mounted() {
+		const orderId = this.$route.query && this.$route.query.orden;
 		const rawUrl = this.$route.query && this.$route.query.urlPago;
 
-		if (!rawUrl) {
-			this.redirecting = false;
-			return;
-		}
-
-		try {
-			this.urlPago = decodeURIComponent(String(rawUrl));
-		} catch (e) {
-			this.urlPago = String(rawUrl);
-		}
-
-		if (!this.urlPago.startsWith('http')) {
+		if (!orderId && !rawUrl) {
 			this.redirecting = false;
 			return;
 		}
 
 		this.redirecting = true;
-		this.stepTimer = setInterval(() => {
-			if (this.activeStep < 3) {
-				this.activeStep += 1;
-			}
-		}, 800);
 
-		this.redirectTimer = setTimeout(() => {
-			window.location.href = this.urlPago;
-		}, 2600);
+		try {
+			const params = {};
+			if (orderId) {
+				params.orden = orderId;
+			} else {
+				params.urlPago = rawUrl;
+			}
+
+			const response = await api.get('/api/shoppingcar/payphone/resolve_link', { params });
+			const payload = response && response.data;
+
+			if (!payload || payload.errorCode !== 200 || !payload.url) {
+				this.showLinkError('No pudimos abrir el pago', 'El enlace de pago no está disponible. Genera uno nuevo desde Mis pedidos.');
+				return;
+			}
+
+			this.urlPago = payload.url;
+			this.startRedirectFlow();
+		} catch (error) {
+			const message = getApiErrorMessage(error, 'El enlace de pago no está disponible.');
+			const step = error.response
+				&& error.response.data
+				&& error.response.data.error
+				&& error.response.data.error.step;
+
+			if (step === 'order_cancelled') {
+				this.showLinkError(
+					'Pedido cancelado',
+					'Esta orden fue cancelada. El enlace de pago ya no está activo.'
+				);
+				return;
+			}
+
+			if (step === 'order_paid') {
+				this.showLinkError(
+					'Pedido ya pagado',
+					'Esta orden ya fue pagada. Revisa el comprobante en Mis pedidos.'
+				);
+				return;
+			}
+
+			this.showLinkError('No pudimos abrir el pago', message);
+		}
 	},
 	beforeDestroy() {
 		if (this.stepTimer) clearInterval(this.stepTimer);
 		if (this.redirectTimer) clearTimeout(this.redirectTimer);
+	},
+	methods: {
+		showLinkError(title, message) {
+			this.redirecting = false;
+			this.errorTitle = title;
+			this.errorMessage = message;
+			if (this.stepTimer) clearInterval(this.stepTimer);
+			if (this.redirectTimer) clearTimeout(this.redirectTimer);
+		},
+		startRedirectFlow() {
+			this.activeStep = 1;
+			this.stepTimer = setInterval(() => {
+				if (this.activeStep < 3) {
+					this.activeStep += 1;
+				}
+			}, 800);
+
+			this.redirectTimer = setTimeout(() => {
+				window.location.href = this.urlPago;
+			}, 2600);
+		},
 	},
 };
 </script>

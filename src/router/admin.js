@@ -2,6 +2,7 @@ import Admin from 'Container/Adminpanel.vue';
 
 const Reports = () => import('Views/AdminPanel/Reports.vue');
 const Invoice = () => import('Views/AdminPanel/Invoices.vue');
+const AdminOrders = () => import('Views/AdminPanel/Orders.vue');
 const AdminAccount = () => import('Views/AdminPanel/Account.vue');
 const Collaboration = () => import('Views/AdminPanel/Collaboration.vue');
 const AccountSetting = () => import('Views/AdminPanel/AccountSetting.vue');
@@ -24,6 +25,11 @@ export default {
 			path: 'reports',  
 			component: Reports, 
 			name:'Reports'
+		},
+		{ 
+			path: 'orders',  
+			component: AdminOrders, 
+			name:'AdminOrders'
 		},
 		{ 
 			path: 'invoices',  

@@ -18,13 +18,13 @@
 						:src="appLogoFooter"
 					>
 				</router-link>
-				<span class="aio-admin__sidebar-eyebrow">Panel admin</span>
+				<span class="aio-admin__sidebar-eyebrow">{{ $t('admin.panel') }}</span>
 			</div>
 
 			<nav class="aio-admin__nav" aria-label="Menú administración">
 				<template v-for="(item, index) in adminPanelMenus">
 					<div v-if="item.children && item.children.length" :key="`group-${index}`" class="aio-admin__nav-group">
-						<span class="aio-admin__nav-group-label">{{ item.label }}</span>
+						<span class="aio-admin__nav-group-label">{{ $t(item.labelKey) }}</span>
 						<router-link
 							v-for="child in item.children"
 							:key="child.path"
@@ -33,7 +33,7 @@
 							active-class="aio-admin__nav-item--active"
 							@click="closeSidebar"
 						>
-							<span>{{ child.label }}</span>
+							<span>{{ $t(child.labelKey) }}</span>
 						</router-link>
 					</div>
 
@@ -48,7 +48,7 @@
 						<span class="aio-admin__nav-icon">
 							<v-icon>{{ item.icon }}</v-icon>
 						</span>
-						<span>{{ item.label }}</span>
+						<span>{{ $t(item.labelKey) }}</span>
 					</router-link>
 				</template>
 			</nav>
@@ -58,7 +58,7 @@
 					<span class="aio-admin__nav-icon">
 						<v-icon>power_settings_new</v-icon>
 					</span>
-					<span>Cerrar sesión admin</span>
+					<span>{{ $t('admin.logout') }}</span>
 				</button>
 			</div>
 		</aside>
@@ -94,16 +94,17 @@ import AppConfig from 'Constants/AppConfig';
 import { mapGetters } from 'vuex';
 import { clearUserSession } from 'Helpers/auth';
 
-const PAGE_META = {
-	'/admin-panel/reports': { title: 'Reportes', subtitle: 'Resumen de actividad del marketplace' },
-	'/admin-panel/invoices': { title: 'Facturas', subtitle: 'Listado y gestión de facturación' },
-	'/admin-panel/documents': { title: 'Documentos', subtitle: 'Verificación de archivos de clientes' },
-	'/admin-panel/coupons': { title: 'Cupones', subtitle: 'Códigos promocionales del carrito' },
-	'/admin-panel/products': { title: 'Productos', subtitle: 'Catálogo conectado a la API' },
-	'/admin-panel/product-add': { title: 'Nuevo producto', subtitle: 'Publica un artículo en el catálogo de la tienda' },
-	'/admin-panel/account/profile': { title: 'Mi perfil', subtitle: 'Datos de tu cuenta administrador' },
-	'/admin-panel/account/settings': { title: 'Configuración', subtitle: 'Preferencias y seguridad de tu cuenta admin' },
-	'/admin-panel/account/collaboration': { title: 'Colaboración', subtitle: 'Usuarios con acceso al panel' },
+const PAGE_META_KEYS = {
+	'/admin-panel/reports': 'admin.pages.reports',
+	'/admin-panel/orders': 'admin.pages.orders',
+	'/admin-panel/invoices': 'admin.pages.invoices',
+	'/admin-panel/documents': 'admin.pages.documents',
+	'/admin-panel/coupons': 'admin.pages.coupons',
+	'/admin-panel/products': 'admin.pages.products',
+	'/admin-panel/product-add': 'admin.pages.productAdd',
+	'/admin-panel/account/profile': 'admin.pages.profile',
+	'/admin-panel/account/settings': 'admin.pages.settings',
+	'/admin-panel/account/collaboration': 'admin.pages.collaboration',
 };
 
 export default {
@@ -111,31 +112,40 @@ export default {
 		return {
 			appLogoFooter: AppConfig.appLogoFooter,
 			sidebarOpen: false,
-			userLinks: [
-				{
-					icon: 'account_circle',
-					title: 'Perfil',
-					path: '/admin-panel/account/profile',
-				},
-				{
-					icon: 'storefront',
-					title: 'Ir a la tienda',
-					path: '/mainPage',
-				},
-			],
 		};
 	},
 	computed: {
 		...mapGetters(['adminPanelMenus']),
+		userLinks() {
+			return [
+				{
+					icon: 'account_circle',
+					title: this.$t('admin.nav.profile'),
+					path: '/admin-panel/account/profile',
+				},
+				{
+					icon: 'storefront',
+					title: this.$t('admin.nav.goToStore'),
+					path: '/mainPage',
+				},
+			];
+		},
 		currentPageMeta() {
 			const path = this.$route.path;
-			if (PAGE_META[path]) {
-				return PAGE_META[path];
+			const key = PAGE_META_KEYS[path];
+			if (key) {
+				return {
+					title: this.$t(`${key}.title`),
+					subtitle: this.$t(`${key}.subtitle`),
+				};
 			}
 			if (path.indexOf('/admin-panel/product-edit') === 0) {
-				return { title: 'Editar producto', subtitle: 'Modifica los datos del catálogo' };
+				return {
+					title: this.$t('admin.pages.productAdd.title'),
+					subtitle: this.$t('admin.pages.products.subtitle'),
+				};
 			}
-			return { title: 'Administración', subtitle: 'All in One' };
+			return { title: this.$t('admin.panel'), subtitle: 'All in One' };
 		},
 		currentPageTitle() {
 			return this.currentPageMeta.title;

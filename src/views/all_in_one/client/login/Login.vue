@@ -24,13 +24,13 @@
 							alt="All in One"
 							class="aio-login__logo-mobile"
 						>
-						<h2>Bienvenido de nuevo</h2>
-						<p>Ingresa tus credenciales para continuar</p>
+						<h2>{{ $t('auth.welcomeBack') }}</h2>
+						<p>{{ $t('auth.loginSubtitle') }}</p>
 					</div>
 
-					<form class="aio-login__form" @submit.prevent="saveDetails">
+					<form v-if="!requiresTwoFactor" class="aio-login__form" @submit.prevent="saveDetails">
 						<label class="aio-login__field">
-							<span class="aio-login__label">Correo electrónico</span>
+							<span class="aio-login__label">{{ $t('auth.email') }}</span>
 							<div class="aio-login__input-wrap">
 								<v-icon size="20" class="aio-login__field-icon">email</v-icon>
 								<input
@@ -45,7 +45,7 @@
 						</label>
 
 						<label class="aio-login__field">
-							<span class="aio-login__label">Contraseña</span>
+							<span class="aio-login__label">{{ $t('auth.password') }}</span>
 							<div class="aio-login__input-wrap">
 								<v-icon size="20" class="aio-login__field-icon">lock_outline</v-icon>
 								<input
@@ -68,22 +68,51 @@
 						</label>
 
 						<button type="submit" class="aio-login__submit" :disabled="loading">
-							<span v-if="loading">Ingresando...</span>
-							<span v-else>Ingresar</span>
+							<span v-if="loading">{{ $t('common.signingIn') }}</span>
+							<span v-else>{{ $t('auth.login') }}</span>
 						</button>
 
 						<button type="button" class="aio-login__secondary" @click="openModalrecoverPassword">
-							¿Olvidaste tu contraseña?
+							{{ $t('auth.forgotPassword') }}
+						</button>
+					</form>
+
+					<form v-else class="aio-login__form" @submit.prevent="verifyTwoFactor">
+						<div class="aio-login__card-header">
+							<h2>{{ $t('account.twoFactorLoginTitle') }}</h2>
+							<p>{{ $t('account.twoFactorLoginHint') }}</p>
+						</div>
+						<label class="aio-login__field">
+							<span class="aio-login__label">{{ $t('account.verificationCode') }}</span>
+							<div class="aio-login__input-wrap">
+								<v-icon size="20" class="aio-login__field-icon">pin</v-icon>
+								<input
+									v-model="twoFactorCode"
+									type="text"
+									inputmode="numeric"
+									maxlength="8"
+									class="aio-login__input"
+									placeholder="000000"
+									autocomplete="one-time-code"
+								>
+							</div>
+						</label>
+						<button type="submit" class="aio-login__submit" :disabled="loading">
+							<span v-if="loading">Verificando...</span>
+							<span v-else>Verificar</span>
+						</button>
+						<button type="button" class="aio-login__secondary" @click="resetTwoFactor">
+							Volver al inicio de sesión
 						</button>
 					</form>
 
 					<p class="aio-login__footer">
-						¿No tienes cuenta?
-						<router-link to="/client/register">Crea una aquí</router-link>
+						{{ $t('auth.noAccount') }}
+						<router-link to="/client/register">{{ $t('auth.createAccount') }}</router-link>
 						<br>
 						<span class="aio-login__footer-admin">
-							¿Administrador?
-							<router-link to="/client/admin-login">Accede al panel</router-link>
+							{{ $t('auth.isAdmin') }}
+							<router-link to="/client/admin-login">{{ $t('auth.adminAccess') }}</router-link>
 						</span>
 					</p>
 				</div>
@@ -133,6 +162,7 @@
 <script>
 import api from 'Api';
 import AppConfig from 'Constants/AppConfig';
+import { completeClientLogin } from 'Helpers/loginSession';
 
 export default {
 	data() {
@@ -152,6 +182,9 @@ export default {
 				email: '',
 				password: '',
 			},
+			requiresTwoFactor: false,
+			twoFactorToken: '',
+			twoFactorCode: '',
 			emailRules: [
 				(v) => !!v || 'El email es requerido',
 				(v) => /.+@.+/.test(v) || 'El email ingresado es incorrecto',
@@ -221,24 +254,20 @@ export default {
 			this.loading = true;
 			api.post('/api/users/login', this.form)
 				.then((res) => {
+					const data = res.data && res.data.data;
+					if (data && data.requiresTwoFactor) {
+						this.requiresTwoFactor = true;
+						this.twoFactorToken = data.twoFactorToken;
+						return;
+					}
+
 					this.$snotify.success('Bienvenido', {
 						closeOnClick: false,
 						pauseOnHover: false,
 						timeout: 2000,
 						showProgressBar: false,
 					});
-					localStorage.email = res.data.data.email;
-					localStorage.id_users = res.data.data.id_users;
-					localStorage.identification_number = res.data.data.identification_number;
-					localStorage.name_user = res.data.data.name_user;
-					localStorage.last_name_user = res.data.data.last_name_user;
-					localStorage.id_user_rol = res.data.data.id_user_rol;
-					localStorage.id_rol = res.data.data.id_rol;
-					localStorage.id_company_user = res.data.data.id_company_user;
-					localStorage.access_token = res.data.data.access_token;
-					this.$store.dispatch('fetchWishlist');
-					const redirect = this.$route.query.redirect;
-					this.$router.push(redirect ? redirect : '/mainPage');
+					completeClientLogin(this, data);
 				})
 				.catch((err) => {
 					this.handleApiError(err);
@@ -246,6 +275,29 @@ export default {
 				.finally(() => {
 					this.loading = false;
 				});
+		},
+		verifyTwoFactor() {
+			if (!this.twoFactorCode) return;
+			this.loading = true;
+			api.post('/api/users/2fa/verify-login', {
+				twoFactorToken: this.twoFactorToken,
+				code: this.twoFactorCode,
+				isAdmin: false,
+			})
+				.then((res) => {
+					const data = res.data && res.data.data;
+					this.$snotify.success('Bienvenido', { timeout: 2000 });
+					completeClientLogin(this, data);
+				})
+				.catch((err) => this.handleApiError(err))
+				.finally(() => {
+					this.loading = false;
+				});
+		},
+		resetTwoFactor() {
+			this.requiresTwoFactor = false;
+			this.twoFactorToken = '';
+			this.twoFactorCode = '';
 		},
 		handleApiError(err) {
 			const defaultErrorMessage = err?.response?.data?.error?.message || 'Ocurrió un error inesperado';

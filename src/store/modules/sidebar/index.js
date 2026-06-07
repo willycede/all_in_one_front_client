@@ -1,6 +1,7 @@
 //-----------------------| Sidebar Module |-------------------//
 
-import { menus as defaultMenus, adminPanelMenus } from './data.js';
+import { menus as defaultMenus } from './data.js';
+import { adminPanelMenus } from './adminMenus.js';
 import api from 'Api';
 
 const buildCategoryMenus = (categories) => {

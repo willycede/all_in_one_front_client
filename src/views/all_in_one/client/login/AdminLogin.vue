@@ -28,7 +28,7 @@
 						<p>Selecciona tu empresa e ingresa tus credenciales</p>
 					</div>
 
-					<form class="aio-login__form" @submit.prevent="saveDetails">
+					<form v-if="!requiresTwoFactor" class="aio-login__form" @submit.prevent="saveDetails">
 						<label class="aio-login__field">
 							<span class="aio-login__label">Empresa</span>
 							<div class="aio-login__input-wrap">
@@ -95,6 +95,22 @@
 						</button>
 					</form>
 
+					<form v-else class="aio-login__form" @submit.prevent="verifyTwoFactor">
+						<div class="aio-login__card-header">
+							<h2>{{ $t('account.twoFactorLoginTitle') }}</h2>
+							<p>{{ $t('account.twoFactorLoginHint') }}</p>
+						</div>
+						<label class="aio-login__field">
+							<span class="aio-login__label">{{ $t('account.verificationCode') }}</span>
+							<div class="aio-login__input-wrap">
+								<v-icon size="20" class="aio-login__field-icon">pin</v-icon>
+								<input v-model="twoFactorCode" type="text" maxlength="8" class="aio-login__input" placeholder="000000">
+							</div>
+						</label>
+						<button type="submit" class="aio-login__submit" :disabled="loading">Verificar</button>
+						<button type="button" class="aio-login__secondary" @click="resetTwoFactor">Volver</button>
+					</form>
+
 					<p class="aio-login__footer">
 						¿Eres cliente?
 						<router-link to="/client/login">Ir al login de tienda</router-link>
@@ -108,6 +124,7 @@
 <script>
 import api from 'Api';
 import AppConfig from 'Constants/AppConfig';
+import { completeAdminLogin } from 'Helpers/loginSession';
 
 export default {
 	data() {
@@ -124,6 +141,9 @@ export default {
 				password: '',
 				company_id: '',
 			},
+			requiresTwoFactor: false,
+			twoFactorToken: '',
+			twoFactorCode: '',
 			emailRules: [
 				(v) => !!v || 'El email es requerido',
 				(v) => /.+@.+/.test(v) || 'El email ingresado es incorrecto',
@@ -185,21 +205,17 @@ export default {
 			})
 				.then((res) => {
 					const user = res.data.data;
+					if (user && user.requiresTwoFactor) {
+						this.requiresTwoFactor = true;
+						this.twoFactorToken = user.twoFactorToken;
+						return;
+					}
 					this.$snotify.success('Bienvenido al panel admin', { timeout: 2000 });
-					localStorage.email = user.email;
-					localStorage.id_users = user.id_users;
-					localStorage.identification_number = user.identification_number;
-					localStorage.name_user = user.name_user;
-					localStorage.last_name_user = user.last_name_user;
-					localStorage.id_user_rol = user.id_user_rol;
-					localStorage.id_rol = user.id_rol;
-					localStorage.id_company_user = user.id_company_user;
-					localStorage.access_token = user.access_token;
 					const redirect = this.$route.query.redirect;
 					const target = redirect && redirect.indexOf('/admin-panel') === 0
 						? redirect
 						: '/admin-panel/reports';
-					this.$router.push(target);
+					completeAdminLogin(this, user, target);
 				})
 				.catch((err) => {
 					const message = (err.response && err.response.data && err.response.data.error && err.response.data.error.message)
@@ -209,6 +225,34 @@ export default {
 				.finally(() => {
 					this.loading = false;
 				});
+		},
+		verifyTwoFactor() {
+			if (!this.twoFactorCode) return;
+			this.loading = true;
+			api.post('/api/users/2fa/verify-login', {
+				twoFactorToken: this.twoFactorToken,
+				code: this.twoFactorCode,
+				isAdmin: true,
+				company_id: parseInt(this.form.company_id, 10),
+			})
+				.then((res) => {
+					const user = res.data.data;
+					this.$snotify.success('Bienvenido al panel admin', { timeout: 2000 });
+					completeAdminLogin(this, user);
+				})
+				.catch((err) => {
+					const message = (err.response && err.response.data && err.response.data.error && err.response.data.error.message)
+						|| 'Código incorrecto';
+					this.$snotify.error(message, { timeout: 3500 });
+				})
+				.finally(() => {
+					this.loading = false;
+				});
+		},
+		resetTwoFactor() {
+			this.requiresTwoFactor = false;
+			this.twoFactorToken = '';
+			this.twoFactorCode = '';
 		},
 	},
 };

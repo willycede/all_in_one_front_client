@@ -34,6 +34,11 @@ export default {
 			this.$store.dispatch('syncActiveCart').catch(() => {
 				this.$store.dispatch('addSetToCart', []);
 			});
+			this.$store.dispatch('loadUserPreferences').then((prefs) => {
+				if (prefs && prefs.locale) {
+					this.$i18n.locale = prefs.locale;
+				}
+			});
 		}
 	},
 	methods: {

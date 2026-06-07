@@ -102,6 +102,7 @@
 <script>
 import api from 'Api';
 import HtmlElement from 'Constants/HtmlMailComprobante';
+import { getApiErrorMessage } from 'Helpers/apiError';
 
 export default {
 	data() {
@@ -171,8 +172,7 @@ export default {
 					this.showPaymentError(message);
 				}
 			} catch (e) {
-				const message = (e.response && e.response.data && e.response.data.error && e.response.data.error.message)
-					|| 'Error de conexión al verificar el pago';
+				const message = getApiErrorMessage(e, 'Error de conexión al verificar el pago');
 				this.showPaymentError(message);
 			}
 		},

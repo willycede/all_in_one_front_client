@@ -18,6 +18,7 @@
 
 <script>
 	import { mapGetters } from "vuex";
+	import { saveUserPreferences } from 'Helpers/userPreferences';
 
 	export default {
 		computed: {
@@ -27,6 +28,13 @@
 			changeLanguage(language) {
 				this.$i18n.locale = language.locale;
 				this.$store.dispatch("changeLanguage", language);
+
+				if (localStorage.id_users) {
+					saveUserPreferences({
+						id_user: localStorage.id_users,
+						locale: language.locale,
+					}).catch(() => {});
+				}
 			}
 		}
 	}

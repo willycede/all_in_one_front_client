@@ -7,8 +7,8 @@
 						{{ userInitials }}
 					</div>
 					<div>
-						<span class="aio-account__eyebrow">Mi cuenta</span>
-						<h1 class="aio-account__title">Hola, {{ userDisplayName }}</h1>
+					<span class="aio-account__eyebrow">{{ $t('account.eyebrow') }}</span>
+					<h1 class="aio-account__title">{{ $t('nav.hello', { name: userDisplayName }) }}</h1>
 						<p class="aio-account__email">{{ userEmail }}</p>
 					</div>
 				</div>
@@ -49,22 +49,6 @@
 import { getUserDisplayName } from 'Helpers/auth';
 
 export default {
-	data() {
-		return {
-			navItems: [
-				{
-					title: 'Perfil',
-					icon: 'person_outline',
-					path: '/account/profile',
-				},
-				{
-					title: 'Historial de pedidos',
-					icon: 'history',
-					path: '/account/order-history',
-				},
-			],
-		};
-	},
 	computed: {
 		userDisplayName() {
 			return getUserDisplayName();
@@ -78,6 +62,14 @@ export default {
 			const parts = name.split(/\s+/).filter(Boolean);
 			if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
 			return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+		},
+		navItems() {
+			return [
+				{ title: this.$t('account.profile'), icon: 'person_outline', path: '/account/profile' },
+				{ title: this.$t('account.preferences'), icon: 'tune', path: '/account/preferences' },
+				{ title: this.$t('account.security'), icon: 'shield', path: '/account/security' },
+				{ title: this.$t('account.orderHistory'), icon: 'history', path: '/account/order-history' },
+			];
 		},
 	},
 };
