@@ -6,7 +6,6 @@
 import 'babel-polyfill'
 import Vue from 'vue'
 import vuetify from '@/plugins/vuetify'
-import * as VueGoogleMaps from 'vue2-google-maps'
 import Nprogress from 'nprogress'
 import { isUserLoggedIn, requiresAuthentication, requiresAdmin, isAdminUser, isGuestOnlyRoute, resolveAuthenticatedHome, ADMIN_LOGIN_PATH } from 'Helpers/auth'
 import VueI18n from 'vue-i18n'
@@ -52,12 +51,6 @@ Vue.use(InstantSearch)
 Vue.use(VueI18n)
 Vue.use(Snotify, options)
 Vue.use(money, {precision: 4})
-Vue.use(VueGoogleMaps, {
-	load: {
-		key: "AIzaSyDC6tKEbtRlB6B0HgrFEN9P6ztTSJ89xt8",
-		libraries: "places"
-	}
-});
 Vue.use(GlobalComponents)
 
 Nprogress.configure({ showSpinner: false, trickleSpeed: 180, minimum: 0.15 });

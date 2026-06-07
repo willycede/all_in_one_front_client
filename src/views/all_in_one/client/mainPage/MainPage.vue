@@ -48,12 +48,12 @@ export default {
 			];
 		},
 	},
-	async created() {
+	created() {
 		if (this.$route.query.denied === 'admin') {
 			this.$snotify.warning(this.$t('homePage.adminDenied'), { timeout: 4000 });
 		}
-		await this.getCompanies();
-		await this.getRandomProducts();
+		this.getCompanies();
+		this.getRandomProducts();
 	},
 	methods: {
 		...mapActions(['getCompanies', 'getRandomProducts']),

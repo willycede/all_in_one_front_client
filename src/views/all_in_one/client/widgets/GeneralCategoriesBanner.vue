@@ -1,5 +1,13 @@
 <template>
-	<div v-if="generalCategories.length > 0" class="aio-hero">
+	<div v-if="isLoading" class="aio-hero aio-hero--skeleton" aria-hidden="true">
+		<div class="aio-hero__frame">
+			<div class="aio-hero__stage aio-hero__stage--skeleton">
+				<div class="aio-hero__skeleton-shimmer"></div>
+			</div>
+		</div>
+	</div>
+
+	<div v-else-if="generalCategories.length > 0" class="aio-hero">
 		<div class="aio-hero__frame">
 			<button type="button" class="aio-hero__arrow aio-hero__arrow--prev" :aria-label="$t('hero.prev')" @click="prev">
 				<v-icon>chevron_left</v-icon>
@@ -62,7 +70,12 @@
 				:class="{ 'aio-hero__thumb--active': index === activeIndex }"
 				@click="goTo(index)"
 			>
-				<img :src="slideImage(category)" :alt="localizedCategoryName(category.name)">
+				<img
+					:src="slideImage(category)"
+					:alt="localizedCategoryName(category.name)"
+					loading="lazy"
+					decoding="async"
+				>
 				<span>{{ localizedCategoryName(category.name) }}</span>
 			</button>
 		</div>
@@ -73,11 +86,18 @@
 import { mapActions, mapGetters } from 'vuex';
 import { localizedCategoryName, localizedCategoryNameLower } from 'Helpers/localizedCategory';
 
+const CATEGORY_BANNER_IMAGES = {
+	Accesorios: '/static/images/generalCategories/accesior_banne_aio.webp',
+	Rastreo: '/static/images/generalCategories/rastreo_banner_aio.webp',
+	Seguros: '/static/images/generalCategories/seguro_banner_aio.webp',
+};
+
 export default {
 	data() {
 		return {
 			activeIndex: 0,
 			autoplayTimer: null,
+			isLoading: true,
 		};
 	},
 	computed: {
@@ -87,7 +107,12 @@ export default {
 		},
 	},
 	async created() {
-		await this.getGeneralCategories();
+		try {
+			await this.getGeneralCategories();
+			this.preloadBannerImages();
+		} finally {
+			this.isLoading = false;
+		}
 	},
 	mounted() {
 		this.startAutoplay();
@@ -104,7 +129,17 @@ export default {
 			return localizedCategoryNameLower(this.$i18n, name);
 		},
 		slideImage(category) {
-			return `/static/images/generalCategories/${category.name}.jpg`;
+			return CATEGORY_BANNER_IMAGES[category.name]
+				|| `/static/images/generalCategories/${category.name}.jpg`;
+		},
+		preloadBannerImages() {
+			this.generalCategories.forEach((category) => {
+				const src = this.slideImage(category);
+				if (!src) return;
+				const img = new Image();
+				img.decoding = 'async';
+				img.src = src;
+			});
 		},
 		goTo(index) {
 			this.activeIndex = index;
@@ -146,6 +181,28 @@ export default {
 <style scoped>
 .aio-hero {
 	padding: 1.5rem 0 0;
+}
+
+.aio-hero__stage--skeleton {
+	background: linear-gradient(160deg, #f0ebfa 0%, #e8e0f4 100%);
+}
+
+.aio-hero__skeleton-shimmer {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		90deg,
+		rgba(255, 255, 255, 0) 0%,
+		rgba(255, 255, 255, 0.45) 50%,
+		rgba(255, 255, 255, 0) 100%
+	);
+	background-size: 200% 100%;
+	animation: aio-hero-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes aio-hero-shimmer {
+	0% { background-position: 200% 0; }
+	100% { background-position: -200% 0; }
 }
 
 .aio-hero__frame {

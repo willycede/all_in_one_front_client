@@ -1,25 +1,101 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="vuejs ecommerce template" content="eCommerce vuejs">
-		<meta name="embryo" content="Embryo is a fully responsive E-Commerce template developed with Vuejs2 and Vuetify Js vuetify js is a type of material component framework.">
-		<meta name="embryo" content="ecommerce, vuejs,vuex,template,rtl, multilingualism, multi currency pricing , MCP, dynamic , blogs ">
-		<meta name="author" content="The Iron Network">
-		<!--To share your website on Google+-->
-		<!-- <meta itemprop="embryo" content="">-->
-		<!--To share your website on Twitter-->
-		<!-- <meta twitter:card content=""> -->
-		<!--To share your website on Facebook-->
-		<!-- <meta property=”og:embryo" content=””> -->
 		<meta name="viewport" content="width=device-width,initial-scale=1.0">
-	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-		<link rel="icon" href=".//favicon.ico">
-		<title>All In One</title>
+		<meta name="description" content="All in One — Tu marketplace de confianza en Ecuador.">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap" rel="stylesheet">
+		<link rel="icon" href="./favicon.ico">
+		<link rel="preload" as="image" href="/static/images/logo/AIO_LOGO_NAME_BLACK&COLOR.png">
+		<title>All in One</title>
+		<style>
+			#app-splash {
+				position: fixed;
+				inset: 0;
+				z-index: 999999;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: linear-gradient(180deg, #faf8ff 0%, #f3eefb 100%);
+				transition: opacity 0.4s ease, visibility 0.4s ease;
+			}
+
+			#app-splash.app-splash--hide {
+				opacity: 0;
+				visibility: hidden;
+				pointer-events: none;
+			}
+
+			.app-splash__inner {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 1.5rem;
+				padding: 2rem;
+				text-align: center;
+			}
+
+			.app-splash__logo {
+				width: min(220px, 72vw);
+				height: auto;
+				object-fit: contain;
+				animation: app-splash-fade-in 0.6s ease both;
+			}
+
+			.app-splash__ring {
+				width: 52px;
+				height: 52px;
+				border-radius: 50%;
+				border: 3px solid rgba(169, 109, 250, 0.15);
+				border-top-color: #A96DFA;
+				border-right-color: #CA1DFF;
+				animation: app-splash-spin 0.9s linear infinite;
+			}
+
+			.app-splash__text {
+				margin: 0;
+				font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+				font-size: 0.9375rem;
+				font-weight: 500;
+				color: #6b7280;
+				letter-spacing: 0.02em;
+				animation: app-splash-fade-in 0.8s ease 0.15s both;
+			}
+
+			@keyframes app-splash-spin {
+				to { transform: rotate(360deg); }
+			}
+
+			@keyframes app-splash-fade-in {
+				from {
+					opacity: 0;
+					transform: translateY(8px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+		</style>
 	</head>
 	<body>
+		<div id="app-splash" role="status" aria-live="polite" aria-label="Cargando All in One">
+			<div class="app-splash__inner">
+				<img
+					class="app-splash__logo"
+					src="/static/images/logo/AIO_LOGO_NAME_BLACK&COLOR.png"
+					alt="All in One"
+					width="220"
+					height="124"
+				>
+				<div class="app-splash__ring" aria-hidden="true"></div>
+				<p class="app-splash__text">Cargando tu experiencia...</p>
+			</div>
+		</div>
 		<div id="app"></div>
 	</body>
 </html>

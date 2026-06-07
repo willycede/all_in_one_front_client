@@ -32,7 +32,7 @@
 								</div>
 								<div class="aio-legal__doc-body">
 									<a
-										:href="buildPdfUrl(doc.file_path)"
+										:href="buildPdfUrl(doc)"
 										target="_blank"
 										rel="noopener"
 										class="aio-legal__doc-link"
@@ -40,7 +40,7 @@
 									<span v-if="doc.is_required" class="aio-legal__doc-badge">{{ $t('publicPages.privacy.requiredDoc') }}</span>
 								</div>
 								<a
-									:href="buildPdfUrl(doc.file_path)"
+									:href="buildPdfUrl(doc)"
 									target="_blank"
 									rel="noopener"
 									class="aio-legal__doc-action"
@@ -83,8 +83,8 @@ export default {
 		this.loadPageData();
 	},
 	methods: {
-		buildPdfUrl(filePath) {
-			return buildApiFileUrl(filePath);
+		buildPdfUrl(doc) {
+			return buildApiFileUrl(doc);
 		},
 		loadPageData() {
 			this.isLoading = true;

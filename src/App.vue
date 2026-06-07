@@ -8,6 +8,7 @@
 <script>
 import { mapGetters } from "vuex";
 import CookieBanner from "Components/Global/CookieBanner.vue";
+import { removeAppSplash } from "Helpers/appSplash";
 export default {
 	components: { CookieBanner },
 	computed: {
@@ -25,6 +26,10 @@ export default {
 	 * Method To set the Rtl While page is opened
 	*/
 	mounted() {
+		this.$nextTick(() => {
+			removeAppSplash();
+		});
+
 		if(this.rtlLayout) {
 			this.$vuetify.rtl = this.rtlLayout;
 		}

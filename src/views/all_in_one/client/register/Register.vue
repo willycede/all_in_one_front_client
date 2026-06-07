@@ -166,7 +166,7 @@
 								<span class="aio-auth__consent-text">
 									{{ $t('signup.consentPrefix') }}
 									<a
-										:href="buildPdfUrl(doc.file_path)"
+										:href="buildPdfUrl(doc)"
 										target="_blank"
 										rel="noopener"
 										@click.stop
@@ -197,6 +197,7 @@
 <script>
 import api from 'Api';
 import AppConfig from 'Constants/AppConfig';
+import { buildApiFileUrl } from 'Helpers/apiUrls';
 
 export default {
 	data() {
@@ -289,10 +290,8 @@ export default {
 			const fields = ['name_user', 'last_name_user', 'identification_number', 'email', 'password', 'confirm_password'];
 			return fields.every((field) => this.fieldRules(field).every((rule) => rule(this.formData[field]) === true));
 		},
-		buildPdfUrl(filePath) {
-			const base = AppConfig.apiUrl.replace(/\/$/, '');
-			const path = filePath.startsWith('/') ? filePath : `/${filePath}`;
-			return `${base}${path}`;
+		buildPdfUrl(doc) {
+			return buildApiFileUrl(doc);
 		},
 		loadLegalDocuments() {
 			this.loadingDocuments = true;

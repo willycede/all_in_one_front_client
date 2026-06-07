@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import AppConfig from 'Constants/AppConfig';
+import { buildLegalDocumentUrl } from 'Helpers/apiUrls';
 import { isUserLoggedIn } from 'Helpers/auth';
 
 const STORAGE_KEY = 'cookie_consent';
@@ -35,7 +35,7 @@ export default {
     data() {
         return {
             visible: false,
-            policyUrl: `${AppConfig.apiUrl.replace(/\/$/, '')}/legal/v1/politica-tratamiento-datos.pdf`,
+            policyUrl: buildLegalDocumentUrl('data_treatment_policy'),
         };
     },
     watch: {
