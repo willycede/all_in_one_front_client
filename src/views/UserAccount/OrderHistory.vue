@@ -181,6 +181,7 @@
 <script>
 import api from 'Api';
 import moment from 'moment';
+import AppConfig from 'Constants/AppConfig';
 
 const DEFAULT_PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
@@ -384,8 +385,9 @@ export default {
 				});
 
 				if (response.data && response.data.errorCode === 200 && response.data.url) {
+					const payUrl = AppConfig.buildPayphoneRedirectUrl(response.data.url);
 					item.url_payphone = response.data.url;
-					window.open(response.data.url, '_blank');
+					window.open(payUrl, '_blank');
 					this.$snotify.success('Link de pago generado. Se abrió en una nueva pestaña.', {
 						timeout: 3500,
 					});

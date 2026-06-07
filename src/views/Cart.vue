@@ -195,7 +195,7 @@ export default {
         /*validamos si el link de pago se genero correctamente */
         if (urlPayphone.data.errorCode === 200) {
           const html = HtmlElement.buildOrderPaymentEmail({
-            payUrl: urlPayphone.data.url,
+            payUrl: AppConfig.buildPayphoneRedirectUrl(urlPayphone.data.url),
             siteUrl: AppConfig.siteUrl,
             logoUrl: AppConfig.emailLogoUrl,
             customerName: `${localStorage.name_user} ${localStorage.last_name_user}`.trim(),
@@ -213,6 +213,8 @@ export default {
               html: html,
               email: localStorage.email,
               name: `${localStorage.name_user} ${localStorage.last_name_user}`,
+              order_number: localStorage.id_orden,
+              subject: `ALL IN ONE - Pedido #${localStorage.id_orden}`,
             };
 
             try {

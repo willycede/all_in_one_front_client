@@ -10,6 +10,10 @@ const siteUrl = normalizeSiteUrl(
 	process.env.VUE_APP_NODE_ENV === 'production' ? 'https://aioecuador.com' : 'http://localhost:8080'
 );
 
+const buildPayphoneRedirectUrl = (payphoneUrl) => (
+	`${siteUrl}botonpagomail?urlPago=${encodeURIComponent(payphoneUrl)}`
+);
+
 export default {
 	appLogo: '/static/images/logo/AIO_LOGO_NAME_BLACK&COLOR.png',
 	appLogoFooter: '/static/images/logo/AIO_LOGO_NAME_ALL_WHITE.png',
@@ -35,6 +39,7 @@ export default {
 	siteUrl,
 	urlSite: siteUrl,
 	emailLogoUrl: `${siteUrl}static/images/logo/AIO_LOGO_NAME_ALL_WHITE.png`,
+	buildPayphoneRedirectUrl,
 
 	//configuracion correo
 	FROM_NAME:'',
