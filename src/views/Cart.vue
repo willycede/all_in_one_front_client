@@ -8,6 +8,7 @@ import CartDocumentsModal from "../components/Cart/CartDocumentsModal.vue";
 import CartCoupon from "../components/Cart/CartCoupon.vue";
 import { parseRequiredDocuments, formatDocumentName as formatDocLabel } from 'Helpers/documents';
 import { getApiErrorMessage, logApiError } from 'Helpers/apiError';
+import { buildCartPayphoneAmounts, centsToDisplay, toCents } from 'Helpers/payphoneAmounts';
 
 const key = '82f2ceed4c503896c8a291e560bd4325' // change to your key
 const iv = 'sinasinasisinaaa' // change to your iv
@@ -157,20 +158,16 @@ export default {
     async onRegisterShop() {
       try {
         /*Creramos variables de los totales de pago de la orden para crear arreglo payphone */
-        let subtotal = parseInt(parseFloat(this.itemTotal) * 100);
-        let couponCents = parseInt(parseFloat(this.couponDiscount) * 100);
-        let subtotalAfterCoupon = Math.max(0, subtotal - couponCents);
-        let impuesto = parseInt(parseFloat(this.tax) * 100);
-        let total = parseInt(parseFloat(this.getTotalPrice) * 100);
+        const payphoneAmounts = buildCartPayphoneAmounts({
+          subtotal: this.itemTotal,
+          couponDiscount: this.couponDiscount,
+          tax: this.tax,
+        });
         this.$refs.confirmationDialog.close();
         this.$refs.loadComponent.openDialog();
         const arr_pay = {
           id_shopping_car: localStorage.id_orden,
-          amount: total,
-          tax: impuesto,
-          amountWithTax: subtotalAfterCoupon,
-          service: 0,
-          tip: 0,
+          ...payphoneAmounts,
           currency: "USD",
           forceNewTransaction: true,
           reference: "PAGO ORDEN DE PAGO #" + localStorage.id_orden,
@@ -204,10 +201,10 @@ export default {
             date: `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`,
             itemsHtml: detallefinal,
             itemCount: this.cart.length,
-            subtotal: (subtotal / 100).toFixed(2),
-            tax: (impuesto / 100).toFixed(2),
-            discount: (couponCents / 100).toFixed(2),
-            total: (total / 100).toFixed(2),
+            subtotal: centsToDisplay(payphoneAmounts.amountWithTax + toCents(this.couponDiscount)),
+            tax: centsToDisplay(payphoneAmounts.tax),
+            discount: centsToDisplay(toCents(this.couponDiscount)),
+            total: centsToDisplay(payphoneAmounts.amount),
           });
 
             const data_send_mail = {
