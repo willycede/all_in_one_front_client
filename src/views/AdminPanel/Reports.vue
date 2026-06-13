@@ -13,7 +13,7 @@
 				<strong>{{ $t('adminReports.invoiceAlertTitle', { count: invoiceAlertCount }) }}</strong>
 				<p>{{ $t('adminReports.invoiceAlertHint') }}</p>
 			</div>
-			<v-btn small outlined color="primary" to="/admin-panel/invoices">
+			<v-btn small outlined color="primary" to="/admin-panel/invoices?status=error">
 				{{ $t('adminReports.invoiceAlertAction') }}
 			</v-btn>
 		</div>

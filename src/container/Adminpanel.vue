@@ -148,7 +148,7 @@
 							<strong>{{ $t('adminReports.invoiceAlertTitle', { count: invoiceAlertCount }) }}</strong>
 							<p>{{ $t('adminReports.invoiceAlertHint') }}</p>
 						</div>
-						<router-link to="/admin-panel/invoices" class="aio-admin__global-alert-link">
+						<router-link to="/admin-panel/invoices?status=error" class="aio-admin__global-alert-link">
 							{{ $t('adminReports.invoiceAlertAction') }}
 						</router-link>
 						<button type="button" class="aio-admin__global-alert-close" @click="dismissInvoiceAlert">

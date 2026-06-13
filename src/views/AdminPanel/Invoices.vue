@@ -17,6 +17,7 @@
 
 				<v-btn-toggle v-model="statusFilter" mandatory dense class="aio-admin-invoices__filters" @change="reload">
 					<v-btn value="all" small>{{ $t('adminInvoices.all') }}</v-btn>
+					<v-btn value="error" small>{{ $t('adminInvoices.errors') }}</v-btn>
 					<v-btn value="pending" small>{{ $t('adminInvoices.pending') }}</v-btn>
 					<v-btn value="invoiced" small>{{ $t('adminInvoices.invoiced') }}</v-btn>
 				</v-btn-toggle>
@@ -53,6 +54,7 @@
 						<th>{{ $t('adminInvoices.totalColumn') }}</th>
 						<th>{{ $t('adminInvoices.paidDateColumn') }}</th>
 						<th>{{ $t('adminInvoices.statusColumn') }}</th>
+						<th>{{ $t('adminInvoices.detailColumn') }}</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -68,10 +70,23 @@
 						<td>
 							<span
 								class="aio-admin-badge"
-								:class="isOrderInvoicePending(item.status_invoice) ? 'aio-admin-badge--warning' : 'aio-admin-badge--success'"
+								:class="invoiceBadgeClass(item)"
 							>
-								{{ isOrderInvoicePending(item.status_invoice) ? $t('adminInvoices.pendingStatus') : $t('adminInvoices.invoicedStatus') }}
+								{{ invoiceStatusLabel(item) }}
 							</span>
+						</td>
+						<td class="aio-admin-invoices__detail">
+							<template v-if="item.invoice_number">
+								<span class="aio-admin-invoices__invoice-number">{{ item.invoice_number }}</span>
+							</template>
+							<span
+								v-if="item.invoice_error"
+								class="aio-admin-invoices__error"
+								:title="item.invoice_error"
+							>
+								{{ item.invoice_error }}
+							</span>
+							<span v-if="!item.invoice_number && !item.invoice_error" class="aio-admin-invoices__muted">—</span>
 						</td>
 						<td class="aio-admin-invoices__actions">
 							<template v-if="!isOrderInvoicePending(item.status_invoice)">
@@ -154,10 +169,28 @@ export default {
 		};
 	},
 	mounted() {
+		const status = this.$route && this.$route.query && this.$route.query.status;
+		if (status === 'error' || status === 'pending' || status === 'invoiced' || status === 'all') {
+			this.statusFilter = status;
+		}
 		this.loadInvoices();
 	},
 	methods: {
 		isOrderInvoicePending,
+		invoiceBadgeClass(item) {
+			if (!isOrderInvoicePending(item.status_invoice)) return 'aio-admin-badge--success';
+			if (item.invoice_error) return 'aio-admin-badge--danger';
+			return 'aio-admin-badge--warning';
+		},
+		invoiceStatusLabel(item) {
+			if (!isOrderInvoicePending(item.status_invoice)) {
+				return this.$t('adminInvoices.invoicedStatus');
+			}
+			if (item.invoice_error) {
+				return this.$t('adminInvoices.errorStatus');
+			}
+			return this.$t('adminInvoices.pendingStatus');
+		},
 		formatMoney(value) {
 			return (parseFloat(value) || 0).toLocaleString('es-EC', {
 				minimumFractionDigits: 2,
@@ -214,8 +247,12 @@ export default {
 		async reprocess(item) {
 			this.reprocessingId = item.id_shopping_car;
 			try {
-				await api.post(`/api/admin/invoices/${item.id_shopping_car}/reprocess`);
-				this.$snotify.success(this.$t('adminInvoices.reprocessSuccess'), { timeout: 3000 });
+				const response = await api.post(`/api/admin/invoices/${item.id_shopping_car}/reprocess`);
+				const data = response.data && response.data.data;
+				const message = (data && data.invoice_number)
+					? this.$t('adminInvoices.reprocessSuccessWithNumber', { number: data.invoice_number })
+					: this.$t('adminInvoices.reprocessSuccess');
+				this.$snotify.success(message, { timeout: 3500 });
 				await this.loadInvoices(this.pagination.page);
 			} catch (error) {
 				const message = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)
@@ -267,6 +304,29 @@ export default {
 .aio-admin-invoices__actions {
 	text-align: right;
 	white-space: nowrap;
+}
+
+.aio-admin-invoices__detail {
+	max-width: 320px;
+}
+
+.aio-admin-invoices__invoice-number {
+	display: block;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: #111827;
+}
+
+.aio-admin-invoices__error {
+	display: block;
+	font-size: 0.75rem;
+	color: #b91c1c;
+	line-height: 1.4;
+	word-break: break-word;
+}
+
+.aio-admin-invoices__muted {
+	color: #9ca3af;
 }
 
 .aio-admin-invoices__pagination {

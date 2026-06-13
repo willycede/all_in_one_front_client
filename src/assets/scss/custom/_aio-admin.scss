@@ -926,6 +926,11 @@ $aio-admin-accent: #CA1DFF;
 	color: #e65100;
 }
 
+.aio-admin-badge--danger {
+	background: rgba(239, 68, 68, 0.12);
+	color: #b91c1c;
+}
+
 .aio-admin-stats {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
