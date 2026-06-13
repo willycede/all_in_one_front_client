@@ -241,6 +241,18 @@
 						{{ $t('adminBilling.signatureLoaded') }}: {{ form.signature_file_name || '—' }}
 					</p>
 
+					<v-text-field
+						v-model="form.signature_deploy_path"
+						:label="$t('adminBilling.signatureDeployPath')"
+						:hint="$t('adminBilling.signatureDeployPathHint')"
+						persistent-hint
+						outlined
+						dense
+						hide-details="auto"
+						class="aio-admin-billing__field mb-4"
+						:disabled="!canManageSignature"
+					></v-text-field>
+
 					<div class="aio-admin-billing__signature-fields">
 						<v-file-input
 							v-model="signatureFile"
@@ -348,6 +360,7 @@ const emptyForm = () => ({
 	service_url: '',
 	output_path: '',
 	jasper_path: '',
+	signature_deploy_path: '/opt/wildfly/standalone/data/firma',
 	signature_password: '',
 	has_signature: false,
 	signature_file_name: null,
@@ -466,6 +479,7 @@ export default {
 			const formData = new FormData();
 			formData.append('signature', file);
 			formData.append('signature_password', this.form.signature_password || '');
+			formData.append('signature_deploy_path', this.form.signature_deploy_path || '');
 			return formData;
 		},
 		async loadSettings() {
@@ -527,13 +541,16 @@ export default {
 				);
 
 				const payload = response.data.data || {};
-				const { signature_validation: validationMeta, ...settings } = payload;
+				const { signature_validation: validationMeta, signature_deployment: deploymentMeta, ...settings } = payload;
 				if (validationMeta) {
 					this.signatureValidation = validationMeta;
 				}
 				this.applySettings(settings);
 				this.signatureFile = null;
-				this.notifySuccess(this.$t('adminBilling.signatureSuccess'));
+				const deployPath = deploymentMeta && deploymentMeta.deployedPath;
+				this.notifySuccess(deployPath
+					? this.$t('adminBilling.signatureSuccessDeployed', { path: deployPath })
+					: this.$t('adminBilling.signatureSuccess'));
 			} catch (error) {
 				this.notifyError(this.getApiError(error, this.$t('adminBilling.signatureError')));
 			} finally {
