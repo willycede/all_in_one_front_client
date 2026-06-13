@@ -54,8 +54,23 @@
 
 				<template v-if="setupData && !status.enabled">
 					<div class="aio-account-security__setup">
+						<div class="aio-account-security__setup-brand">
+							<img
+								:src="setupData.logoUrl || '/static/images/logo/AIO_LOGO_NAME_BLACK&COLOR.png'"
+								:alt="setupData.issuer || 'All In One'"
+								class="aio-account-security__brand-logo"
+							>
+							<div>
+								<p class="aio-account-security__brand-label">{{ $t('account.twoFactorBrandTitle') }}</p>
+								<strong>{{ setupData.issuer }}</strong>
+								<p class="aio-account-security__brand-account">{{ setupData.accountLabel || setupData.email }}</p>
+							</div>
+						</div>
 						<p>{{ $t('account.scanQr') }}</p>
 						<img :src="setupData.qrCodeDataUrl" alt="QR 2FA" class="aio-account-security__qr">
+						<p class="aio-account-security__brand-hint">
+							{{ $t('account.scanQrBrandHint', { label: setupData.accountLabel || setupData.email }) }}
+						</p>
 						<p class="aio-account-security__manual">
 							{{ $t('account.manualKey') }}: <code>{{ setupData.manualKey }}</code>
 						</p>

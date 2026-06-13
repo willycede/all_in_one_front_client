@@ -25,6 +25,18 @@ export const adminPanelMenus = [
 		children: null,
 	},
 	{
+		path: '/admin-panel/users',
+		labelKey: 'admin.nav.users',
+		icon: 'people',
+		children: null,
+	},
+	{
+		path: '/admin-panel/audit-logs',
+		labelKey: 'admin.nav.auditLogs',
+		icon: 'history',
+		children: null,
+	},
+	{
 		path: '/admin-panel/documents',
 		labelKey: 'admin.nav.documents',
 		icon: 'description',

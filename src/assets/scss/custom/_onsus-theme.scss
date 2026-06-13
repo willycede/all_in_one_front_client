@@ -5278,6 +5278,57 @@
 	border-top: 1px solid rgba($primary, 0.08);
 }
 
+.aio-account-security__setup-brand {
+	display: flex;
+	align-items: center;
+	gap: 0.875rem;
+	padding: 0.875rem 1rem;
+	border-radius: 12px;
+	background: rgba($primary, 0.06);
+	border: 1px solid rgba($primary, 0.12);
+
+	strong {
+		display: block;
+		font-size: 1rem;
+		color: #1f1f28;
+	}
+
+	p {
+		margin: 0;
+	}
+}
+
+.aio-account-security__brand-logo {
+	width: 52px;
+	height: 52px;
+	object-fit: contain;
+	border-radius: 10px;
+	background: #fff;
+	padding: 4px;
+	flex-shrink: 0;
+}
+
+.aio-account-security__brand-label {
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: #6b6b78;
+	margin-bottom: 0.15rem !important;
+}
+
+.aio-account-security__brand-account {
+	font-size: 0.8125rem;
+	color: #6b6b78;
+	margin-top: 0.15rem !important;
+}
+
+.aio-account-security__brand-hint {
+	font-size: 0.8125rem;
+	color: #6b6b78;
+	margin: 0;
+}
+
 .aio-account-security__backup {
 	margin-top: 1.25rem;
 	padding: 1rem;
