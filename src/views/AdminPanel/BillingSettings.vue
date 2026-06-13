@@ -277,7 +277,15 @@
 						<div>
 							<p class="aio-admin-billing__validation-title">{{ $t('adminBilling.signatureValidated') }}</p>
 							<p class="aio-admin-billing__validation-detail">
-								{{ $t('adminBilling.signatureValidationRuc', { ruc: signatureValidation.certificateRuc }) }}
+								<template v-if="signatureValidation.usesPersonalCertificate">
+									{{ $t('adminBilling.signatureValidationPersonal', {
+										id: signatureValidation.certificateId || '—',
+										issuerRuc: signatureValidation.certificateRuc,
+									}) }}
+								</template>
+								<template v-else>
+									{{ $t('adminBilling.signatureValidationRuc', { ruc: signatureValidation.certificateRuc }) }}
+								</template>
 							</p>
 							<p class="aio-admin-billing__validation-detail">
 								{{ $t('adminBilling.signatureValidationHolder', { holder: signatureValidation.subjectCn || signatureValidation.subjectOrganization }) }}

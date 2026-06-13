@@ -723,6 +723,7 @@ export default {
 		validatingSignature: 'Validating...',
 		signatureValidated: 'Certificate is valid and matches the configured issuer',
 		signatureValidationRuc: 'Certificate tax ID: {ruc}',
+		signatureValidationPersonal: 'Natural person certificate (ID: {id}). Configured issuer tax ID: {issuerRuc}',
 		signatureValidationHolder: 'Holder: {holder}',
 		signatureValidationExpiry: 'Valid until: {date}',
 		uploadSignature: 'Upload signature',

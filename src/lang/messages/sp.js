@@ -723,6 +723,7 @@ export default {
 		validatingSignature: 'Validando...',
 		signatureValidated: 'Certificado válido y coincidente con el emisor',
 		signatureValidationRuc: 'RUC en certificado: {ruc}',
+		signatureValidationPersonal: 'Certificado de persona natural (cédula: {id}). Emisor configurado: RUC {issuerRuc}',
 		signatureValidationHolder: 'Titular: {holder}',
 		signatureValidationExpiry: 'Vigencia hasta: {date}',
 		uploadSignature: 'Subir firma',
