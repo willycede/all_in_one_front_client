@@ -1,12 +1,13 @@
 <template>
 	<div class="aio-admin-page">
-		<div class="aio-admin-page__header">
-			<div></div>
-			<v-btn color="primary" depressed @click="openCreateDialog">
-				<v-icon left>add</v-icon>
-				{{ $t('adminCoupons.newCoupon') }}
-			</v-btn>
-		</div>
+		<AdminPageHeader>
+			<template #actions>
+				<v-btn color="primary" depressed @click="openCreateDialog">
+					<v-icon left>add</v-icon>
+					{{ $t('adminCoupons.newCoupon') }}
+				</v-btn>
+			</template>
+		</AdminPageHeader>
 
 		<div v-if="errorMessage" class="aio-admin-page__error">
 			<v-icon color="error" class="mr-2">error_outline</v-icon>

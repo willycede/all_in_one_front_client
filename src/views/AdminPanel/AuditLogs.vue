@@ -1,11 +1,6 @@
 <template>
 	<div class="aio-admin-page">
-		<div class="aio-admin-page__header">
-			<div>
-				<h2 class="aio-admin-page__title">{{ $t('adminAuditLogs.title') }}</h2>
-				<p class="aio-admin-page__subtitle">{{ $t('adminAuditLogs.subtitle') }}</p>
-			</div>
-		</div>
+		<AdminPageHeader />
 
 		<div class="aio-admin-card pa-4 mb-4">
 			<div class="aio-admin-invoices__toolbar">

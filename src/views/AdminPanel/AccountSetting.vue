@@ -1,5 +1,7 @@
 <template>
 	<div class="aio-admin-settings">
+		<AdminPageHeader />
+
 		<p class="aio-admin-settings__lead">
 			Administra preferencias de tu cuenta de administrador, notificaciones y opciones de seguridad.
 		</p>

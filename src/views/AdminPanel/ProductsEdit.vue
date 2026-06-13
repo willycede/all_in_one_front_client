@@ -1,18 +1,6 @@
 <template>
 	<div class="aio-admin-page aio-admin-product-form">
-		<div class="aio-admin-product-form__intro">
-			<router-link to="/admin-panel/products" class="aio-admin-product-form__back">
-				<v-icon size="18">arrow_back</v-icon>
-				{{ $t('adminProducts.backToList') }}
-			</router-link>
-			<div class="aio-admin-product-form__intro-text">
-				<span class="aio-admin-product-form__eyebrow">{{ $t('adminProducts.editEyebrow') }}</span>
-				<p class="aio-admin-page__subtitle aio-admin-product-form__lead">
-					{{ $t('adminProducts.editLead') }}
-					<strong v-if="form.name">{{ form.name }}</strong>
-				</p>
-			</div>
-		</div>
+		<AdminPageHeader />
 
 		<div v-if="loadError" class="aio-admin-page__error">
 			<v-icon color="error" class="mr-2">error_outline</v-icon>

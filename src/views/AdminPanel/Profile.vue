@@ -1,5 +1,7 @@
 <template>
 	<div class="aio-admin-profile">
+		<AdminPageHeader />
+
 		<p class="aio-admin-settings__lead">
 			Consulta y edita la información básica asociada a tu cuenta de administrador.
 		</p>

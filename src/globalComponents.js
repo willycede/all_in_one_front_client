@@ -21,6 +21,7 @@ import Timer from './components/Global/Timer';
 import AppCard from 'Components/AppCard/AppCard';
 import DeleteConfirmationDialog2 from './components/Global/DeleteConfirmationDialog2';
 import VuePerfectScrollbar from 'vue-perfect-scrollbar';
+import AdminPageHeader from './components/Admin/AdminPageHeader.vue';
 
 
 const GlobalComponents = {
@@ -45,6 +46,7 @@ const GlobalComponents = {
       Vue.component('appCard', AppCard);
       Vue.component('embDeleteConfirmation2', DeleteConfirmationDialog2);
       Vue.component('embPerfectScrollbar', VuePerfectScrollbar);
+      Vue.component('AdminPageHeader', AdminPageHeader);
    }
 }
 

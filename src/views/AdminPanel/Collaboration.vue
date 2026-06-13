@@ -1,5 +1,7 @@
 <template>
 	<div class="aio-admin-collaboration">
+		<AdminPageHeader />
+
 		<p class="aio-admin-settings__lead">
 			Usuarios vinculados a empresas del sistema. Puedes invitar por correo o quitar accesos.
 		</p>

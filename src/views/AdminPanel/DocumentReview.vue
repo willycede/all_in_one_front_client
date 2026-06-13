@@ -1,15 +1,16 @@
 <template>
 	<div class="aio-admin-page">
-		<div class="aio-admin-page__header">
-			<div></div>
-			<div class="aio-admin-docs__filters">
-				<v-btn-toggle v-model="statusFilter" mandatory dense @change="onFilterChange">
-					<v-btn value="pending" small>{{ $t('adminDocumentReview.filterPending') }}</v-btn>
-					<v-btn value="verified" small>{{ $t('adminDocumentReview.filterVerified') }}</v-btn>
-					<v-btn value="all" small>{{ $t('adminDocumentReview.filterAll') }}</v-btn>
-				</v-btn-toggle>
-			</div>
-		</div>
+		<AdminPageHeader>
+			<template #actions>
+				<div class="aio-admin-docs__filters">
+					<v-btn-toggle v-model="statusFilter" mandatory dense @change="onFilterChange">
+						<v-btn value="pending" small>{{ $t('adminDocumentReview.filterPending') }}</v-btn>
+						<v-btn value="verified" small>{{ $t('adminDocumentReview.filterVerified') }}</v-btn>
+						<v-btn value="all" small>{{ $t('adminDocumentReview.filterAll') }}</v-btn>
+					</v-btn-toggle>
+				</div>
+			</template>
+		</AdminPageHeader>
 
 		<div v-if="errorMessage" class="aio-admin-page__error">
 			<v-icon color="error" class="mr-2">error_outline</v-icon>

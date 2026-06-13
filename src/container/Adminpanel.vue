@@ -111,36 +111,53 @@
 					<button type="button" class="aio-admin__menu-btn" aria-label="Menú" @click="toggleSidebar">
 						<v-icon color="white">menu</v-icon>
 					</button>
-					<div class="aio-admin__topbar-heading">
-						<p class="aio-admin__topbar-eyebrow">{{ $t('admin.panel') }}</p>
-						<h1 class="aio-admin__page-title">{{ currentPageTitle }}</h1>
-						<p v-if="currentPageSubtitle" class="aio-admin__page-subtitle">{{ currentPageSubtitle }}</p>
-					</div>
+					<router-link to="/admin-panel/reports" class="aio-admin__topbar-brand">
+						<img
+							alt="All in One"
+							class="aio-admin__topbar-logo"
+							src="/static/images/logo/favicon.ico"
+						>
+						<div class="aio-admin__topbar-brand-text">
+							<span class="aio-admin__topbar-brand-name">All in One</span>
+							<span class="aio-admin__topbar-brand-role">{{ $t('admin.panel') }}</span>
+						</div>
+					</router-link>
 				</div>
 				<div class="aio-admin__topbar-actions">
+					<router-link
+						v-if="invoiceAlertCount > 0"
+						to="/admin-panel/invoices"
+						class="aio-admin__topbar-alert"
+						:title="$t('adminReports.invoiceAlertTitle', { count: invoiceAlertCount })"
+					>
+						<v-icon size="20" color="warning">warning_amber</v-icon>
+						<span class="aio-admin__topbar-alert-count">{{ invoiceAlertCount > 99 ? '99+' : invoiceAlertCount }}</span>
+					</router-link>
 					<emb-user-block :data="userLinks"></emb-user-block>
 				</div>
 			</header>
 
-			<main class="aio-admin__content">
-				<div
-					v-if="invoiceAlertCount > 0 && showGlobalInvoiceAlert"
-					class="aio-admin__global-alert"
-				>
-					<v-icon color="warning" size="20">warning_amber</v-icon>
-					<div>
-						<strong>{{ $t('adminReports.invoiceAlertTitle', { count: invoiceAlertCount }) }}</strong>
-						<p>{{ $t('adminReports.invoiceAlertHint') }}</p>
+			<div class="aio-admin__content-scroll">
+				<main class="aio-admin__content">
+					<div
+						v-if="invoiceAlertCount > 0 && showGlobalInvoiceAlert"
+						class="aio-admin__global-alert"
+					>
+						<v-icon color="warning" size="20">warning_amber</v-icon>
+						<div>
+							<strong>{{ $t('adminReports.invoiceAlertTitle', { count: invoiceAlertCount }) }}</strong>
+							<p>{{ $t('adminReports.invoiceAlertHint') }}</p>
+						</div>
+						<router-link to="/admin-panel/invoices" class="aio-admin__global-alert-link">
+							{{ $t('adminReports.invoiceAlertAction') }}
+						</router-link>
+						<button type="button" class="aio-admin__global-alert-close" @click="dismissInvoiceAlert">
+							<v-icon size="18">close</v-icon>
+						</button>
 					</div>
-					<router-link to="/admin-panel/invoices" class="aio-admin__global-alert-link">
-						{{ $t('adminReports.invoiceAlertAction') }}
-					</router-link>
-					<button type="button" class="aio-admin__global-alert-close" @click="dismissInvoiceAlert">
-						<v-icon size="18">close</v-icon>
-					</button>
-				</div>
-				<router-view></router-view>
-			</main>
+					<router-view></router-view>
+				</main>
+			</div>
 		</div>
 
 		<vue-snotify></vue-snotify>
@@ -153,22 +170,6 @@ import AppConfig from 'Constants/AppConfig';
 import api from 'Api';
 import { mapGetters } from 'vuex';
 import { clearUserSession } from 'Helpers/auth';
-
-const PAGE_META_KEYS = {
-	'/admin-panel/reports': 'admin.pages.reports',
-	'/admin-panel/orders': 'admin.pages.orders',
-	'/admin-panel/invoices': 'admin.pages.invoices',
-	'/admin-panel/billing-settings': 'admin.pages.billing',
-	'/admin-panel/users': 'admin.pages.users',
-	'/admin-panel/audit-logs': 'admin.pages.auditLogs',
-	'/admin-panel/documents': 'admin.pages.documents',
-	'/admin-panel/coupons': 'admin.pages.coupons',
-	'/admin-panel/products': 'admin.pages.products',
-	'/admin-panel/product-add': 'admin.pages.productAdd',
-	'/admin-panel/account/profile': 'admin.pages.profile',
-	'/admin-panel/account/settings': 'admin.pages.settings',
-	'/admin-panel/account/collaboration': 'admin.pages.collaboration',
-};
 
 export default {
 	data() {
@@ -195,29 +196,6 @@ export default {
 					path: '/mainPage',
 				},
 			];
-		},
-		currentPageMeta() {
-			const path = this.$route.path;
-			const key = PAGE_META_KEYS[path];
-			if (key) {
-				return {
-					title: this.$t(`${key}.title`),
-					subtitle: this.$t(`${key}.subtitle`),
-				};
-			}
-			if (path.indexOf('/admin-panel/product-edit') === 0) {
-				return {
-					title: this.$t('admin.pages.productAdd.title'),
-					subtitle: this.$t('admin.pages.products.subtitle'),
-				};
-			}
-			return { title: this.$t('admin.panel'), subtitle: 'All in One' };
-		},
-		currentPageTitle() {
-			return this.currentPageMeta.title;
-		},
-		currentPageSubtitle() {
-			return this.currentPageMeta.subtitle;
 		},
 	},
 	mounted() {

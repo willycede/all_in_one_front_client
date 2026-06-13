@@ -1,5 +1,7 @@
 <template>
 	<div class="aio-admin-page">
+		<AdminPageHeader />
+
 		<div v-if="loadError" class="aio-admin-page__error mb-4">
 			<v-icon color="error" class="mr-2">error_outline</v-icon>
 			{{ loadError }}
