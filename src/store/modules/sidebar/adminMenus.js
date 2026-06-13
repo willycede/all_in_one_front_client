@@ -1,79 +1,107 @@
 /* eslint-disable */
 export const adminPanelMenus = [
 	{
+		id: 'dashboard',
 		path: '/admin-panel/reports',
 		labelKey: 'admin.nav.reports',
 		icon: 'poll',
-		children: null,
 	},
 	{
-		path: '/admin-panel/orders',
-		labelKey: 'admin.nav.orders',
+		id: 'sales',
+		labelKey: 'admin.nav.sales',
 		icon: 'shopping_bag',
-		children: null,
-	},
-	{
-		path: '/admin-panel/invoices',
-		labelKey: 'admin.nav.invoices',
-		icon: 'receipt_long',
-		children: null,
-	},
-	{
-		path: '/admin-panel/billing-settings',
-		labelKey: 'admin.nav.billing',
-		icon: 'settings_suggest',
-		children: null,
-	},
-	{
-		path: '/admin-panel/users',
-		labelKey: 'admin.nav.users',
-		icon: 'people',
-		children: null,
-	},
-	{
-		path: '/admin-panel/audit-logs',
-		labelKey: 'admin.nav.auditLogs',
-		icon: 'history',
-		children: null,
-	},
-	{
-		path: '/admin-panel/documents',
-		labelKey: 'admin.nav.documents',
-		icon: 'description',
-		children: null,
-	},
-	{
-		path: '/admin-panel/coupons',
-		labelKey: 'admin.nav.coupons',
-		icon: 'local_offer',
-		children: null,
-	},
-	{
-		path: '',
-		labelKey: 'admin.nav.products',
-		icon: 'inventory_2',
 		children: [
 			{
-				labelKey: 'admin.nav.productList',
-				path: '/admin-panel/products',
+				path: '/admin-panel/orders',
+				labelKey: 'admin.nav.orders',
+				icon: 'shopping_bag',
 			},
 			{
-				labelKey: 'admin.nav.productAdd',
-				path: '/admin-panel/product-add',
+				path: '/admin-panel/invoices',
+				labelKey: 'admin.nav.invoices',
+				icon: 'receipt_long',
+				badgeKey: 'invoices',
 			},
 		],
 	},
 	{
-		path: '/admin-panel/account/profile',
-		labelKey: 'admin.nav.profile',
-		icon: 'account_circle',
-		children: null,
+		id: 'billing',
+		labelKey: 'admin.nav.billingSection',
+		icon: 'account_balance',
+		children: [
+			{
+				path: '/admin-panel/billing-settings',
+				labelKey: 'admin.nav.billing',
+				icon: 'settings_suggest',
+			},
+		],
 	},
 	{
-		path: '/mainPage',
-		labelKey: 'admin.nav.goToStore',
-		icon: 'storefront',
-		children: null,
-		external: false,
+		id: 'catalog',
+		labelKey: 'admin.nav.catalog',
+		icon: 'inventory_2',
+		children: [
+			{
+				path: '/admin-panel/products',
+				labelKey: 'admin.nav.productList',
+				icon: 'view_list',
+			},
+			{
+				path: '/admin-panel/product-add',
+				labelKey: 'admin.nav.productAdd',
+				icon: 'add_box',
+			},
+			{
+				path: '/admin-panel/coupons',
+				labelKey: 'admin.nav.coupons',
+				icon: 'local_offer',
+			},
+		],
+	},
+	{
+		id: 'customers',
+		labelKey: 'admin.nav.customers',
+		icon: 'groups',
+		children: [
+			{
+				path: '/admin-panel/users',
+				labelKey: 'admin.nav.users',
+				icon: 'people',
+			},
+			{
+				path: '/admin-panel/documents',
+				labelKey: 'admin.nav.documents',
+				icon: 'description',
+			},
+		],
+	},
+	{
+		id: 'security',
+		labelKey: 'admin.nav.security',
+		icon: 'shield',
+		children: [
+			{
+				path: '/admin-panel/audit-logs',
+				labelKey: 'admin.nav.auditLogs',
+				icon: 'history',
+			},
+		],
+	},
+	{
+		id: 'account',
+		labelKey: 'admin.nav.account',
+		icon: 'manage_accounts',
+		children: [
+			{
+				path: '/admin-panel/account/profile',
+				labelKey: 'admin.nav.profile',
+				icon: 'account_circle',
+			},
+			{
+				path: '/mainPage',
+				labelKey: 'admin.nav.goToStore',
+				icon: 'storefront',
+			},
+		],
 	},
 ];

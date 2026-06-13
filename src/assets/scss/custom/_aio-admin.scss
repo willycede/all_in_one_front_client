@@ -1,72 +1,193 @@
 // Shell del panel de administración (tema morado All in One)
 
+$aio-admin-sidebar-collapsed: 76px;
+$aio-admin-sidebar-expanded: 272px;
+$aio-admin-primary: #A96DFA;
+$aio-admin-accent: #CA1DFF;
+
 .aio-admin {
 	display: flex;
 	min-height: 100vh;
-	background: linear-gradient(180deg, #f8f5ff 0%, #f3eefb 100%);
+	background:
+		radial-gradient(ellipse 80% 50% at 100% 0%, rgba(169, 109, 250, 0.08) 0%, transparent 55%),
+		radial-gradient(ellipse 60% 40% at 0% 100%, rgba(202, 29, 255, 0.05) 0%, transparent 50%),
+		linear-gradient(180deg, #faf8ff 0%, #f4effc 100%);
 }
 
 .aio-admin__sidebar {
-	width: 260px;
+	width: $aio-admin-sidebar-collapsed;
 	flex-shrink: 0;
-	background: linear-gradient(180deg, #08080c 0%, #150820 55%, #1a0a28 100%);
+	background: linear-gradient(180deg, #06060a 0%, #12061c 48%, #180a24 100%);
 	color: #fff;
-	display: flex;
-	flex-direction: column;
 	position: fixed;
 	top: 0;
 	left: 0;
 	bottom: 0;
 	z-index: 120;
-	transition: transform 0.25s ease;
+	overflow: hidden;
+	transition:
+		width 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+
+	&::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(180deg, rgba($aio-admin-primary, 0.06) 0%, transparent 40%);
+		pointer-events: none;
+	}
+
+	&:hover {
+		width: $aio-admin-sidebar-expanded;
+		box-shadow: 12px 0 40px rgba(8, 8, 12, 0.35);
+	}
 }
 
-.aio-admin__sidebar--closed {
-	transform: translateX(-100%);
+.aio-admin__sidebar-inner {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-width: $aio-admin-sidebar-expanded;
+	position: relative;
+	z-index: 1;
 }
 
 .aio-admin__sidebar-brand {
-	padding: 1.5rem 1.25rem 1.25rem;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	padding: 1.25rem 1rem 1rem;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+	flex-shrink: 0;
+}
+
+.aio-admin__sidebar-brand-link {
+	display: block;
+	text-decoration: none;
 }
 
 .aio-admin__sidebar-logo {
 	display: block;
 	margin: 0 auto;
-	height: 38px;
-	max-width: 168px;
 	object-fit: contain;
+	transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.aio-admin__sidebar-logo--full {
+	height: 36px;
+	max-width: 168px;
+}
+
+.aio-admin__sidebar-logo--compact {
+	display: none;
+	height: 36px;
+	width: 36px;
+	border-radius: 10px;
+	box-shadow: 0 4px 16px rgba($aio-admin-primary, 0.35);
 }
 
 .aio-admin__sidebar-eyebrow {
 	display: block;
-	margin-top: 0.75rem;
+	margin-top: 0.625rem;
 	text-align: center;
-	font-size: 0.6875rem;
+	font-size: 0.625rem;
 	font-weight: 700;
-	letter-spacing: 0.12em;
+	letter-spacing: 0.14em;
 	text-transform: uppercase;
-	color: rgba(169, 109, 250, 0.85);
+	color: rgba($aio-admin-primary, 0.9);
+	white-space: nowrap;
 }
 
 .aio-admin__nav {
 	flex: 1;
+	overflow-x: hidden;
 	overflow-y: auto;
-	padding: 1rem 0.75rem;
+	padding: 0.875rem 0.625rem;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+
+	&::-webkit-scrollbar {
+		width: 4px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.15);
+		border-radius: 4px;
+	}
 }
 
 .aio-admin__nav-group {
-	margin-bottom: 0.5rem;
+	margin-bottom: 0.25rem;
 }
 
-.aio-admin__nav-group-label {
-	display: block;
-	padding: 0.5rem 0.75rem 0.375rem;
-	font-size: 0.6875rem;
-	font-weight: 700;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-	color: rgba(255, 255, 255, 0.35);
+.aio-admin__nav-group-head {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.625rem 0.75rem;
+	margin-bottom: 0.125rem;
+	border-radius: 14px;
+	color: rgba(255, 255, 255, 0.72);
+	background: transparent;
+	border: none;
+	width: 100%;
+	cursor: pointer;
+	text-align: left;
+	position: relative;
+	transition: background 0.22s ease, color 0.22s ease;
+
+	&:hover {
+		background: rgba($aio-admin-primary, 0.12);
+		color: #fff;
+	}
+}
+
+.aio-admin__nav-group--active > .aio-admin__nav-group-head {
+	color: #fff;
+	background: rgba($aio-admin-primary, 0.1);
+}
+
+.aio-admin__nav-group--active > .aio-admin__nav-group-head .aio-admin__nav-icon {
+	background: rgba($aio-admin-primary, 0.22);
+	box-shadow: 0 4px 12px rgba($aio-admin-primary, 0.2);
+}
+
+.aio-admin__nav-chevron {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: auto;
+	flex-shrink: 0;
+	transition: transform 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+	opacity: 0.65;
+
+	.v-icon {
+		font-size: 20px !important;
+		color: inherit !important;
+	}
+}
+
+.aio-admin__nav-group--expanded .aio-admin__nav-chevron {
+	transform: rotate(180deg);
+	opacity: 1;
+}
+
+.aio-admin__nav-group-items {
+	display: flex;
+	flex-direction: column;
+	gap: 0.125rem;
+	max-height: 0;
+	overflow: hidden;
+	opacity: 0;
+	padding-left: 0.25rem;
+	transition:
+		max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+		opacity 0.22s ease,
+		padding 0.22s ease;
+}
+
+.aio-admin__nav-group--expanded .aio-admin__nav-group-items {
+	max-height: 320px;
+	opacity: 1;
+	padding-top: 0.125rem;
+	padding-bottom: 0.25rem;
 }
 
 .aio-admin__nav-item {
@@ -74,68 +195,194 @@
 	align-items: center;
 	gap: 0.75rem;
 	padding: 0.6875rem 0.875rem;
-	margin-bottom: 0.25rem;
-	border-radius: 12px;
-	color: rgba(255, 255, 255, 0.72);
+	margin-bottom: 0.125rem;
+	border-radius: 14px;
+	color: rgba(255, 255, 255, 0.68);
 	text-decoration: none;
-	font-size: 0.9375rem;
+	font-size: 0.875rem;
 	font-weight: 500;
-	transition: background 0.2s, color 0.2s;
+	transition: background 0.22s ease, color 0.22s ease, transform 0.18s ease;
 	border: none;
 	background: transparent;
 	width: 100%;
 	cursor: pointer;
 	text-align: left;
+	position: relative;
+	white-space: nowrap;
+
+	&::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 50%;
+		transform: translateY(-50%) scaleY(0);
+		width: 3px;
+		height: 60%;
+		border-radius: 0 4px 4px 0;
+		background: linear-gradient(180deg, $aio-admin-primary, $aio-admin-accent);
+		transition: transform 0.22s ease;
+	}
 }
 
 .aio-admin__nav-item:hover {
-	background: rgba(169, 109, 250, 0.12);
+	background: rgba($aio-admin-primary, 0.14);
 	color: #fff;
+	transform: translateX(2px);
 }
 
 .aio-admin__nav-item--active {
-	background: linear-gradient(135deg, rgba(169, 109, 250, 0.35) 0%, rgba(202, 29, 255, 0.2) 100%);
+	background: linear-gradient(135deg, rgba($aio-admin-primary, 0.32) 0%, rgba($aio-admin-accent, 0.18) 100%);
 	color: #fff;
-	box-shadow: inset 0 0 0 1px rgba(169, 109, 250, 0.35);
+	box-shadow: inset 0 0 0 1px rgba($aio-admin-primary, 0.28);
+
+	&::before {
+		transform: translateY(-50%) scaleY(1);
+	}
 }
 
 .aio-admin__nav-item--sub {
-	padding-left: 2.5rem;
-	font-size: 0.875rem;
+	padding: 0.5625rem 0.75rem 0.5625rem 0.5rem;
+	font-size: 0.8125rem;
+	margin-left: 0.375rem;
+}
+
+.aio-admin__nav-icon--sub {
+	width: 30px;
+	height: 30px;
+	border-radius: 9px;
+	background: rgba(255, 255, 255, 0.04);
+
+	.v-icon {
+		font-size: 17px !important;
+	}
 }
 
 .aio-admin__nav-icon {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 28px;
-	height: 28px;
-	border-radius: 8px;
-	background: rgba(255, 255, 255, 0.06);
+	width: 36px;
+	height: 36px;
+	border-radius: 11px;
+	background: rgba(255, 255, 255, 0.05);
 	flex-shrink: 0;
+	transition: background 0.22s ease, box-shadow 0.22s ease;
 
 	.v-icon {
 		color: inherit !important;
-		font-size: 18px !important;
+		font-size: 20px !important;
 	}
 }
 
+.aio-admin__nav-item:hover .aio-admin__nav-icon,
 .aio-admin__nav-item--active .aio-admin__nav-icon {
-	background: rgba(255, 255, 255, 0.12);
+	background: rgba(255, 255, 255, 0.1);
+	box-shadow: 0 4px 12px rgba($aio-admin-primary, 0.2);
+}
+
+.aio-admin__nav-item--logout:hover {
+	background: rgba(239, 68, 68, 0.15);
+	color: #fca5a5;
+}
+
+.aio-admin__nav-label {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	transition: opacity 0.22s ease, transform 0.22s ease;
 }
 
 .aio-admin__sidebar-footer {
-	padding: 1rem 0.75rem 1.25rem;
-	border-top: 1px solid rgba(255, 255, 255, 0.08);
+	padding: 0.75rem 0.625rem 1.125rem;
+	border-top: 1px solid rgba(255, 255, 255, 0.07);
+	flex-shrink: 0;
+}
+
+// Estado colapsado: solo iconos centrados
+.aio-admin__sidebar:not(:hover):not(.aio-admin__sidebar--open) {
+	.aio-admin__sidebar-logo--full {
+		display: none;
+	}
+
+	.aio-admin__sidebar-logo--compact {
+		display: block;
+	}
+
+	.aio-admin__sidebar-eyebrow,
+	.aio-admin__nav-label,
+	.aio-admin__nav-chevron,
+	.aio-admin__nav-group-head .aio-admin__nav-label,
+	.aio-admin__nav-group-items {
+		opacity: 0;
+		visibility: hidden;
+		width: 0;
+		height: 0;
+		overflow: hidden;
+		margin: 0;
+		padding: 0;
+		pointer-events: none;
+	}
+
+	.aio-admin__nav-group-items {
+		max-height: 0 !important;
+	}
+
+	.aio-admin__nav-group-head {
+		padding: 0.625rem;
+		justify-content: center;
+		margin-bottom: 0.125rem;
+		pointer-events: auto;
+	}
+
+	.aio-admin__nav-badge--group {
+		position: absolute;
+		top: 6px;
+		right: 10px;
+		min-width: 8px;
+		width: 8px;
+		height: 8px;
+		padding: 0;
+		font-size: 0;
+		border-radius: 50%;
+		margin-left: 0;
+		box-shadow: 0 0 0 2px #12061c;
+	}
+
+	.aio-admin__nav-item {
+		justify-content: center;
+		padding-left: 0.625rem;
+		padding-right: 0.625rem;
+		gap: 0;
+	}
+
+	.aio-admin__nav-item::before {
+		left: 2px;
+	}
+
+	.aio-admin__nav-badge {
+		position: absolute;
+		top: 6px;
+		right: 10px;
+		min-width: 8px;
+		width: 8px;
+		height: 8px;
+		padding: 0;
+		font-size: 0;
+		border-radius: 50%;
+		margin-left: 0;
+		box-shadow: 0 0 0 2px #12061c;
+	}
 }
 
 .aio-admin__main {
 	flex: 1;
-	margin-left: 260px;
+	margin-left: $aio-admin-sidebar-collapsed;
 	min-width: 0;
 	display: flex;
 	flex-direction: column;
 	min-height: 100vh;
+	transition: margin-left 0.32s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .aio-admin__topbar {
@@ -143,10 +390,11 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 1rem;
-	padding: 0.875rem 1.5rem;
-	background: rgba(255, 255, 255, 0.92);
-	backdrop-filter: blur(12px);
-	border-bottom: 1px solid rgba(169, 109, 250, 0.12);
+	padding: 0.75rem 1.5rem;
+	background: rgba(255, 255, 255, 0.88);
+	backdrop-filter: blur(16px);
+	border-bottom: 1px solid rgba($aio-admin-primary, 0.1);
+	box-shadow: 0 4px 24px rgba($aio-admin-primary, 0.06);
 	position: sticky;
 	top: 0;
 	z-index: 100;
@@ -159,33 +407,55 @@
 	min-width: 0;
 }
 
+.aio-admin__topbar-heading {
+	min-width: 0;
+}
+
+.aio-admin__topbar-eyebrow {
+	margin: 0 0 0.125rem;
+	font-size: 0.6875rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: $aio-admin-primary;
+}
+
 .aio-admin__menu-btn {
 	display: none;
 	align-items: center;
 	justify-content: center;
-	width: 40px;
-	height: 40px;
+	width: 42px;
+	height: 42px;
 	border: none;
-	border-radius: 10px;
-	background: linear-gradient(135deg, #A96DFA 0%, #CA1DFF 100%);
+	border-radius: 12px;
+	background: linear-gradient(135deg, $aio-admin-primary 0%, $aio-admin-accent 100%);
 	color: #fff;
 	cursor: pointer;
+	box-shadow: 0 4px 16px rgba($aio-admin-accent, 0.35);
+	transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+	&:hover {
+		transform: scale(1.04);
+		box-shadow: 0 6px 20px rgba($aio-admin-accent, 0.45);
+	}
 }
 
 .aio-admin__page-title {
 	margin: 0;
-	font-size: 1.125rem;
+	font-size: 1.25rem;
 	font-weight: 700;
-	color: #111827;
+	color: #0f0f14;
+	letter-spacing: -0.02em;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
 
 .aio-admin__page-subtitle {
-	margin: 0.125rem 0 0;
+	margin: 0.2rem 0 0;
 	font-size: 0.8125rem;
 	color: #6b7280;
+	line-height: 1.4;
 }
 
 .aio-admin__topbar-actions {
@@ -196,18 +466,19 @@
 
 .aio-admin__content {
 	flex: 1;
-	padding: 1.5rem;
+	padding: 1.5rem 1.75rem 2rem;
 }
 
 .aio-admin__global-alert {
 	display: flex;
 	align-items: flex-start;
 	gap: 0.75rem;
-	margin-bottom: 1rem;
-	padding: 0.875rem 1rem;
-	border-radius: 12px;
-	background: rgba(245, 158, 11, 0.12);
-	border: 1px solid rgba(245, 158, 11, 0.28);
+	margin-bottom: 1.25rem;
+	padding: 1rem 1.125rem;
+	border-radius: 14px;
+	background: rgba(245, 158, 11, 0.1);
+	border: 1px solid rgba(245, 158, 11, 0.25);
+	box-shadow: 0 4px 16px rgba(245, 158, 11, 0.08);
 }
 
 .aio-admin__global-alert p {
@@ -220,9 +491,14 @@
 	margin-left: auto;
 	font-size: 0.8125rem;
 	font-weight: 700;
-	color: #A96DFA;
+	color: $aio-admin-primary;
 	text-decoration: none;
 	white-space: nowrap;
+	transition: color 0.18s ease;
+
+	&:hover {
+		color: $aio-admin-accent;
+	}
 }
 
 .aio-admin__global-alert-close {
@@ -233,21 +509,18 @@
 	color: #6b7280;
 }
 
-.aio-admin__nav-item {
-	position: relative;
-}
-
 .aio-admin__nav-badge {
 	margin-left: auto;
 	min-width: 1.25rem;
-	padding: 0.1rem 0.4rem;
+	padding: 0.1rem 0.45rem;
 	border-radius: 999px;
-	background: #ef4444;
+	background: linear-gradient(135deg, #ef4444, #dc2626);
 	color: #fff;
-	font-size: 0.6875rem;
+	font-size: 0.625rem;
 	font-weight: 700;
-	line-height: 1.2;
+	line-height: 1.3;
 	text-align: center;
+	flex-shrink: 0;
 }
 
 .aio-admin__overlay {
@@ -255,6 +528,7 @@
 	position: fixed;
 	inset: 0;
 	background: rgba(8, 8, 12, 0.55);
+	backdrop-filter: blur(4px);
 	z-index: 110;
 }
 
@@ -264,7 +538,7 @@
 
 // Páginas internas del admin
 .aio-admin-page {
-	max-width: 1280px;
+	max-width: 1320px;
 	margin: 0 auto;
 }
 
@@ -281,7 +555,8 @@
 	margin: 0;
 	font-size: 1.375rem;
 	font-weight: 700;
-	color: #111827;
+	color: #0f0f14;
+	letter-spacing: -0.02em;
 }
 
 .aio-admin-page__subtitle {
@@ -291,10 +566,13 @@
 }
 
 .aio-admin-card {
-	background: #fff;
-	border-radius: 16px;
-	border: 1px solid rgba(169, 109, 250, 0.12);
-	box-shadow: 0 8px 32px rgba(169, 109, 250, 0.08);
+	background: rgba(255, 255, 255, 0.95);
+	border-radius: 18px;
+	border: 1px solid rgba($aio-admin-primary, 0.1);
+	box-shadow:
+		0 1px 2px rgba($aio-admin-primary, 0.04),
+		0 8px 32px rgba($aio-admin-primary, 0.07);
+	transition: box-shadow 0.22s ease, border-color 0.22s ease;
 }
 
 .aio-admin-page__loading,
@@ -311,7 +589,7 @@
 
 .aio-admin-page__empty h3 {
 	margin: 0;
-	color: #111827;
+	color: #0f0f14;
 	font-size: 1.125rem;
 }
 
@@ -325,7 +603,7 @@
 	align-items: flex-start;
 	gap: 0.5rem;
 	padding: 1rem 1.25rem;
-	border-radius: 12px;
+	border-radius: 14px;
 	background: rgba(220, 38, 38, 0.08);
 	border: 1px solid rgba(220, 38, 38, 0.2);
 	color: #991b1b;
@@ -345,17 +623,26 @@
 
 .aio-admin-table th,
 .aio-admin-table td {
-	padding: 0.875rem 1rem;
+	padding: 0.9375rem 1.125rem;
 	text-align: left;
-	border-bottom: 1px solid rgba(169, 109, 250, 0.1);
+	border-bottom: 1px solid rgba($aio-admin-primary, 0.08);
 }
 
 .aio-admin-table th {
-	font-size: 0.75rem;
+	font-size: 0.6875rem;
 	text-transform: uppercase;
-	letter-spacing: 0.04em;
+	letter-spacing: 0.06em;
 	color: #6b6b78;
-	background: rgba(169, 109, 250, 0.04);
+	background: rgba($aio-admin-primary, 0.04);
+	font-weight: 700;
+}
+
+.aio-admin-table tbody tr {
+	transition: background 0.15s ease;
+}
+
+.aio-admin-table tbody tr:hover {
+	background: rgba($aio-admin-primary, 0.03);
 }
 
 .aio-admin-badge {
@@ -390,6 +677,12 @@
 
 .aio-admin-stat {
 	padding: 1.25rem;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+	&:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 12px 36px rgba($aio-admin-primary, 0.12);
+	}
 }
 
 .aio-admin-stat__label {
@@ -405,31 +698,139 @@
 	margin: 0.375rem 0 0;
 	font-size: 1.75rem;
 	font-weight: 700;
-	color: #111827;
+	color: #0f0f14;
 }
 
 .aio-admin-stat__icon {
-	width: 40px;
-	height: 40px;
-	border-radius: 10px;
+	width: 42px;
+	height: 42px;
+	border-radius: 12px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: rgba(169, 109, 250, 0.12);
+	background: linear-gradient(135deg, rgba($aio-admin-primary, 0.14), rgba($aio-admin-accent, 0.1));
 	margin-bottom: 0.75rem;
 
 	.v-icon {
-		color: #A96DFA !important;
+		color: $aio-admin-primary !important;
+	}
+}
+
+// Toolbar compartido (facturas, pedidos, usuarios, etc.)
+.aio-admin-invoices__toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.aio-admin-invoices__search {
+	flex: 1;
+	min-width: 200px;
+	max-width: 360px;
+}
+
+.aio-admin-invoices__filters {
+	flex-shrink: 0;
+}
+
+.aio-admin-invoices__name {
+	display: block;
+	font-weight: 600;
+	color: #0f0f14;
+}
+
+.aio-admin-invoices__email {
+	display: block;
+	font-size: 0.8125rem;
+	color: #6b7280;
+}
+
+.aio-admin-invoices__actions {
+	white-space: nowrap;
+}
+
+.aio-admin-invoices__pagination {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-top: 1px solid rgba($aio-admin-primary, 0.08);
+
+	p {
+		margin: 0;
+		font-size: 0.875rem;
+		color: #6b7280;
 	}
 }
 
 @media (max-width: 959px) {
 	.aio-admin__sidebar {
+		width: $aio-admin-sidebar-expanded;
 		transform: translateX(-100%);
+		box-shadow: none;
+
+		&:hover {
+			width: $aio-admin-sidebar-expanded;
+			box-shadow: none;
+		}
 	}
 
 	.aio-admin__sidebar--open {
 		transform: translateX(0);
+		box-shadow: 12px 0 40px rgba(8, 8, 12, 0.4);
+	}
+
+	.aio-admin__sidebar--open,
+	.aio-admin__sidebar--open:hover {
+		.aio-admin__sidebar-logo--full {
+			display: block;
+		}
+
+		.aio-admin__sidebar-logo--compact {
+			display: none;
+		}
+
+		.aio-admin__sidebar-eyebrow,
+		.aio-admin__nav-label,
+		.aio-admin__nav-chevron,
+		.aio-admin__nav-group-head .aio-admin__nav-label {
+			opacity: 1;
+			visibility: visible;
+			width: auto;
+			height: auto;
+			overflow: visible;
+			pointer-events: auto;
+		}
+
+		.aio-admin__nav-group-items {
+			opacity: 1;
+			visibility: visible;
+			width: auto;
+			overflow: hidden;
+			pointer-events: auto;
+		}
+
+		.aio-admin__nav-group--expanded .aio-admin__nav-group-items {
+			max-height: 320px;
+		}
+
+		.aio-admin__nav-group-head {
+			padding: 0.625rem 0.75rem;
+			justify-content: flex-start;
+		}
+
+		.aio-admin__nav-item {
+			justify-content: flex-start;
+			gap: 0.75rem;
+		}
+
+		.aio-admin__nav-badge {
+			position: static;
+			min-width: 1.25rem;
+			width: auto;
+			height: auto;
+			font-size: 0.625rem;
+		}
 	}
 
 	.aio-admin__main {
@@ -438,6 +839,10 @@
 
 	.aio-admin__menu-btn {
 		display: flex;
+	}
+
+	.aio-admin__content {
+		padding: 1.25rem 1rem 1.75rem;
 	}
 }
 

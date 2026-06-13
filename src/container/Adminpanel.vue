@@ -10,70 +10,109 @@
 			class="aio-admin__sidebar"
 			:class="{ 'aio-admin__sidebar--open': sidebarOpen }"
 		>
-			<div class="aio-admin__sidebar-brand">
-				<router-link to="/admin-panel/reports">
-					<img
-						alt="All in One"
-						class="aio-admin__sidebar-logo"
-						:src="appLogoFooter"
-					>
-				</router-link>
-				<span class="aio-admin__sidebar-eyebrow">{{ $t('admin.panel') }}</span>
-			</div>
+			<div class="aio-admin__sidebar-inner">
+				<div class="aio-admin__sidebar-brand">
+					<router-link to="/admin-panel/reports" class="aio-admin__sidebar-brand-link">
+						<img
+							alt="All in One"
+							class="aio-admin__sidebar-logo aio-admin__sidebar-logo--full"
+							:src="appLogoFooter"
+						>
+						<img
+							alt="AIO"
+							class="aio-admin__sidebar-logo aio-admin__sidebar-logo--compact"
+							src="/static/images/logo/favicon.ico"
+						>
+					</router-link>
+					<span class="aio-admin__sidebar-eyebrow aio-admin__nav-label">{{ $t('admin.panel') }}</span>
+				</div>
 
-			<nav class="aio-admin__nav" aria-label="Menú administración">
-				<template v-for="(item, index) in adminPanelMenus">
-					<div v-if="item.children && item.children.length" :key="`group-${index}`" class="aio-admin__nav-group">
-						<span class="aio-admin__nav-group-label">{{ $t(item.labelKey) }}</span>
+				<nav class="aio-admin__nav" aria-label="Menú administración">
+					<template v-for="(item, index) in adminPanelMenus">
 						<router-link
-							v-for="child in item.children"
-							:key="child.path"
-							:to="child.path"
-							class="aio-admin__nav-item aio-admin__nav-item--sub"
+							v-if="!item.children"
+							:key="item.path || `single-${index}`"
+							:to="item.path"
+							class="aio-admin__nav-item"
 							active-class="aio-admin__nav-item--active"
+							:title="$t(item.labelKey)"
 							@click="closeSidebar"
 						>
-							<span>{{ $t(child.labelKey) }}</span>
+							<span class="aio-admin__nav-icon">
+								<v-icon>{{ item.icon }}</v-icon>
+							</span>
+							<span class="aio-admin__nav-label">{{ $t(item.labelKey) }}</span>
 						</router-link>
-					</div>
 
-					<router-link
-						v-else
-						:key="item.path || index"
-						:to="item.path"
-						class="aio-admin__nav-item"
-						active-class="aio-admin__nav-item--active"
-						@click="closeSidebar"
-					>
+						<div
+							v-else
+							:key="`group-${item.id || index}`"
+							class="aio-admin__nav-group"
+							:class="{
+								'aio-admin__nav-group--active': isGroupActive(item),
+								'aio-admin__nav-group--expanded': isGroupExpanded(item.id),
+							}"
+						>
+							<button
+								type="button"
+								class="aio-admin__nav-group-head"
+								:aria-expanded="isGroupExpanded(item.id) ? 'true' : 'false'"
+								@click="toggleGroup(item.id)"
+							>
+								<span class="aio-admin__nav-icon">
+									<v-icon>{{ item.icon }}</v-icon>
+								</span>
+								<span class="aio-admin__nav-label">{{ $t(item.labelKey) }}</span>
+								<span
+									v-if="groupBadgeCount(item) > 0"
+									class="aio-admin__nav-badge aio-admin__nav-badge--group"
+								>{{ groupBadgeCount(item) > 99 ? '99+' : groupBadgeCount(item) }}</span>
+								<span class="aio-admin__nav-chevron" aria-hidden="true">
+									<v-icon>expand_more</v-icon>
+								</span>
+							</button>
+							<div class="aio-admin__nav-group-items">
+								<router-link
+									v-for="child in item.children"
+									:key="child.path"
+									:to="child.path"
+									class="aio-admin__nav-item aio-admin__nav-item--sub"
+									active-class="aio-admin__nav-item--active"
+									@click="closeSidebar"
+								>
+									<span class="aio-admin__nav-icon aio-admin__nav-icon--sub">
+										<v-icon>{{ child.icon }}</v-icon>
+									</span>
+									<span class="aio-admin__nav-label">{{ $t(child.labelKey) }}</span>
+									<span
+										v-if="child.badgeKey === 'invoices' && invoiceAlertCount > 0"
+										class="aio-admin__nav-badge"
+									>{{ invoiceAlertCount > 99 ? '99+' : invoiceAlertCount }}</span>
+								</router-link>
+							</div>
+						</div>
+					</template>
+				</nav>
+
+				<div class="aio-admin__sidebar-footer">
+					<button type="button" class="aio-admin__nav-item aio-admin__nav-item--logout" @click="onLogout">
 						<span class="aio-admin__nav-icon">
-							<v-icon>{{ item.icon }}</v-icon>
+							<v-icon>power_settings_new</v-icon>
 						</span>
-						<span>{{ $t(item.labelKey) }}</span>
-						<span
-							v-if="item.path === '/admin-panel/invoices' && invoiceAlertCount > 0"
-							class="aio-admin__nav-badge"
-						>{{ invoiceAlertCount > 99 ? '99+' : invoiceAlertCount }}</span>
-					</router-link>
-				</template>
-			</nav>
-
-			<div class="aio-admin__sidebar-footer">
-				<button type="button" class="aio-admin__nav-item" @click="onLogout">
-					<span class="aio-admin__nav-icon">
-						<v-icon>power_settings_new</v-icon>
-					</span>
-					<span>{{ $t('admin.logout') }}</span>
-				</button>
+						<span class="aio-admin__nav-label">{{ $t('admin.logout') }}</span>
+					</button>
+				</div>
 			</div>
 		</aside>
 
 		<div class="aio-admin__main">
 			<header class="aio-admin__topbar">
 				<div class="aio-admin__topbar-left">
-					<button type="button" class="aio-admin__menu-btn" @click="toggleSidebar">
+					<button type="button" class="aio-admin__menu-btn" aria-label="Menú" @click="toggleSidebar">
 						<v-icon color="white">menu</v-icon>
 					</button>
-					<div>
+					<div class="aio-admin__topbar-heading">
+						<p class="aio-admin__topbar-eyebrow">{{ $t('admin.panel') }}</p>
 						<h1 class="aio-admin__page-title">{{ currentPageTitle }}</h1>
 						<p v-if="currentPageSubtitle" class="aio-admin__page-subtitle">{{ currentPageSubtitle }}</p>
 					</div>
@@ -138,6 +177,7 @@ export default {
 			sidebarOpen: false,
 			invoiceAlertCount: 0,
 			showGlobalInvoiceAlert: true,
+			expandedGroups: {},
 		};
 	},
 	computed: {
@@ -182,8 +222,49 @@ export default {
 	},
 	mounted() {
 		this.loadInvoiceAlerts();
+		this.syncExpandedGroupsFromRoute();
+	},
+	watch: {
+		'$route.path'() {
+			this.syncExpandedGroupsFromRoute();
+		},
 	},
 	methods: {
+		isGroupExpanded(id) {
+			return !!this.expandedGroups[id];
+		},
+		toggleGroup(id) {
+			this.$set(this.expandedGroups, id, !this.expandedGroups[id]);
+		},
+		syncExpandedGroupsFromRoute() {
+			const path = this.$route.path;
+			(this.adminPanelMenus || []).forEach((item) => {
+				if (!item.children || !item.children.length || !item.id) return;
+				const isActive = item.children.some((child) => this.isChildRouteActive(child.path, path));
+				if (isActive) {
+					this.$set(this.expandedGroups, item.id, true);
+				}
+			});
+		},
+		isChildRouteActive(childPath, currentPath) {
+			if (childPath === '/mainPage') {
+				return currentPath === '/mainPage';
+			}
+			if (currentPath === childPath) return true;
+			if (childPath === '/admin-panel/products' && currentPath.indexOf('/admin-panel/product-edit') === 0) {
+				return true;
+			}
+			return currentPath.indexOf(`${childPath}/`) === 0;
+		},
+		groupBadgeCount(item) {
+			if (!item.children || !item.children.length) return 0;
+			const hasInvoiceBadge = item.children.some((child) => child.badgeKey === 'invoices');
+			return hasInvoiceBadge && this.invoiceAlertCount > 0 ? this.invoiceAlertCount : 0;
+		},
+		isGroupActive(item) {
+			if (!item.children || !item.children.length) return false;
+			return item.children.some((child) => this.isChildRouteActive(child.path, this.$route.path));
+		},
 		async loadInvoiceAlerts() {
 			try {
 				const response = await api.get('/api/admin/invoices/alerts');
