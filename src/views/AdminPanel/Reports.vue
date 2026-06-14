@@ -1,5 +1,5 @@
 <template>
-	<div class="aio-admin-page">
+	<div class="aio-admin-page aio-admin-reports">
 		<AdminPageHeader />
 
 		<div v-if="loadError" class="aio-admin-page__error mb-4">
@@ -41,9 +41,9 @@
 				</v-btn>
 			</div>
 
-			<div class="aio-admin-reports-grid">
-				<div class="aio-admin-card pa-4">
-					<div class="aio-admin-page__header" style="margin-bottom: 1rem;">
+			<div class="aio-admin-reports__charts-row aio-admin-reports__charts-row--products">
+				<div class="aio-admin-card aio-admin-reports__chart-card">
+					<div class="aio-admin-reports__chart-header">
 						<div>
 							<h2 class="aio-admin-page__title">{{ $t('adminReports.topProductsTitle') }}</h2>
 							<p class="aio-admin-page__subtitle">{{ $t('adminReports.topProductsSubtitle') }}</p>
@@ -52,28 +52,31 @@
 					<div v-if="!topProducts.length" class="aio-admin-page__empty">
 						<p>{{ $t('adminReports.noTopProducts') }}</p>
 					</div>
-					<div v-else class="aio-admin-reports-table-wrap">
-						<table class="aio-admin-reports-table">
-							<thead>
-								<tr>
-									<th>{{ $t('adminReports.productColumn') }}</th>
-									<th>{{ $t('adminReports.unitsColumn') }}</th>
-									<th>{{ $t('adminReports.revenueColumn') }}</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr v-for="product in topProducts" :key="product.id_product">
-									<td>{{ product.name }}</td>
-									<td>{{ product.units_sold }}</td>
-									<td>${{ product.total }}</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
+					<template v-else>
+						<AdminHighchart :options="topProductsChartOptions" height="340px" />
+						<div class="aio-admin-reports-table-wrap aio-admin-reports__chart-table">
+							<table class="aio-admin-reports-table">
+								<thead>
+									<tr>
+										<th>{{ $t('adminReports.productColumn') }}</th>
+										<th>{{ $t('adminReports.unitsColumn') }}</th>
+										<th>{{ $t('adminReports.revenueColumn') }}</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr v-for="product in topProducts" :key="product.id_product">
+										<td>{{ product.name }}</td>
+										<td>{{ product.units_sold }}</td>
+										<td>${{ product.total }}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</template>
 				</div>
 
-				<div class="aio-admin-card pa-4">
-					<div class="aio-admin-page__header" style="margin-bottom: 1rem;">
+				<div class="aio-admin-card aio-admin-reports__chart-card aio-admin-reports__chart-card--side">
+					<div class="aio-admin-reports__chart-header">
 						<div>
 							<h2 class="aio-admin-page__title">{{ $t('adminReports.restockTitle') }}</h2>
 							<p class="aio-admin-page__subtitle">{{ $t('adminReports.restockSubtitle') }}</p>
@@ -88,7 +91,10 @@
 								<strong>{{ item.name }}</strong>
 								<span>{{ item.units_sold }} uds · ${{ item.total }}</span>
 							</div>
-							<span class="aio-admin-badge" :class="item.priority === 'high' ? 'aio-admin-badge--warning' : 'aio-admin-badge--muted'">
+							<span
+								class="aio-admin-badge"
+								:class="item.priority === 'high' ? 'aio-admin-badge--warning' : 'aio-admin-badge--muted'"
+							>
 								{{ item.priority === 'high' ? $t('adminReports.priorityHigh') : $t('adminReports.priorityMedium') }}
 							</span>
 						</li>
@@ -96,63 +102,69 @@
 				</div>
 			</div>
 
-			<div class="aio-admin-reports-grid mt-4">
-				<div class="aio-admin-card pa-4">
-					<div class="aio-admin-page__header" style="margin-bottom: 1rem;">
-						<div>
-							<h2 class="aio-admin-page__title">{{ $t('adminReports.trendsTitle') }}</h2>
-							<p class="aio-admin-page__subtitle">{{ $t('adminReports.trendsSubtitle') }}</p>
-						</div>
-					</div>
-					<div class="aio-admin-reports-table-wrap">
-						<table class="aio-admin-reports-table">
-							<thead>
-								<tr>
-									<th>{{ $t('adminReports.weekColumn') }}</th>
-									<th>{{ $t('adminReports.ordersColumn') }}</th>
-									<th>{{ $t('adminReports.revenueColumn') }}</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr v-for="week in weeklyTrend" :key="week.week_key">
-									<td>{{ week.week_key }}</td>
-									<td>{{ week.orders_count }}</td>
-									<td>${{ week.total }}</td>
-								</tr>
-							</tbody>
-						</table>
+			<div class="aio-admin-card aio-admin-reports__chart-card mt-4">
+				<div class="aio-admin-reports__chart-header">
+					<div>
+						<h2 class="aio-admin-page__title">{{ $t('adminReports.trendsTitle') }}</h2>
+						<p class="aio-admin-page__subtitle">{{ $t('adminReports.trendsSubtitle') }}</p>
 					</div>
 				</div>
+				<div v-if="!weeklyTrend.length" class="aio-admin-page__empty">
+					<p>{{ $t('adminReports.noChartData') }}</p>
+				</div>
+				<AdminHighchart v-else :options="weeklyTrendChartOptions" height="320px" />
+			</div>
 
-				<div class="aio-admin-card pa-4">
-					<div class="aio-admin-page__header" style="margin-bottom: 1rem;">
+			<div class="aio-admin-reports__charts-row mt-4">
+				<div class="aio-admin-card aio-admin-reports__chart-card">
+					<div class="aio-admin-reports__chart-header">
 						<div>
 							<h2 class="aio-admin-page__title">{{ $t('adminReports.categoriesTitle') }}</h2>
+							<p class="aio-admin-page__subtitle">{{ $t('adminReports.categoriesSubtitle') }}</p>
 						</div>
 					</div>
-					<div class="aio-admin-reports-table-wrap">
-						<table class="aio-admin-reports-table">
-							<thead>
-								<tr>
-									<th>{{ $t('adminReports.categoryColumn') }}</th>
-									<th>{{ $t('adminReports.unitsColumn') }}</th>
-									<th>{{ $t('adminReports.revenueColumn') }}</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr v-for="cat in categorySales" :key="cat.id_category || cat.category_name">
-									<td>{{ cat.category_name }}</td>
-									<td>{{ cat.units_sold }}</td>
-									<td>${{ cat.total }}</td>
-								</tr>
-							</tbody>
-						</table>
+					<div v-if="!categorySales.length" class="aio-admin-page__empty">
+						<p>{{ $t('adminReports.noChartData') }}</p>
 					</div>
+					<template v-else>
+						<AdminHighchart :options="categorySalesChartOptions" height="300px" />
+						<div class="aio-admin-reports-table-wrap aio-admin-reports__chart-table">
+							<table class="aio-admin-reports-table">
+								<thead>
+									<tr>
+										<th>{{ $t('adminReports.categoryColumn') }}</th>
+										<th>{{ $t('adminReports.unitsColumn') }}</th>
+										<th>{{ $t('adminReports.revenueColumn') }}</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr v-for="cat in categorySales" :key="cat.id_category || cat.category_name">
+										<td>{{ cat.category_name }}</td>
+										<td>{{ cat.units_sold }}</td>
+										<td>${{ cat.total }}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</template>
+				</div>
+
+				<div class="aio-admin-card aio-admin-reports__chart-card">
+					<div class="aio-admin-reports__chart-header">
+						<div>
+							<h2 class="aio-admin-page__title">{{ $t('adminReports.invoiceStatusTitle') }}</h2>
+							<p class="aio-admin-page__subtitle">{{ $t('adminReports.invoiceStatusSubtitle') }}</p>
+						</div>
+					</div>
+					<div v-if="!hasInvoiceStatusData" class="aio-admin-page__empty">
+						<p>{{ $t('adminReports.noChartData') }}</p>
+					</div>
+					<AdminHighchart v-else :options="invoiceStatusChartOptions" height="300px" />
 				</div>
 			</div>
 
-			<div class="aio-admin-card pa-4 mt-4">
-				<div class="aio-admin-page__header" style="margin-bottom: 1rem;">
+			<div class="aio-admin-card aio-admin-reports__chart-card mt-4">
+				<div class="aio-admin-reports__chart-header">
 					<div>
 						<h2 class="aio-admin-page__title">{{ $t('adminReports.recentOrdersTitle') }}</h2>
 						<p class="aio-admin-page__subtitle">{{ $t('adminReports.recentOrdersSubtitle') }}</p>
@@ -194,8 +206,13 @@
 
 <script>
 import api from 'Api';
+import AdminHighchart from '@/components/Admin/AdminHighchart.vue';
+import { AIO_CHART_COLORS, formatCurrency, formatWeekLabel } from '@/helpers/adminHighchartsTheme';
 
 export default {
+	components: {
+		AdminHighchart,
+	},
 	data() {
 		return {
 			isLoading: true,
@@ -207,15 +224,245 @@ export default {
 			categorySales: [],
 			restockSuggestions: [],
 			invoiceAlertCount: 0,
+			invoiceStatus: {
+				invoicedOrders: 0,
+				pendingInvoices: 0,
+				invoiceErrors: 0,
+			},
 		};
+	},
+	computed: {
+		hasInvoiceStatusData() {
+			const { invoicedOrders, pendingInvoices, invoiceErrors } = this.invoiceStatus;
+			return (invoicedOrders + pendingInvoices + invoiceErrors) > 0;
+		},
+		topProductsChartOptions() {
+			if (!this.topProducts.length) {
+				return null;
+			}
+
+			const rows = [...this.topProducts].slice(0, 8).reverse();
+
+			return {
+				chart: { type: 'bar' },
+				xAxis: {
+					categories: rows.map((row) => row.name),
+					labels: {
+						style: { color: '#6b7280', fontSize: '12px' },
+					},
+					lineColor: 'rgba(169, 109, 250, 0.12)',
+					tickColor: 'rgba(169, 109, 250, 0.12)',
+				},
+				yAxis: {
+					title: { text: null },
+					gridLineColor: 'rgba(169, 109, 250, 0.08)',
+					labels: {
+						style: { color: '#9ca3af', fontSize: '11px' },
+						formatter() {
+							return `$${formatCurrency(this.value)}`;
+						},
+					},
+				},
+				legend: { enabled: false },
+				plotOptions: {
+					bar: {
+						borderRadius: 6,
+						borderWidth: 0,
+						pointPadding: 0.12,
+						groupPadding: 0.08,
+						dataLabels: {
+							enabled: true,
+							align: 'right',
+							style: { color: '#6b7280', fontSize: '11px', fontWeight: '600', textOutline: 'none' },
+							formatter() {
+								return `$${formatCurrency(this.y)}`;
+							},
+						},
+					},
+				},
+				series: [{
+					name: this.$t('adminReports.revenueColumn'),
+					color: {
+						linearGradient: { x1: 0, y1: 0, x2: 1, y2: 0 },
+						stops: [
+							[0, AIO_CHART_COLORS[0]],
+							[1, AIO_CHART_COLORS[1]],
+						],
+					},
+					data: rows.map((row) => row.revenueRaw),
+				}],
+				tooltip: {
+					pointFormatter() {
+						return `<span style="color:${this.color}">●</span> ${this.series.name}: <b>$${formatCurrency(this.y)}</b><br/>`;
+					},
+				},
+			};
+		},
+		weeklyTrendChartOptions() {
+			if (!this.weeklyTrend.length) {
+				return null;
+			}
+
+			const categories = this.weeklyTrend.map((row) => formatWeekLabel(row.week_key));
+
+			return {
+				chart: { zoomType: 'xy' },
+				xAxis: {
+					categories,
+					crosshair: true,
+					labels: { style: { color: '#6b7280', fontSize: '12px' } },
+					lineColor: 'rgba(169, 109, 250, 0.12)',
+				},
+				yAxis: [{
+					title: {
+						text: this.$t('adminReports.ordersColumn'),
+						style: { color: AIO_CHART_COLORS[0], fontSize: '12px' },
+					},
+					gridLineColor: 'rgba(169, 109, 250, 0.08)',
+					labels: { style: { color: '#9ca3af', fontSize: '11px' } },
+				}, {
+					title: {
+						text: this.$t('adminReports.revenueColumn'),
+						style: { color: AIO_CHART_COLORS[1], fontSize: '12px' },
+					},
+					opposite: true,
+					gridLineWidth: 0,
+					labels: {
+						style: { color: '#9ca3af', fontSize: '11px' },
+						formatter() {
+							return `$${formatCurrency(this.value)}`;
+						},
+					},
+				}],
+				plotOptions: {
+					column: {
+						borderRadius: 6,
+						borderWidth: 0,
+						maxPointWidth: 48,
+					},
+					spline: {
+						lineWidth: 3,
+						marker: {
+							enabled: true,
+							radius: 4,
+							fillColor: '#fff',
+							lineWidth: 2,
+							lineColor: AIO_CHART_COLORS[1],
+						},
+					},
+				},
+				series: [{
+					type: 'column',
+					name: this.$t('adminReports.ordersColumn'),
+					yAxis: 0,
+					color: {
+						linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+						stops: [
+							[0, 'rgba(169, 109, 250, 0.95)'],
+							[1, 'rgba(169, 109, 250, 0.55)'],
+						],
+					},
+					data: this.weeklyTrend.map((row) => row.orders_count),
+				}, {
+					type: 'spline',
+					name: this.$t('adminReports.revenueColumn'),
+					yAxis: 1,
+					color: AIO_CHART_COLORS[1],
+					data: this.weeklyTrend.map((row) => row.revenueRaw),
+				}],
+				tooltip: {
+					shared: true,
+					formatter() {
+						let html = `<b>${this.x}</b><br/>`;
+						this.points.forEach((point) => {
+							const isRevenue = point.series.index === 1;
+							const displayValue = isRevenue ? `$${formatCurrency(point.y)}` : point.y;
+							html += `<span style="color:${point.color}">●</span> ${point.series.name}: <b>${displayValue}</b><br/>`;
+						});
+						return html;
+					},
+				},
+			};
+		},
+		categorySalesChartOptions() {
+			if (!this.categorySales.length) {
+				return null;
+			}
+
+			return {
+				chart: { type: 'pie' },
+				plotOptions: {
+					pie: {
+						innerSize: '58%',
+						borderWidth: 0,
+						borderRadius: 4,
+						dataLabels: {
+							enabled: true,
+							distance: 18,
+							style: { color: '#374151', fontSize: '12px', fontWeight: '500', textOutline: 'none' },
+							formatter() {
+								return `${this.point.name}<br/><b>$${formatCurrency(this.y)}</b>`;
+							},
+						},
+					},
+				},
+				series: [{
+					name: this.$t('adminReports.revenueColumn'),
+					data: this.categorySales.map((row, index) => ({
+						name: row.category_name,
+						y: row.revenueRaw,
+						color: AIO_CHART_COLORS[index % AIO_CHART_COLORS.length],
+					})),
+				}],
+				tooltip: {
+					pointFormatter() {
+						return `<span style="color:${this.color}">●</span> ${this.name}: <b>$${formatCurrency(this.y)}</b> (${this.percentage.toFixed(1)}%)`;
+					},
+				},
+			};
+		},
+		invoiceStatusChartOptions() {
+			if (!this.hasInvoiceStatusData) {
+				return null;
+			}
+
+			const { invoicedOrders, pendingInvoices, invoiceErrors } = this.invoiceStatus;
+
+			return {
+				chart: { type: 'pie' },
+				colors: ['#22c55e', '#f59e0b', '#ef4444'],
+				plotOptions: {
+					pie: {
+						innerSize: '62%',
+						borderWidth: 0,
+						borderRadius: 4,
+						dataLabels: {
+							enabled: true,
+							distance: 16,
+							style: { color: '#374151', fontSize: '12px', fontWeight: '500', textOutline: 'none' },
+							formatter() {
+								return `${this.point.name}<br/><b>${this.y}</b>`;
+							},
+						},
+					},
+				},
+				series: [{
+					name: this.$t('adminReports.exportValue'),
+					data: [
+						{ name: this.$t('adminReports.invoicedOrders'), y: invoicedOrders },
+						{ name: this.$t('adminReports.pendingInvoices'), y: pendingInvoices },
+						{ name: this.$t('adminReports.invoiceErrors'), y: invoiceErrors },
+					].filter((item) => item.y > 0),
+				}],
+			};
+		},
 	},
 	async mounted() {
 		await this.loadStats();
 	},
 	methods: {
 		formatMoney(value) {
-			const amount = parseFloat(value) || 0;
-			return amount.toLocaleString('es-EC', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+			return formatCurrency(value);
 		},
 		formatDate(value) {
 			if (!value) return '—';
@@ -246,6 +493,12 @@ export default {
 					{ label: this.$t('adminReports.invoiceErrors'), value: String(data.invoiceErrors || 0), icon: 'error_outline' },
 				];
 
+				this.invoiceStatus = {
+					invoicedOrders: Number(data.invoicedOrders || 0),
+					pendingInvoices: Number(data.pendingInvoices || 0),
+					invoiceErrors: Number(data.invoiceErrors || 0),
+				};
+
 				this.recentOrders = (data.recentOrders || []).map((order) => ({
 					...order,
 					customerName: `${order.name_user || ''} ${order.last_name_user || ''}`.trim() || 'Cliente',
@@ -255,16 +508,19 @@ export default {
 
 				this.topProducts = (data.topProducts || []).map((row) => ({
 					...row,
+					revenueRaw: parseFloat(row.revenue) || 0,
 					total: this.formatMoney(row.revenue),
 				}));
 
 				this.weeklyTrend = (data.weeklyTrend || []).map((row) => ({
 					...row,
+					revenueRaw: parseFloat(row.revenue) || 0,
 					total: this.formatMoney(row.revenue),
 				}));
 
 				this.categorySales = (data.categorySales || []).map((row) => ({
 					...row,
+					revenueRaw: parseFloat(row.revenue) || 0,
 					total: this.formatMoney(row.revenue),
 				}));
 
@@ -361,107 +617,3 @@ export default {
 	},
 };
 </script>
-
-<style scoped>
-.aio-admin-reports-grid {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 1rem;
-}
-
-.aio-admin-reports-toolbar {
-	display: flex;
-	justify-content: flex-end;
-	align-items: center;
-}
-
-.aio-admin-alert-banner {
-	display: flex;
-	align-items: flex-start;
-	gap: 0.75rem;
-	padding: 1rem 1.25rem;
-	border-radius: 12px;
-	background: rgba(245, 158, 11, 0.1);
-	border: 1px solid rgba(245, 158, 11, 0.25);
-}
-
-.aio-admin-alert-banner p {
-	margin: 0.25rem 0 0;
-	font-size: 0.875rem;
-	color: #6b7280;
-}
-
-.aio-admin-alert-banner .v-btn {
-	margin-left: auto;
-	flex-shrink: 0;
-}
-
-.aio-admin-restock-list {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-}
-
-.aio-admin-restock-list li {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 1rem;
-	padding: 0.75rem 0;
-	border-bottom: 1px solid rgba(169, 109, 250, 0.1);
-}
-
-.aio-admin-restock-list li div {
-	display: flex;
-	flex-direction: column;
-	gap: 0.15rem;
-}
-
-.aio-admin-restock-list li span {
-	font-size: 0.8125rem;
-	color: #6b7280;
-}
-
-.aio-admin-reports-table-wrap {
-	overflow-x: auto;
-}
-
-.aio-admin-reports-table {
-	width: 100%;
-	border-collapse: collapse;
-	font-size: 0.875rem;
-}
-
-.aio-admin-reports-table th,
-.aio-admin-reports-table td {
-	padding: 0.75rem 0.5rem;
-	text-align: left;
-	border-bottom: 1px solid rgba(169, 109, 250, 0.1);
-}
-
-.aio-admin-reports-table th {
-	font-size: 0.75rem;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 0.04em;
-	color: #6b7280;
-}
-
-.aio-admin-reports-table__name {
-	display: block;
-	font-weight: 600;
-	color: #111827;
-}
-
-.aio-admin-reports-table__email {
-	display: block;
-	font-size: 0.75rem;
-	color: #9ca3af;
-}
-
-@media (max-width: 960px) {
-	.aio-admin-reports-grid {
-		grid-template-columns: 1fr;
-	}
-}
-</style>

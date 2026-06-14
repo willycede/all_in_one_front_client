@@ -2427,3 +2427,152 @@ $aio-admin-accent: #CA1DFF;
 		justify-content: center;
 	}
 }
+
+// Reportes — gráficos Highcharts
+.aio-admin-reports-toolbar {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+}
+
+.aio-admin-alert-banner {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+	padding: 1rem 1.25rem;
+	border-radius: 12px;
+	background: rgba(245, 158, 11, 0.1);
+	border: 1px solid rgba(245, 158, 11, 0.25);
+
+	p {
+		margin: 0.25rem 0 0;
+		font-size: 0.875rem;
+		color: #6b7280;
+	}
+
+	.v-btn {
+		margin-left: auto;
+		flex-shrink: 0;
+	}
+}
+
+.aio-admin-reports__charts-row {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1rem;
+
+	&--products {
+		grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+	}
+}
+
+.aio-admin-reports__chart-card {
+	padding: 1.25rem 1.5rem 1.5rem;
+	overflow: hidden;
+
+	&--side {
+		display: flex;
+		flex-direction: column;
+	}
+}
+
+.aio-admin-reports__chart-header {
+	margin-bottom: 0.5rem;
+}
+
+.aio-admin-reports__chart-table {
+	margin-top: 1rem;
+	padding-top: 1rem;
+	border-top: 1px solid rgba($aio-admin-primary, 0.1);
+
+	.aio-admin-reports-table th,
+	.aio-admin-reports-table td {
+		padding: 0.5rem 0.35rem;
+		font-size: 0.8125rem;
+	}
+}
+
+.aio-admin-chart {
+	width: 100%;
+	min-height: 200px;
+}
+
+.aio-admin-restock-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	flex: 1;
+
+	li {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 0.85rem 0;
+		border-bottom: 1px solid rgba($aio-admin-primary, 0.1);
+
+		div {
+			display: flex;
+			flex-direction: column;
+			gap: 0.15rem;
+			min-width: 0;
+		}
+
+		strong {
+			font-size: 0.9rem;
+			color: #111827;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		span {
+			font-size: 0.8125rem;
+			color: #6b7280;
+		}
+	}
+}
+
+.aio-admin-reports-table-wrap {
+	overflow-x: auto;
+}
+
+.aio-admin-reports-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.875rem;
+
+	th,
+	td {
+		padding: 0.75rem 0.5rem;
+		text-align: left;
+		border-bottom: 1px solid rgba($aio-admin-primary, 0.1);
+	}
+
+	th {
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: #6b7280;
+	}
+}
+
+.aio-admin-reports-table__name {
+	display: block;
+	font-weight: 600;
+	color: #111827;
+}
+
+.aio-admin-reports-table__email {
+	display: block;
+	font-size: 0.75rem;
+	color: #9ca3af;
+}
+
+@media (max-width: 960px) {
+	.aio-admin-reports__charts-row,
+	.aio-admin-reports__charts-row--products {
+		grid-template-columns: 1fr;
+	}
+}
