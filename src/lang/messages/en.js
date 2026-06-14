@@ -512,6 +512,12 @@ export default {
 		reprocessSuccess: 'Invoice reprocessed successfully',
 		reprocessSuccessWithNumber: 'Invoice {number} generated successfully',
 		reprocessError: 'Could not reprocess',
+		muteAlerts: 'Mute email alerts',
+		enableAlerts: 'Re-enable email alerts',
+		alertsMuted: 'Alerts muted',
+		muteAlertsSuccess: 'Email alerts were muted for this order',
+		enableAlertsSuccess: 'Email alerts were re-enabled for this order',
+		alertSettingsError: 'Could not update alert settings',
 	},
 	adminCoupons: {
 		newCoupon: 'New coupon',

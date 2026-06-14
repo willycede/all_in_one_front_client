@@ -119,6 +119,13 @@
 								{{ item.invoice_error }}
 							</span>
 							<span
+								v-if="item.invoice_error && item.invoice_alert_muted"
+								class="aio-admin-invoices__alert-muted-badge"
+							>
+								<v-icon x-small class="mr-1">notifications_off</v-icon>
+								{{ $t('adminInvoices.alertsMuted') }}
+							</span>
+							<span
 								v-if="!item.invoice_number && !item.invoice_error"
 								class="aio-admin-invoices__muted"
 							>—</span>
@@ -194,6 +201,18 @@
 										</v-list-item-icon>
 										<v-list-item-title>{{ $t('adminInvoices.downloadXml') }}</v-list-item-title>
 									</v-list-item>
+									<v-list-item
+										v-if="item.invoice_error"
+										:disabled="mutingAlertId === item.id_shopping_car"
+										@click="toggleInvoiceAlerts(item)"
+									>
+										<v-list-item-icon class="mr-2">
+											<v-icon small>{{ item.invoice_alert_muted ? 'notifications_active' : 'notifications_off' }}</v-icon>
+										</v-list-item-icon>
+										<v-list-item-title>
+											{{ item.invoice_alert_muted ? $t('adminInvoices.enableAlerts') : $t('adminInvoices.muteAlerts') }}
+										</v-list-item-title>
+									</v-list-item>
 								</v-list>
 							</v-menu>
 						</td>
@@ -258,6 +277,7 @@ export default {
 			statusFilter: 'all',
 			invoices: [],
 			reprocessingId: null,
+			mutingAlertId: null,
 			downloadingKey: null,
 			pagination: {
 				page: 1,
@@ -425,6 +445,26 @@ export default {
 				this.$snotify.error(this.$t('adminInvoices.downloadError'), { timeout: 4000 });
 			} finally {
 				this.downloadingKey = null;
+			}
+		},
+		async toggleInvoiceAlerts(item) {
+			this.mutingAlertId = item.id_shopping_car;
+			const nextMuted = !item.invoice_alert_muted;
+			try {
+				await api.patch(`/api/admin/invoices/${item.id_shopping_car}/alert-settings`, {
+					muted: nextMuted,
+				});
+				item.invoice_alert_muted = nextMuted;
+				this.$snotify.success(
+					nextMuted ? this.$t('adminInvoices.muteAlertsSuccess') : this.$t('adminInvoices.enableAlertsSuccess'),
+					{ timeout: 3500 }
+				);
+			} catch (error) {
+				const message = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)
+					|| this.$t('adminInvoices.alertSettingsError');
+				this.$snotify.error(message, { timeout: 4000 });
+			} finally {
+				this.mutingAlertId = null;
 			}
 		},
 	},

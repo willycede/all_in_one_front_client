@@ -512,6 +512,12 @@ export default {
 		reprocessSuccess: 'Factura reprocesada correctamente',
 		reprocessSuccessWithNumber: 'Factura {number} generada correctamente',
 		reprocessError: 'No se pudo reprocesar',
+		muteAlerts: 'Silenciar alertas por correo',
+		enableAlerts: 'Reactivar alertas por correo',
+		alertsMuted: 'Alertas silenciadas',
+		muteAlertsSuccess: 'Las alertas por correo quedaron silenciadas para esta orden',
+		enableAlertsSuccess: 'Las alertas por correo se reactivaron para esta orden',
+		alertSettingsError: 'No se pudo actualizar la configuración de alertas',
 	},
 	adminCoupons: {
 		newCoupon: 'Nuevo cupón',
