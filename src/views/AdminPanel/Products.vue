@@ -1,42 +1,66 @@
 <template>
-	<div class="aio-admin-page">
+	<div class="aio-admin-page aio-admin-products">
 		<AdminPageHeader>
 			<template #actions>
-				<v-btn color="primary" depressed to="/admin-panel/product-add">
-					Agregar producto
-					<v-icon right>add</v-icon>
+				<v-btn
+					depressed
+					class="aio-admin-products__add-btn"
+					to="/admin-panel/product-add"
+				>
+					{{ $t('adminProducts.list.addProduct') }}
+					<v-icon right small>add</v-icon>
 				</v-btn>
 			</template>
 		</AdminPageHeader>
 
-		<div class="aio-admin-card pa-4 mb-4">
-			<div class="aio-admin-products__search-row">
+		<div class="aio-admin-card aio-admin-products__toolbar-card">
+			<div class="aio-admin-products__toolbar">
 				<v-text-field
 					v-model="searchBy"
-					label="Buscar por nombre"
+					:placeholder="$t('adminProducts.list.searchPlaceholder')"
 					prepend-inner-icon="search"
 					hide-details
 					clearable
 					outlined
 					dense
+					class="aio-admin-products__search"
 					@keyup.enter="applySearch"
 					@click:clear="clearSearch"
 				></v-text-field>
-				<v-btn color="primary" depressed @click="applySearch">Buscar</v-btn>
+				<v-btn
+					depressed
+					class="aio-admin-products__search-btn"
+					@click="applySearch"
+				>
+					<v-icon left small>search</v-icon>
+					{{ $t('adminProducts.list.searchButton') }}
+				</v-btn>
 			</div>
 		</div>
 
 		<div class="aio-admin-products__meta">
-			<span v-if="pagination.total !== null">
-				{{ pagination.total }} {{ pagination.total === 1 ? 'producto' : 'productos' }}
+			<span v-if="pagination.total !== null" class="aio-admin-products__count">
+				{{ productCountLabel }}
 			</span>
-			<div class="aio-admin-products__view-toggle">
-				<v-btn icon :color="gridView ? 'primary' : ''" @click="gridView = true">
-					<v-icon>apps</v-icon>
-				</v-btn>
-				<v-btn icon :color="!gridView ? 'primary' : ''" @click="gridView = false">
-					<v-icon>list</v-icon>
-				</v-btn>
+			<div class="aio-admin-products__view-toggle" role="group" :aria-label="$t('adminProducts.list.viewCards')">
+				<button
+					type="button"
+					class="aio-admin-products__view-btn"
+					:class="{ 'aio-admin-products__view-btn--active': gridView }"
+					@click="gridView = true"
+				>
+					<v-icon small>apps</v-icon>
+					<span>{{ $t('adminProducts.list.viewCards') }}</span>
+				</button>
+				<button
+					type="button"
+					class="aio-admin-products__view-btn"
+					:class="{ 'aio-admin-products__view-btn--active': !gridView }"
+					@click="gridView = false"
+				>
+					<v-icon small>view_list</v-icon>
+					<span>{{ $t('adminProducts.list.viewList') }}</span>
+				</button>
 			</div>
 		</div>
 
@@ -63,6 +87,14 @@ export default {
 			pagination: { total: null },
 		};
 	},
+	computed: {
+		productCountLabel() {
+			const total = this.pagination.total || 0;
+			return total === 1
+				? this.$t('adminProducts.list.productCount', { count: total })
+				: this.$t('adminProducts.list.productCountPlural', { count: total });
+		},
+	},
 	methods: {
 		applySearch() {
 			if (this.$refs.productItems) {
@@ -79,32 +111,3 @@ export default {
 	},
 };
 </script>
-
-<style scoped>
-.aio-admin-products__search-row {
-	display: grid;
-	grid-template-columns: 1fr auto;
-	gap: 0.75rem;
-	align-items: center;
-}
-
-.aio-admin-products__meta {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin: 0 0 0.75rem;
-	color: #6b6b78;
-	font-size: 0.875rem;
-}
-
-.aio-admin-products__view-toggle {
-	display: inline-flex;
-	gap: 0.25rem;
-}
-
-@media (max-width: 599px) {
-	.aio-admin-products__search-row {
-		grid-template-columns: 1fr;
-	}
-}
-</style>

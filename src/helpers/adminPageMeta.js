@@ -42,7 +42,7 @@ const PAGE_ROUTES = {
 		breadcrumbs: [
 			{ labelKey: 'admin.breadcrumb.panel', to: ADMIN_HOME },
 			{ labelKey: 'admin.nav.catalog' },
-			{ labelKey: 'admin.nav.productList' },
+			{ labelKey: 'admin.nav.products' },
 		],
 	},
 	'/admin-panel/product-add': {

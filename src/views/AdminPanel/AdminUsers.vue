@@ -1,29 +1,44 @@
 <template>
-	<div class="aio-admin-page">
+	<div class="aio-admin-page aio-admin-users">
 		<AdminPageHeader />
 
-		<div class="aio-admin-card pa-4 mb-4">
-			<div class="aio-admin-invoices__toolbar">
+		<div class="aio-admin-card aio-admin-users__toolbar-card">
+			<div class="aio-admin-users__toolbar">
 				<v-text-field
 					v-model="search"
-					:label="$t('adminUsers.searchPlaceholder')"
+					:placeholder="$t('adminUsers.searchPlaceholder')"
 					outlined
 					dense
 					hide-details
 					clearable
-					class="aio-admin-invoices__search"
+					prepend-inner-icon="search"
+					class="aio-admin-users__search"
 					@keyup.enter="reload"
 				></v-text-field>
 
-				<v-btn-toggle v-model="twoFactorFilter" mandatory dense class="aio-admin-invoices__filters" @change="reload">
-					<v-btn value="all" small>{{ $t('adminUsers.filterAll') }}</v-btn>
-					<v-btn value="enabled" small>{{ $t('adminUsers.filterEnabled') }}</v-btn>
-					<v-btn value="pending" small>{{ $t('adminUsers.filterPending') }}</v-btn>
-					<v-btn value="disabled" small>{{ $t('adminUsers.filterDisabled') }}</v-btn>
-				</v-btn-toggle>
+				<div
+					class="aio-admin-users__filters"
+					role="group"
+					:aria-label="$t('adminUsers.twoFactorColumn')"
+				>
+					<button
+						v-for="filter in filterOptions"
+						:key="filter.value"
+						type="button"
+						class="aio-admin-users__filter-btn"
+						:class="{ 'aio-admin-users__filter-btn--active': twoFactorFilter === filter.value }"
+						@click="setFilter(filter.value)"
+					>
+						{{ filter.label }}
+					</button>
+				</div>
 
-				<v-btn color="primary" depressed @click="reload">
-					<v-icon left>search</v-icon>
+				<v-btn
+					depressed
+					class="aio-admin-users__search-btn"
+					@click="reload"
+				>
+					<v-icon left small>search</v-icon>
 					{{ $t('adminUsers.searchButton') }}
 				</v-btn>
 			</div>
@@ -45,8 +60,8 @@
 			<p>{{ $t('adminUsers.emptyHint') }}</p>
 		</div>
 
-		<div v-else class="aio-admin-card pa-0 aio-admin-table-wrap">
-			<table class="aio-admin-table">
+		<div v-else class="aio-admin-card pa-0 aio-admin-table-wrap aio-admin-users__table-card">
+			<table class="aio-admin-table aio-admin-users__table">
 				<thead>
 					<tr>
 						<th>{{ $t('adminUsers.idColumn') }}</th>
@@ -54,50 +69,73 @@
 						<th>{{ $t('adminUsers.statusColumn') }}</th>
 						<th>{{ $t('adminUsers.twoFactorColumn') }}</th>
 						<th>{{ $t('adminUsers.createdColumn') }}</th>
-						<th></th>
+						<th class="aio-admin-users__action-col">{{ $t('adminUsers.actionColumn') }}</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr v-for="item in users" :key="item.id">
-						<td><strong>#{{ item.id }}</strong></td>
+						<td class="aio-admin-users__id">#{{ item.id }}</td>
 						<td>
-							<span class="aio-admin-invoices__name">{{ item.fullName || '—' }}</span>
-							<span class="aio-admin-invoices__email">{{ item.email }}</span>
+							<div class="aio-admin-users__user">
+								<span class="aio-admin-users__avatar" aria-hidden="true">
+									{{ userInitials(item) }}
+								</span>
+								<span class="aio-admin-users__user-copy">
+									<span class="aio-admin-users__name">{{ item.fullName || '—' }}</span>
+									<span class="aio-admin-users__email">{{ item.email }}</span>
+								</span>
+							</div>
 						</td>
 						<td>
 							<span
-								class="aio-admin-badge"
-								:class="item.isActive ? 'aio-admin-badge--success' : 'aio-admin-badge--warning'"
+								class="aio-admin-users__badge"
+								:class="item.isActive ? 'aio-admin-users__badge--success' : 'aio-admin-users__badge--muted'"
 							>
+								<span class="aio-admin-users__badge-dot" aria-hidden="true"></span>
 								{{ item.isActive ? $t('adminUsers.activeStatus') : $t('adminUsers.inactiveStatus') }}
 							</span>
 						</td>
 						<td>
 							<span
-								class="aio-admin-badge"
+								class="aio-admin-users__badge"
 								:class="twoFactorBadgeClass(item)"
 							>
+								<span class="aio-admin-users__badge-dot" aria-hidden="true"></span>
 								{{ twoFactorLabel(item) }}
 							</span>
 						</td>
-						<td>{{ formatDate(item.createdAt) }}</td>
-						<td class="aio-admin-invoices__actions">
-							<v-btn
+						<td class="aio-admin-users__date">{{ formatDate(item.createdAt) }}</td>
+						<td class="aio-admin-users__actions">
+							<v-menu
 								v-if="item.twoFactorEnabled || item.twoFactorPending"
-								small
-								depressed
-								color="error"
-								class="mr-1"
-								:loading="disablingId === item.id"
-								@click="openDisableDialog(item)"
+								offset-y
+								left
 							>
-								<v-icon left small>no_encryption</v-icon>
-								{{ $t('adminUsers.disable2fa') }}
-							</v-btn>
+								<template v-slot:activator="{ on, attrs }">
+									<v-btn
+										icon
+										small
+										class="aio-admin-users__menu-btn"
+										v-bind="attrs"
+										v-on="on"
+									>
+										<v-icon small>more_vert</v-icon>
+									</v-btn>
+								</template>
+								<v-list dense>
+									<v-list-item @click="openDisableDialog(item)">
+										<v-list-item-icon class="mr-2">
+											<v-icon small color="error">no_encryption</v-icon>
+										</v-list-item-icon>
+										<v-list-item-title>{{ $t('adminUsers.disable2fa') }}</v-list-item-title>
+									</v-list-item>
+								</v-list>
+							</v-menu>
 							<v-btn
+								outlined
 								small
-								depressed
-								:color="item.isActive ? 'warning' : 'success'"
+								color="primary"
+								class="aio-admin-users__action-btn"
 								:loading="togglingId === item.id"
 								@click="toggleStatus(item)"
 							>
@@ -109,7 +147,7 @@
 				</tbody>
 			</table>
 
-			<div v-if="pagination.totalPages > 1" class="aio-admin-invoices__pagination pa-4">
+			<div v-if="pagination.totalPages > 1" class="aio-admin-users__pagination">
 				<p>{{ $t('adminOrders.pageOf', { page: pagination.page, total: pagination.totalPages }) }}</p>
 				<div>
 					<v-btn icon small :disabled="!pagination.hasPrevPage" @click="goToPage(pagination.page - 1)">
@@ -174,10 +212,26 @@ export default {
 			selectedUser: null,
 		};
 	},
+	computed: {
+		filterOptions() {
+			return [
+				{ value: 'all', label: this.$t('adminUsers.filterAll') },
+				{ value: 'enabled', label: this.$t('adminUsers.filterEnabled') },
+				{ value: 'pending', label: this.$t('adminUsers.filterPending') },
+				{ value: 'disabled', label: this.$t('adminUsers.filterDisabled') },
+			];
+		},
+	},
 	mounted() {
 		this.reload();
 	},
 	methods: {
+		setFilter(value) {
+			if (this.twoFactorFilter === value) return;
+			this.twoFactorFilter = value;
+			this.pagination.page = 1;
+			this.reload();
+		},
 		async reload() {
 			this.isLoading = true;
 			this.errorMessage = '';
@@ -203,15 +257,24 @@ export default {
 			this.pagination.page = page;
 			this.reload();
 		},
+		userInitials(item) {
+			const source = (item.fullName || item.email || '').trim();
+			if (!source) return '?';
+			const parts = source.split(/\s+/).filter(Boolean);
+			if (parts.length >= 2) {
+				return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+			}
+			return source.slice(0, 2).toUpperCase();
+		},
 		twoFactorLabel(item) {
 			if (item.twoFactorEnabled) return this.$t('adminUsers.twoFactorEnabled');
 			if (item.twoFactorPending) return this.$t('adminUsers.twoFactorPending');
 			return this.$t('adminUsers.twoFactorOff');
 		},
 		twoFactorBadgeClass(item) {
-			if (item.twoFactorEnabled) return 'aio-admin-badge--success';
-			if (item.twoFactorPending) return 'aio-admin-badge--warning';
-			return 'aio-admin-badge--muted';
+			if (item.twoFactorEnabled) return 'aio-admin-users__badge--success';
+			if (item.twoFactorPending) return 'aio-admin-users__badge--warning';
+			return 'aio-admin-users__badge--muted';
 		},
 		formatDate(value) {
 			if (!value) return '—';
