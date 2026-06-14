@@ -716,6 +716,7 @@ export default {
 		serviceUrl: 'Billing API URL',
 		outputPath: 'PDF/XML output path',
 		jasperPath: 'Jasper template path',
+		jasperPathHint: 'Absolute path on WildFly (.jasper or .jrxml) or filename relative to rutajasper.',
 		signatureTitle: 'Electronic signature',
 		signatureHint: 'Save issuer details first. On upload, the certificate is copied automatically to the WildFly path.',
 		signatureDeployPath: 'Signature deploy path (WildFly)',

@@ -200,6 +200,8 @@
 							<v-text-field
 								v-model="form.jasper_path"
 								:label="$t('adminBilling.jasperPath')"
+								:hint="$t('adminBilling.jasperPathHint')"
+								persistent-hint
 								outlined
 								dense
 								hide-details="auto"

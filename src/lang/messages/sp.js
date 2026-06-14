@@ -716,6 +716,7 @@ export default {
 		serviceUrl: 'URL API facturación',
 		outputPath: 'Ruta de salida PDF/XML',
 		jasperPath: 'Plantilla Jasper',
+		jasperPathHint: 'Ruta absoluta en WildFly (.jasper o .jrxml) o nombre relativo a rutajasper.',
 		signatureTitle: 'Firma electrónica',
 		signatureHint: 'Primero guarda los datos del emisor. Al subir, el certificado se copia automáticamente a la ruta de WildFly.',
 		signatureDeployPath: 'Ruta de despliegue de la firma (WildFly)',
