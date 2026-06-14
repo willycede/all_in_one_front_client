@@ -25,6 +25,21 @@
 				<p>{{ $t('account.profileNotice') }}</p>
 			</div>
 
+			<div
+				class="aio-account-panel__notice"
+				:class="billingReady ? 'aio-account-panel__notice--success' : 'aio-account-panel__notice--warning'"
+			>
+				<v-icon size="20">{{ billingReady ? 'check_circle' : 'warning' }}</v-icon>
+				<p>
+					<strong>{{ billingReady ? $t('account.billingReady') : $t('account.billingIncomplete') }}</strong>
+					<span v-if="!billingReady && billingMissing.length">
+						{{ $t('account.billingMissingFields', { fields: billingMissing.join(', ') }) }}
+					</span>
+				</p>
+			</div>
+
+			<h3 class="aio-account-panel__section-title">{{ $t('account.billingData') }}</h3>
+
 			<div class="aio-account-panel__grid">
 				<div
 					v-for="field in profileFields"
@@ -48,45 +63,66 @@
 <script>
 import api from 'Api';
 
+const TYPE_LABEL_KEYS = {
+	C: 'account.billingTypeCedula',
+	R: 'account.billingTypeRuc',
+	P: 'account.billingTypePassport',
+};
+
 export default {
 	data() {
 		return {
 			isLoading: true,
 			user: null,
+			billing: null,
+			billingReady: false,
+			billingMissing: [],
 		};
 	},
 	computed: {
 		profileFields() {
 			if (!this.user) return [];
+			const billing = this.billing || {};
+			const typeId = billing.type_id;
+			const typeLabel = typeId && TYPE_LABEL_KEYS[typeId]
+				? this.$t(TYPE_LABEL_KEYS[typeId])
+				: '—';
+
 			return [
 				{
+					key: 'type',
+					label: this.$t('account.idFieldLabel'),
+					value: typeLabel,
+					icon: 'badge',
+				},
+				{
+					key: 'id',
+					label: this.$t('account.idNumber'),
+					value: billing.id_document || this.user.identification_number || localStorage.getItem('identification_number'),
+					icon: 'fingerprint',
+				},
+				{
 					key: 'name',
-					label: this.$t('account.firstName'),
-					value: this.user.name_user || localStorage.getItem('name_user'),
+					label: this.$t('account.nameFieldLabel'),
+					value: billing.razon_social || this.user.name_user || localStorage.getItem('name_user'),
 					icon: 'person_outline',
 				},
 				{
 					key: 'last',
-					label: this.$t('account.lastName'),
-					value: this.user.last_name_user || localStorage.getItem('last_name_user'),
+					label: this.$t('account.lastNameFieldLabel'),
+					value: billing.razon_comercial || this.user.last_name_user || localStorage.getItem('last_name_user'),
 					icon: 'person_outline',
 				},
 				{
 					key: 'email',
 					label: this.$t('account.emailLabel'),
-					value: this.user.email || localStorage.getItem('email'),
+					value: billing.mail || this.user.email || localStorage.getItem('email'),
 					icon: 'email',
-				},
-				{
-					key: 'id',
-					label: this.$t('account.idNumber'),
-					value: this.user.identification_number || localStorage.getItem('identification_number'),
-					icon: 'badge',
 				},
 				{
 					key: 'address',
 					label: this.$t('account.addressLabel'),
-					value: this.user.address,
+					value: billing.address || this.user.address,
 					icon: 'location_on',
 					full: true,
 				},
@@ -100,9 +136,20 @@ export default {
 		async loadProfile() {
 			this.isLoading = true;
 			try {
-				const response = await api.get(`/api/users/${localStorage.id_users}`);
-				if (response?.data?.data) {
-					this.user = response.data.data;
+				const [userResponse, billingResponse] = await Promise.all([
+					api.get(`/api/users/${localStorage.id_users}`),
+					api.get(`/api/shoppingcar/get_invoice_data/${localStorage.id_users}`),
+				]);
+
+				if (userResponse?.data?.data) {
+					this.user = userResponse.data.data;
+				}
+
+				const billingPayload = billingResponse?.data?.data;
+				if (billingPayload) {
+					this.billing = billingPayload.billing || null;
+					this.billingReady = !!billingPayload.ready;
+					this.billingMissing = billingPayload.missing || [];
 				}
 			} finally {
 				this.isLoading = false;

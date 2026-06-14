@@ -34,6 +34,8 @@ export default {
       deliveryAddress: '',
       deliveryRecipientName: '',
       deliveryRecipientPhone: '',
+      billingReady: true,
+      billingMissing: [],
       uploadedDocuments: {}, // { id_details: { docType: file } }
       uploadingDocuments: {},
       quantityTimers: {},
@@ -108,6 +110,17 @@ export default {
       } catch (prefsError) {
         // preferencias opcionales
       }
+
+      try {
+        const billingRes = await api.get(`/api/shoppingcar/customer-billing-status/${localStorage.id_users}`);
+        const billingStatus = billingRes && billingRes.data && billingRes.data.data;
+        if (billingStatus) {
+          this.billingReady = !!billingStatus.ready;
+          this.billingMissing = billingStatus.missing || [];
+        }
+      } catch (billingError) {
+        this.billingReady = false;
+      }
     }
   },
   computed: {
@@ -153,7 +166,7 @@ export default {
     formatNumber(num) {
       return parseFloat(num).toFixed(2);
     },
-    registraConfirmaShop() {
+    async registraConfirmaShop() {
       // Validar que todos los productos con documentos requeridos tengan sus documentos subidos
       const missingDocs = this.validateRequiredDocuments();
       
@@ -177,6 +190,28 @@ export default {
           this.$snotify.error(this.$t('cartPage.deliveryIncomplete'), { timeout: 4000 });
           return;
         }
+      }
+
+      try {
+        const billingRes = await api.get(`/api/shoppingcar/customer-billing-status/${localStorage.id_users}`);
+        const billingStatus = billingRes && billingRes.data && billingRes.data.data;
+        this.billingReady = !!(billingStatus && billingStatus.ready);
+        this.billingMissing = (billingStatus && billingStatus.missing) || [];
+      } catch (billingError) {
+        this.billingReady = false;
+      }
+
+      if (!this.billingReady) {
+        const fields = this.billingMissing.length
+          ? this.$t('cartPage.billingIncompleteFields', { fields: this.billingMissing.join(', ') })
+          : this.$t('cartPage.billingIncomplete');
+        this.$snotify.error(fields, {
+          closeOnClick: false,
+          pauseOnHover: false,
+          timeout: 6000,
+          showProgressBar: false,
+        });
+        return;
       }
       
       this.$refs.confirmationDialog.openDialog();
@@ -572,12 +607,18 @@ export default {
 
 				<div v-else class="aio-cart-page__layout cart-shop-list">
 					<div class="aio-cart-page__main">
-						<div class="aio-cart-page__notice">
-							<v-icon size="20">info</v-icon>
+						<div
+							class="aio-cart-page__notice"
+							:class="{ 'aio-cart-page__notice--warning': !billingReady }"
+						>
+							<v-icon size="20">{{ billingReady ? 'info' : 'warning' }}</v-icon>
 							<p>
-								Verifica tus
-								<router-link to="/account/profile">datos de facturación</router-link>
-								antes de confirmar. La factura se emitirá con la información registrada en tu cuenta.
+								<i18n path="cartPage.billingNotice" tag="span">
+									<router-link to="/account/profile" place="link">{{ $t('cartPage.billingNoticeLink') }}</router-link>
+								</i18n>
+								<span v-if="!billingReady && billingMissing.length">
+									{{ $t('cartPage.billingIncompleteFields', { fields: billingMissing.join(', ') }) }}
+								</span>
 							</p>
 						</div>
 

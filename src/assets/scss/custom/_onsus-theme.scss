@@ -1979,6 +1979,15 @@
 	}
 }
 
+.aio-cart-page__notice--warning {
+	background: rgba(#ed6c02, 0.08);
+	border-color: rgba(#ed6c02, 0.2);
+
+	.v-icon {
+		color: #ed6c02 !important;
+	}
+}
+
 .aio-cart-page__item {
 	background: $base;
 	border-radius: 16px;
@@ -4603,6 +4612,31 @@
 		line-height: 1.55;
 		color: #3d3d48;
 	}
+}
+
+.aio-account-panel__notice--success {
+	background: rgba(#2e7d32, 0.08);
+	border-color: rgba(#2e7d32, 0.2);
+
+	.v-icon {
+		color: #2e7d32 !important;
+	}
+}
+
+.aio-account-panel__notice--warning {
+	background: rgba(#ed6c02, 0.08);
+	border-color: rgba(#ed6c02, 0.2);
+
+	.v-icon {
+		color: #ed6c02 !important;
+	}
+}
+
+.aio-account-panel__section-title {
+	margin: 0 0 1rem;
+	font-size: 1rem;
+	font-weight: 600;
+	color: #2d2d35;
 }
 
 .aio-account-panel__grid {
