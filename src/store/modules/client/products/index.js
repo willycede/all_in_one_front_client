@@ -47,6 +47,7 @@ const actions = {
 				minPrice: data.minPrice,
 				maxPrice: data.maxPrice,
 				cityId: data.cityId,
+				subcategoryId: data.subcategoryId,
 				sortBy: data.sortBy,
 			}),
 		});

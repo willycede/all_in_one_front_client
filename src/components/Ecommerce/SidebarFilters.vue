@@ -35,20 +35,50 @@
 					<span>{{ $t('productsPage.allCategories') }}</span>
 					<v-icon v-if="!selectedCategory" size="16">check</v-icon>
 				</button>
-				<button
-					v-for="category in generalCategories"
-					:key="category.idgeneral_categories"
-					type="button"
-					class="aio-shop-sidebar__cat"
-					:class="{ 'aio-shop-sidebar__cat--active': selectedCategory === category.idgeneral_categories }"
-					@click="selectCategory(category.idgeneral_categories)"
-				>
-					<span>{{ category.name }}</span>
-					<v-icon
-						v-if="selectedCategory === category.idgeneral_categories"
-						size="16"
-					>check</v-icon>
-				</button>
+				<template v-for="category in generalCategories">
+					<button
+						:key="category.idgeneral_categories"
+						type="button"
+						class="aio-shop-sidebar__cat"
+						:class="{ 'aio-shop-sidebar__cat--active': selectedCategory === category.idgeneral_categories }"
+						@click="selectCategory(category.idgeneral_categories)"
+					>
+						<span>{{ category.name }}</span>
+						<v-icon
+							v-if="selectedCategory === category.idgeneral_categories"
+							size="16"
+						>check</v-icon>
+					</button>
+					<div
+						v-if="selectedCategory === category.idgeneral_categories && (category.categories || []).length > 0"
+						:key="`subcats-${category.idgeneral_categories}`"
+						class="aio-shop-sidebar__subcategories"
+					>
+						<button
+							type="button"
+							class="aio-shop-sidebar__cat aio-shop-sidebar__cat--sub"
+							:class="{ 'aio-shop-sidebar__cat--active': !selectedSubcategory }"
+							@click="selectSubcategory(null)"
+						>
+							<span>{{ $t('productsPage.allSubcategories') }}</span>
+							<v-icon v-if="!selectedSubcategory" size="16">check</v-icon>
+						</button>
+						<button
+							v-for="subcategory in category.categories"
+							:key="subcategory.id_category"
+							type="button"
+							class="aio-shop-sidebar__cat aio-shop-sidebar__cat--sub"
+							:class="{ 'aio-shop-sidebar__cat--active': selectedSubcategory === subcategory.id_category }"
+							@click="selectSubcategory(subcategory.id_category)"
+						>
+							<span>{{ subcategory.name }}</span>
+							<v-icon
+								v-if="selectedSubcategory === subcategory.id_category"
+								size="16"
+							>check</v-icon>
+						</button>
+					</div>
+				</template>
 			</div>
 		</div>
 
@@ -145,6 +175,7 @@ export default {
 	data() {
 		return {
 			selectedCategory: null,
+			selectedSubcategory: null,
 			searchBy: '',
 			minPrice: '',
 			maxPrice: '',
@@ -175,6 +206,7 @@ export default {
 				}
 				const parsed = parseCatalogQuery(query);
 				this.selectedCategory = parsed.categoryId;
+				this.selectedSubcategory = parsed.subcategoryId;
 				this.searchBy = parsed.searchBy;
 				this.minPrice = parsed.minPrice;
 				this.maxPrice = parsed.maxPrice;
@@ -202,6 +234,7 @@ export default {
 		currentFilters() {
 			return {
 				categoryId: this.selectedCategory,
+				subcategoryId: this.selectedSubcategory,
 				searchBy: this.searchBy.trim(),
 				minPrice: this.minPrice,
 				maxPrice: this.maxPrice,
@@ -239,6 +272,11 @@ export default {
 		},
 		selectCategory(categoryId) {
 			this.selectedCategory = categoryId;
+			this.selectedSubcategory = null;
+			this.applyFilters({ syncRoute: true });
+		},
+		selectSubcategory(subcategoryId) {
+			this.selectedSubcategory = subcategoryId;
 			this.applyFilters({ syncRoute: true });
 		},
 		applyPriceFilter() {
@@ -246,6 +284,7 @@ export default {
 		},
 		clearFilters() {
 			this.selectedCategory = null;
+			this.selectedSubcategory = null;
 			this.searchBy = '';
 			this.minPrice = '';
 			this.maxPrice = '';

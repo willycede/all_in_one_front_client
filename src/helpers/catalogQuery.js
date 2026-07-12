@@ -10,6 +10,7 @@ export const DEFAULT_CATALOG_SORT = 'name_asc';
 export function parseCatalogQuery(query = {}) {
 	return {
 		categoryId: query.generalCategoryId ? parseInt(query.generalCategoryId, 10) : null,
+		subcategoryId: query.subcategoryId ? parseInt(query.subcategoryId, 10) : null,
 		searchBy: query.searchBy || '',
 		minPrice: query.minPrice || '',
 		maxPrice: query.maxPrice || '',
@@ -30,6 +31,9 @@ export function buildCatalogQuery(filters = {}) {
 
 	if (filters.categoryId) {
 		query.generalCategoryId = String(filters.categoryId);
+	}
+	if (filters.subcategoryId) {
+		query.subcategoryId = String(filters.subcategoryId);
 	}
 	if (filters.searchBy && String(filters.searchBy).trim()) {
 		query.searchBy = String(filters.searchBy).trim();
@@ -53,6 +57,7 @@ export function buildCatalogQuery(filters = {}) {
 export function catalogFiltersChanged(a, b) {
 	return (
 		String(a.categoryId || '') !== String(b.categoryId || '')
+		|| String(a.subcategoryId || '') !== String(b.subcategoryId || '')
 		|| String(a.searchBy || '') !== String(b.searchBy || '')
 		|| String(a.minPrice || '') !== String(b.minPrice || '')
 		|| String(a.maxPrice || '') !== String(b.maxPrice || '')
@@ -77,6 +82,7 @@ export function catalogApiParams(filters) {
 		minPrice: filters.minPrice || undefined,
 		maxPrice: filters.maxPrice || undefined,
 		cityId: filters.cityId || undefined,
+		subcategoryId: filters.subcategoryId || undefined,
 		sortBy: filters.sortBy || DEFAULT_CATALOG_SORT,
 	};
 }

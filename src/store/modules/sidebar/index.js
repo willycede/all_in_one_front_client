@@ -5,11 +5,27 @@ import { adminPanelMenus } from './adminMenus.js';
 import api from 'Api';
 
 const buildCategoryMenus = (categories) => {
-	const children = (categories || []).map((category) => ({
-		name: category.name,
-		path: `/products/category/${category.id_general_category || category.id}`,
-		children_menus: null,
-	}));
+	const categoryItems = (categories || []).map((category) => {
+		const generalId = category.idgeneral_categories || category.id_general_category || category.id;
+		const subcategories = Array.isArray(category.categories) ? category.categories : [];
+
+		const item = {
+			name: category.name,
+			path: `/products?generalCategoryId=${generalId}`,
+			children_menus: null,
+		};
+
+		if (subcategories.length) {
+			item.type = 'sub_menu';
+			item.children = subcategories.map((subcategory) => ({
+				name: subcategory.name,
+				path: `/products?generalCategoryId=${generalId}&subcategoryId=${subcategory.id_category}`,
+				children_menus: null,
+			}));
+		}
+
+		return item;
+	});
 
 	return [
 		{
@@ -17,12 +33,7 @@ const buildCategoryMenus = (categories) => {
 			icon: 'home',
 			path: '/mainPage',
 		},
-		{
-			name: 'Categorías',
-			icon: 'pages',
-			type: 'sub_menu',
-			children: children.length ? children : defaultMenus[1].children,
-		},
+		...(categoryItems.length ? categoryItems : [defaultMenus[1]]),
 	];
 };
 

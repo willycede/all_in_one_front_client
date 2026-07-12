@@ -141,6 +141,7 @@ export default {
 			suppressRouteWatch: false,
 			loadRequestId: 0,
 			activeCategoryId: undefined,
+			activeSubcategoryId: null,
 			activeSearch: '',
 			activeMinPrice: '',
 			activeMaxPrice: '',
@@ -232,6 +233,7 @@ export default {
 		...mapActions(['getProductsByCategoryIdAndFilters']),
 		syncActiveFilters(filters) {
 			this.activeCategoryId = filters.categoryId || undefined;
+			this.activeSubcategoryId = filters.subcategoryId || null;
 			this.activeSearch = filters.searchBy || '';
 			this.activeMinPrice = filters.minPrice || '';
 			this.activeMaxPrice = filters.maxPrice || '';
@@ -249,6 +251,7 @@ export default {
 		buildRouteQuery(page, limit, filters = {}) {
 			return buildCatalogQuery({
 				categoryId: filters.categoryId !== undefined ? filters.categoryId : this.activeCategoryId,
+				subcategoryId: filters.subcategoryId !== undefined ? filters.subcategoryId : this.activeSubcategoryId,
 				searchBy: filters.searchBy !== undefined ? filters.searchBy : this.activeSearch,
 				minPrice: filters.minPrice !== undefined ? filters.minPrice : this.activeMinPrice,
 				maxPrice: filters.maxPrice !== undefined ? filters.maxPrice : this.activeMaxPrice,
@@ -276,6 +279,7 @@ export default {
 		},
 		async loadProducts({
 			categoryId,
+			subcategoryId,
 			searchBy,
 			minPrice,
 			maxPrice,
@@ -292,6 +296,9 @@ export default {
 
 			if (categoryId !== undefined) {
 				this.activeCategoryId = categoryId || undefined;
+			}
+			if (subcategoryId !== undefined) {
+				this.activeSubcategoryId = subcategoryId || null;
 			}
 			if (searchBy !== undefined) {
 				this.activeSearch = searchBy || '';
@@ -320,6 +327,7 @@ export default {
 			try {
 				await this.getProductsByCategoryIdAndFilters({
 					categoryId: this.activeCategoryId,
+					subcategoryId: this.activeSubcategoryId,
 					searchBy: this.activeSearch,
 					minPrice: this.activeMinPrice,
 					maxPrice: this.activeMaxPrice,

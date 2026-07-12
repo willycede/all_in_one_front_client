@@ -96,6 +96,8 @@ const actions = {
                   details_subtotal: subtotal,
                   details_iva: iva,
                   details_total: total,
+                  id_modifier: payload.id_modifier || null,
+                  id_city: payload.id_city || null,
                   status: 1,
             }).then((response) => {
                   context.commit('updateCartItemQuantity', {
@@ -213,6 +215,9 @@ const mutations = {
                         name: payload.name,
                         details_price: payload.details_price,
                         details_quantity: payload.details_quantity ? payload.details_quantity : 1,
+                        id_modifier: payload.id_modifier || null,
+                        modifier_name: payload.modifier_name || null,
+                        id_city: payload.id_city || null,
                         total: payload.details_price
       
                   }
@@ -242,6 +247,8 @@ const mutations = {
                                     "details_subtotal": payload.details_subtotal,
                                     "details_iva": payload.details_iva,
                                     "details_total": payload.details_total,
+                                    "id_modifier": payload.id_modifier || null,
+                                    "id_city": payload.id_city || null,
                                     "status": payload.status
                               };
       
@@ -255,6 +262,9 @@ const mutations = {
                                           name: payload.name,
                                           details_price: payload.details_price,
                                           details_quantity: payload.details_quantity ? payload.details_quantity : 1,
+                                          id_modifier: payload.id_modifier || null,
+                                          modifier_name: payload.modifier_name || null,
+                                          id_city: payload.id_city || null,
                                           total: payload.details_price
                         
                                     }
@@ -292,6 +302,8 @@ const mutations = {
                                           "details_subtotal": payload.details_subtotal,
                                           "details_iva": payload.details_iva,
                                           "details_total": payload.details_total,
+                                          "id_modifier": payload.id_modifier || null,
+                                          "id_city": payload.id_city || null,
                                           "status": payload.status
                                     };
       
@@ -306,6 +318,9 @@ const mutations = {
                                                 name: payload.name,
                                                 details_price: payload.details_price,
                                                 details_quantity: payload.details_quantity ? payload.details_quantity : 1,
+                                                id_modifier: payload.id_modifier || null,
+                                                modifier_name: payload.modifier_name || null,
+                                                id_city: payload.id_city || null,
                                                 total: payload.details_price
                               
                                           }
@@ -338,6 +353,9 @@ const mutations = {
                               name: payload.name,
                               details_price: payload.details_price,
                               details_quantity: payload.details_quantity ? payload.details_quantity : 1,
+                              id_modifier: payload.id_modifier || null,
+                              modifier_name: payload.modifier_name || null,
+                              id_city: payload.id_city || null,
                               total: payload.details_price
             
                         }

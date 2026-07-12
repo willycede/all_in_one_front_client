@@ -102,6 +102,14 @@ export default {
 	},
 	methods: {
 		addProductToCart(item) {
+			// Productos con colores o ciudades requieren elegir opciones en el detalle
+			const needsOptions = (parseInt(item.modifiers_count, 10) || 0) > 0
+				|| (item.allowed_cities && String(item.allowed_cities).trim() !== '');
+			if (needsOptions) {
+				this.$router.push(`/products/${item.id_products}`);
+				return;
+			}
+
 			const img = item.images[0].url;
 			const price = parseFloat(String(item.price).replace('$', ''));
 			const quantity = (typeof item.quantity !== 'undefined' && item.quantity !== null) ? item.quantity : 1;

@@ -62,6 +62,9 @@
 							</div>
 							<div class="aio-cart-dropdown__body">
 								<p class="aio-cart-dropdown__name">{{ item.name }}</p>
+								<p v-if="item.modifier_name" class="aio-cart-dropdown__meta">
+									{{ item.modifier_name }}
+								</p>
 								<p class="aio-cart-dropdown__meta">
 									<span v-if="item.details_quantity > 1">{{ item.details_quantity }} × </span>
 									<emb-currency-sign></emb-currency-sign>{{ formatPrice(item.details_price) }}

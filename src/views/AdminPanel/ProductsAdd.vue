@@ -149,6 +149,41 @@
 				</section>
 
 				<section class="aio-admin-card aio-admin-product-form__section">
+					<product-modifiers-section v-model="form.modifiers"></product-modifiers-section>
+				</section>
+
+				<section class="aio-admin-card aio-admin-product-form__section">
+					<header class="aio-admin-product-form__section-head">
+						<span class="aio-admin-product-form__section-icon">
+							<v-icon size="20">location_city</v-icon>
+						</span>
+						<div>
+							<h3>{{ $t('adminProducts.sectionCitiesTitle') }}</h3>
+							<p>{{ $t('adminProducts.sectionCitiesHint') }}</p>
+						</div>
+					</header>
+
+					<v-autocomplete
+						v-model="form.allowed_cities"
+						:items="cities"
+						item-text="name"
+						item-value="id_city"
+						:label="$t('adminProducts.citiesLabel')"
+						:placeholder="$t('adminProducts.citiesPlaceholder')"
+						multiple
+						chips
+						small-chips
+						deletable-chips
+						outlined
+						dense
+						hide-details="auto"
+						:loading="loadingOptions"
+						:hint="$t('adminProducts.citiesHint')"
+						persistent-hint
+					></v-autocomplete>
+				</section>
+
+				<section class="aio-admin-card aio-admin-product-form__section">
 					<header class="aio-admin-product-form__section-head">
 						<span class="aio-admin-product-form__section-icon">
 							<v-icon size="20">link</v-icon>
@@ -261,6 +296,7 @@
 <script>
 import api from 'Api';
 import ProductImagesSection from 'Components/Admin/ProductImagesSection';
+import ProductModifiersSection from 'Components/Admin/ProductModifiersSection';
 
 function emptyForm() {
 	return {
@@ -272,12 +308,15 @@ function emptyForm() {
 		id_cod_catalog: null,
 		id_category: null,
 		external_product_id: '',
+		modifiers: [],
+		allowed_cities: [],
 	};
 }
 
 export default {
 	components: {
 		ProductImagesSection,
+		ProductModifiersSection,
 	},
 	data() {
 		return {
@@ -286,6 +325,7 @@ export default {
 			fieldErrors: {},
 			catalogs: [],
 			categories: [],
+			cities: [],
 			loadingOptions: true,
 			loadError: '',
 			isSubmitting: false,
@@ -329,12 +369,14 @@ export default {
 			this.loadingOptions = true;
 			this.loadError = '';
 			try {
-				const [catalogRes, categoryRes] = await Promise.all([
+				const [catalogRes, categoryRes, citiesRes] = await Promise.all([
 					api.get('/api/catalogs/getCatalogs'),
 					api.get('/api/categories/getCategories/1'),
+					api.get('/api/cities/catalog'),
 				]);
 				this.catalogs = (catalogRes.data && catalogRes.data.data) || [];
 				this.categories = (categoryRes.data && categoryRes.data.data) || [];
+				this.cities = (citiesRes.data && citiesRes.data.data) || [];
 			} catch (error) {
 				this.loadError = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)
 					|| this.$t('adminProducts.optionsLoadError');
@@ -379,6 +421,14 @@ export default {
 				external_product_id: this.form.external_product_id
 					? String(this.form.external_product_id).trim()
 					: null,
+				modifiers: (this.form.modifiers || [])
+					.filter((modifier) => modifier.name && String(modifier.name).trim())
+					.map((modifier) => ({
+						type: modifier.type || 'color',
+						name: String(modifier.name).trim(),
+						price_delta: parseFloat(modifier.price_delta) || 0,
+					})),
+				allowed_cities: this.form.allowed_cities || [],
 			};
 		},
 		async submitProduct() {

@@ -130,7 +130,7 @@
 						<!-- Información -->
 						<div class="aio-product-detail__info">
 							<div class="aio-product-detail__price-row">
-								<span class="aio-product-detail__price">{{ formattedPrice }}</span>
+								<span class="aio-product-detail__price">{{ displayedPrice || formattedPrice }}</span>
 								<span
 									class="aio-product-detail__stock"
 									:class="selectedProduct.status ? 'aio-product-detail__stock--in' : 'aio-product-detail__stock--out'"
@@ -159,6 +159,21 @@
 							</div>
 
 							<div class="aio-product-detail__form">
+								<div v-if="productModifiers.length > 0" class="aio-product-detail__field">
+									<label>{{ $t('productsPage.color') }}</label>
+									<v-select
+										v-model="selectedModifier"
+										:items="modifierOptions"
+										item-text="label"
+										item-value="id_modifier"
+										:placeholder="$t('productsPage.selectColor')"
+										outlined
+										dense
+										hide-details
+										class="aio-product-detail__select"
+									></v-select>
+								</div>
+
 								<div v-if="selectedProduct.cities && selectedProduct.cities.length > 0" class="aio-product-detail__field">
 									<label>{{ $t('productsPage.city') }}</label>
 									<v-select
@@ -325,6 +340,7 @@ export default {
 			thumbLoaded: {},
 			thumbErrors: {},
 			selectedCity: null,
+			selectedModifier: null,
 			productQuantity: 1,
 			formattedPrice: '',
 			lightboxOpen: false,
@@ -341,6 +357,32 @@ export default {
 		},
 		productImages() {
 			return this.selectedProduct?.images || [];
+		},
+		productModifiers() {
+			return this.selectedProduct?.modifiers || [];
+		},
+		modifierOptions() {
+			return this.productModifiers.map((modifier) => {
+				const delta = parseFloat(modifier.price_delta) || 0;
+				return {
+					id_modifier: modifier.id_modifier,
+					label: delta > 0 ? `${modifier.name} (+${moneyMask(delta)})` : modifier.name,
+				};
+			});
+		},
+		selectedModifierData() {
+			if (!this.selectedModifier) return null;
+			return this.productModifiers.find(
+				(modifier) => modifier.id_modifier === this.selectedModifier
+			) || null;
+		},
+		displayedPrice() {
+			if (!this.selectedProduct) return '';
+			const base = this.parsePrice(this.selectedProduct.price);
+			const delta = this.selectedModifierData
+				? parseFloat(this.selectedModifierData.price_delta) || 0
+				: 0;
+			return moneyMask(base + delta);
 		},
 		hasRequiredDocuments() {
 			const docs = this.selectedProduct?.required_documents_array;
@@ -387,6 +429,7 @@ export default {
 			this.thumbErrors = {};
 			this.selectedImageIndex = 0;
 			this.selectedCity = null;
+			this.selectedModifier = null;
 			this.productQuantity = 1;
 
 			const id = this.$route.params.id;
@@ -515,6 +558,16 @@ export default {
 			return parseFloat(String(value).replace(/[$,]/g, '')) || 0;
 		},
 		addProductToCart(item) {
+			if (this.productModifiers.length > 0 && !this.selectedModifier) {
+				this.$snotify.error(this.$t('productsPage.selectColorError'), {
+					closeOnClick: false,
+					pauseOnHover: false,
+					timeout: 2000,
+					showProgressBar: false,
+				});
+				return;
+			}
+
 			if (item.cities && item.cities.length > 0 && !this.selectedCity) {
 				this.$snotify.error(this.$t('productsPage.selectCityError'), {
 					closeOnClick: false,
@@ -536,7 +589,9 @@ export default {
 			}
 
 			const img = item.images[0].url;
-			const price = this.parsePrice(item.price);
+			const modifier = this.selectedModifierData;
+			const modifierPrice = modifier ? parseFloat(modifier.price_delta) || 0 : 0;
+			const price = this.parsePrice(item.price) + modifierPrice;
 			const quantity = this.productQuantity;
 
 			if (typeof localStorage.id_users !== 'undefined' && localStorage.id_users !== null) {
@@ -556,6 +611,9 @@ export default {
 					details_total: (quantity * price) + (quantity * price) * AppConfig.porcentajeIVa,
 					status: 1,
 					id_city: this.selectedCity,
+					id_modifier: modifier ? modifier.id_modifier : null,
+					modifier_name: modifier ? modifier.name : null,
+					modifier_price: modifierPrice,
 					required_documents_array: this.requiredDocumentsArray,
 					uploaded_documents: {},
 				};

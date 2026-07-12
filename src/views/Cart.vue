@@ -244,8 +244,11 @@ export default {
         let detallefinal = "";
         for (const item of this.cart) {
           const totaldetalle = item.details_quantity * item.details_price;
+          const itemLabel = item.modifier_name
+            ? `${item.name} - ${item.modifier_name}`
+            : item.name;
           detallefinal += HtmlElement.htmldetalle
-            .replace("@nombre", item.name)
+            .replace("@nombre", itemLabel)
             .replace("@cantidad", item.details_quantity)
             .replace("@totaldetalle", "$ " + parseFloat(totaldetalle).toFixed(2));
         }
@@ -634,6 +637,12 @@ export default {
 
 								<div class="aio-cart-page__info">
 									<h3 class="aio-cart-page__name">{{ item.name }}</h3>
+									<p v-if="item.modifier_name" class="aio-cart-page__desc">
+										<strong>{{ $t('productsPage.color') }}:</strong> {{ item.modifier_name }}
+									</p>
+									<p v-if="item.city_name" class="aio-cart-page__desc">
+										<strong>{{ $t('productsPage.city') }}:</strong> {{ item.city_name }}
+									</p>
 									<p v-if="item.description" class="aio-cart-page__desc">{{ item.description }}</p>
 								</div>
 
