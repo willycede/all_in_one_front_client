@@ -160,13 +160,13 @@
 
 							<div class="aio-product-detail__form">
 								<div v-if="productModifiers.length > 0" class="aio-product-detail__field">
-									<label>{{ $t('productsPage.color') }}</label>
+									<label>{{ modifierGroupLabel }}</label>
 									<v-select
 										v-model="selectedModifier"
 										:items="modifierOptions"
 										item-text="label"
 										item-value="id_modifier"
-										:placeholder="$t('productsPage.selectColor')"
+										:placeholder="$t('productsPage.selectModifierOption')"
 										outlined
 										dense
 										hide-details
@@ -360,6 +360,14 @@ export default {
 		},
 		productModifiers() {
 			return this.selectedProduct?.modifiers || [];
+		},
+		modifierGroupLabel() {
+			const types = [...new Set(this.productModifiers.map((modifier) => modifier.type))];
+			const labels = this.$t('productsPage.modifierTypeLabels') || {};
+			if (types.length === 1 && labels[types[0]]) {
+				return labels[types[0]];
+			}
+			return this.$t('productsPage.modifierOption');
 		},
 		modifierOptions() {
 			return this.productModifiers.map((modifier) => {
@@ -559,7 +567,7 @@ export default {
 		},
 		addProductToCart(item) {
 			if (this.productModifiers.length > 0 && !this.selectedModifier) {
-				this.$snotify.error(this.$t('productsPage.selectColorError'), {
+				this.$snotify.error(this.$t('productsPage.selectModifierOptionError'), {
 					closeOnClick: false,
 					pauseOnHover: false,
 					timeout: 2000,
