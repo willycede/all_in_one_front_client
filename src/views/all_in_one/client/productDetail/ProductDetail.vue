@@ -146,8 +146,8 @@
 								</li>
 							</ul>
 
-							<p v-if="selectedProduct.descpription" class="aio-product-detail__desc">
-								{{ selectedProduct.descpription }}
+							<p v-if="selectedProduct.description" class="aio-product-detail__desc">
+								{{ selectedProduct.description }}
 							</p>
 
 							<div v-if="hasRequiredDocuments" class="aio-product-detail__alert">
@@ -254,7 +254,7 @@
 			content-class="aio-product-lightbox"
 			@click:outside="closeLightbox"
 		>
-			<div class="aio-product-lightbox__panel" role="dialog" aria-modal="true" :aria-label="$t('productsPage.enlargedImage', { name: selectedProduct?.name || '' })">
+			<div class="aio-product-lightbox__panel" role="dialog" aria-modal="true" :aria-label="$t('productsPage.enlargedImage', { name: (selectedProduct && selectedProduct.name) || '' })">
 				<button type="button" class="aio-product-lightbox__close" :aria-label="$t('productsPage.lightboxClose')" @click="closeLightbox">
 					<v-icon color="white">close</v-icon>
 				</button>
@@ -277,7 +277,7 @@
 						v-show="!lightboxLoading && !lightboxError"
 						ref="lightboxImg"
 						:src="lightboxImage"
-						:alt="selectedProduct?.name"
+						:alt="selectedProduct && selectedProduct.name"
 						class="aio-product-lightbox__img"
 						@load="onLightboxImageLoad"
 						@error="onLightboxImageError"
