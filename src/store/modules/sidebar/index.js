@@ -4,6 +4,19 @@ import { menus as defaultMenus } from './data.js';
 import { adminPanelMenus } from './adminMenus.js';
 import api from 'Api';
 
+const buildSubcategoryMenu = (subcategory, generalId) => {
+	const children = Array.isArray(subcategory.categories) ? subcategory.categories : [];
+	return {
+		name: subcategory.name,
+		path: `/products?generalCategoryId=${generalId}&subcategoryId=${subcategory.id_category}`,
+		children_menus: null,
+		...(children.length ? {
+			type: 'sub_menu',
+			children: children.map((child) => buildSubcategoryMenu(child, generalId)),
+		} : {}),
+	};
+};
+
 const buildCategoryMenus = (categories) => {
 	const categoryItems = (categories || []).map((category) => {
 		const generalId = category.idgeneral_categories || category.id_general_category || category.id;
@@ -17,11 +30,9 @@ const buildCategoryMenus = (categories) => {
 
 		if (subcategories.length) {
 			item.type = 'sub_menu';
-			item.children = subcategories.map((subcategory) => ({
-				name: subcategory.name,
-				path: `/products?generalCategoryId=${generalId}&subcategoryId=${subcategory.id_category}`,
-				children_menus: null,
-			}));
+			item.children = subcategories.map(
+				(subcategory) => buildSubcategoryMenu(subcategory, generalId)
+			);
 		}
 
 		return item;

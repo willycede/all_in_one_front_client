@@ -132,7 +132,7 @@
 						<v-select
 							v-model="form.id_category"
 							:items="categories"
-							item-text="name"
+							item-text="display_name"
 							item-value="id_category"
 							:label="$t('adminProducts.categoryLabel')"
 							:placeholder="$t('adminProducts.categoryPlaceholder')"
@@ -212,25 +212,31 @@
 				</section>
 
 				<div class="aio-admin-product-form__actions">
-					<v-btn
-						type="button"
-						outlined
-						color="primary"
-						:disabled="isSubmitting"
-						@click="discardChanges"
-					>
-						{{ $t('adminProducts.discard') }}
-					</v-btn>
-					<v-btn
-						type="submit"
-						color="primary"
-						depressed
-						:loading="isSubmitting"
-						:disabled="!canSubmit"
-					>
-						<v-icon left>save</v-icon>
-						{{ $t('adminProducts.saveChanges') }}
-					</v-btn>
+					<p v-if="!canSubmit && submitBlockers.length" class="aio-admin-product-form__submit-hint">
+						{{ $t('adminProducts.saveBlockedHint') }}
+						{{ submitBlockers.join(' · ') }}
+					</p>
+					<div class="aio-admin-product-form__actions-row">
+						<v-btn
+							type="button"
+							outlined
+							color="primary"
+							:disabled="isSubmitting"
+							@click="discardChanges"
+						>
+							{{ $t('adminProducts.discard') }}
+						</v-btn>
+						<v-btn
+							type="submit"
+							color="primary"
+							depressed
+							:loading="isSubmitting"
+							:disabled="!canSubmit"
+						>
+							<v-icon left>save</v-icon>
+							{{ $t('adminProducts.saveChanges') }}
+						</v-btn>
+					</div>
 				</div>
 			</div>
 
@@ -267,6 +273,7 @@
 import api from 'Api';
 import ProductImagesSection from 'Components/Admin/ProductImagesSection';
 import ProductModifiersSection from 'Components/Admin/ProductModifiersSection';
+import { buildCategoryOptions } from 'Helpers/categoryHierarchy';
 
 export default {
 	components: {
@@ -317,15 +324,19 @@ export default {
 			const match = this.categories.find(
 				(item) => String(item.id_category) === String(this.form.id_category)
 			);
-			return match ? match.name : '';
+			return match ? (match.display_name || match.name) : '';
+		},
+		submitBlockers() {
+			const blockers = [];
+			if (!this.form.name) blockers.push(this.$t('adminProducts.checkName'));
+			if (!this.form.cod_products) blockers.push(this.$t('adminProducts.checkSku'));
+			if (!this.isPriceValid) blockers.push(this.$t('adminProducts.checkPrice'));
+			if (!this.form.id_cod_catalog) blockers.push(this.$t('adminProducts.checkCatalog'));
+			if (!this.form.id_category) blockers.push(this.$t('adminProducts.checkCategory'));
+			return blockers;
 		},
 		canSubmit() {
-			return !!this.form.name
-				&& !!this.form.cod_products
-				&& !!this.form.id_cod_catalog
-				&& !!this.form.id_category
-				&& this.isPriceValid
-				&& !this.isSubmitting;
+			return this.submitBlockers.length === 0 && !this.isSubmitting;
 		},
 	},
 	async mounted() {
@@ -342,7 +353,9 @@ export default {
 					api.get('/api/cities/catalog'),
 				]);
 				this.catalogs = (catalogRes.data && catalogRes.data.data) || [];
-				this.categories = (categoryRes.data && categoryRes.data.data) || [];
+				this.categories = buildCategoryOptions(
+					(categoryRes.data && categoryRes.data.data) || []
+				);
 				this.cities = (citiesRes.data && citiesRes.data.data) || [];
 			} catch (error) {
 				this.loadError = this.$t('adminProducts.optionsLoadError');
@@ -564,10 +577,26 @@ export default {
 
 .aio-admin-product-form__actions {
 	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 0.5rem;
+	padding: 0.25rem 0 1rem;
+}
+
+.aio-admin-product-form__actions-row {
+	display: flex;
 	justify-content: flex-end;
 	gap: 0.75rem;
 	flex-wrap: wrap;
-	padding: 0.25rem 0 1rem;
+}
+
+.aio-admin-product-form__submit-hint {
+	margin: 0;
+	max-width: 100%;
+	font-size: 0.8125rem;
+	line-height: 1.45;
+	color: #b45309;
+	text-align: right;
 }
 
 .aio-admin-product-form__aside {

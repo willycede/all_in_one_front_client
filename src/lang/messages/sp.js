@@ -626,6 +626,7 @@ export default {
 		discard: 'Descartar',
 		publish: 'Publicar producto',
 		saveChanges: 'Guardar cambios',
+		saveBlockedHint: 'Completa estos campos para habilitar Guardar:',
 		previewLabel: 'Vista previa en tienda',
 		previewNameFallback: 'Nombre del producto',
 		previewCategoryFallback: 'Categoría',

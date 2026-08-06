@@ -134,7 +134,7 @@
 						<v-select
 							v-model="form.id_category"
 							:items="categories"
-							item-text="name"
+							item-text="display_name"
 							item-value="id_category"
 							:label="$t('adminProducts.categoryLabel')"
 							:placeholder="$t('adminProducts.categoryPlaceholder')"
@@ -297,6 +297,7 @@
 import api from 'Api';
 import ProductImagesSection from 'Components/Admin/ProductImagesSection';
 import ProductModifiersSection from 'Components/Admin/ProductModifiersSection';
+import { buildCategoryOptions } from 'Helpers/categoryHierarchy';
 
 function emptyForm() {
 	return {
@@ -375,7 +376,9 @@ export default {
 					api.get('/api/cities/catalog'),
 				]);
 				this.catalogs = (catalogRes.data && catalogRes.data.data) || [];
-				this.categories = (categoryRes.data && categoryRes.data.data) || [];
+				this.categories = buildCategoryOptions(
+					(categoryRes.data && categoryRes.data.data) || []
+				);
 				this.cities = (citiesRes.data && citiesRes.data.data) || [];
 			} catch (error) {
 				this.loadError = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)

@@ -72,7 +72,10 @@ export default {
 		},
 		{			
 			path: '/products/category/:generalCategoryId',
-			component: ProductWithFilters,
+			redirect: (to) => ({
+				path: '/products',
+				query: { generalCategoryId: to.params.generalCategoryId },
+			}),
 		},{			
 			path: '/botonpagomail',
 			component: RedirectPayment,

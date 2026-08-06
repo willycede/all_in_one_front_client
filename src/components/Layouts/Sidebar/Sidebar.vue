@@ -8,7 +8,7 @@
 					</a>
 				</div>
 				<template v-for="menu in menus">
-					<template v-if="menu.children !== null">
+					<template v-if="hasMenuChildren(menu)">
 						<v-list-group
 							light
 							:key="menu.title"
@@ -33,7 +33,7 @@
                               v-if="subItem !== null"
                               :to="subItem.path"
                            >	
-                              <template v-if="subItem.children_menus == null">
+                              <template v-if="!hasMenuChildren(subItem)">
                                  <v-list-item-action class="mr-0">
                                     <v-icon>arrow_right_alt</v-icon>
                                  </v-list-item-action>
@@ -53,7 +53,7 @@
                                  </template>
 
                                  <v-list-item
-                                    v-for="(item, i) in subItem.children_menus"
+                                    v-for="(item, i) in childItems(subItem)"
                                     :key="i"
                                     link
                                     :to="item.path"
@@ -141,6 +141,15 @@ export default {
 		...mapGetters(["menus"]),
 	},
 	methods: {
+		childItems(menu) {
+			if (Array.isArray(menu.children)) {
+				return menu.children;
+			}
+			return Array.isArray(menu.children_menus) ? menu.children_menus : [];
+		},
+		hasMenuChildren(menu) {
+			return this.childItems(menu).length > 0;
+		},
 		toggleMobileSidebar() {
 			this.$store.dispatch('toggleSidebar', false);
 		},

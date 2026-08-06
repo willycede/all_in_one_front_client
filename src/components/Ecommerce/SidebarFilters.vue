@@ -35,26 +35,29 @@
 					<span>{{ $t('productsPage.allCategories') }}</span>
 					<v-icon v-if="!selectedCategory" size="16">check</v-icon>
 				</button>
-				<template v-for="category in generalCategories">
+				<div
+					v-for="category in generalCategories"
+					:key="category.idgeneral_categories"
+					class="aio-shop-sidebar__cat-group"
+				>
 					<button
-						:key="category.idgeneral_categories"
 						type="button"
 						class="aio-shop-sidebar__cat"
-						:class="{ 'aio-shop-sidebar__cat--active': selectedCategory === category.idgeneral_categories }"
+						:class="{ 'aio-shop-sidebar__cat--active': sameId(selectedCategory, category.idgeneral_categories) }"
 						@click="selectCategory(category.idgeneral_categories)"
 					>
 						<span>{{ category.name }}</span>
 						<v-icon
-							v-if="selectedCategory === category.idgeneral_categories"
+							v-if="sameId(selectedCategory, category.idgeneral_categories)"
 							size="16"
 						>check</v-icon>
 					</button>
 					<div
-						v-if="selectedCategory === category.idgeneral_categories && (category.categories || []).length > 0"
-						:key="`subcats-${category.idgeneral_categories}`"
+						v-if="sameId(selectedCategory, category.idgeneral_categories) && (category.categories || []).length > 0"
 						class="aio-shop-sidebar__subcategories"
 					>
 						<button
+							key="all-subcategories"
 							type="button"
 							class="aio-shop-sidebar__cat aio-shop-sidebar__cat--sub"
 							:class="{ 'aio-shop-sidebar__cat--active': !selectedSubcategory }"
@@ -63,22 +66,45 @@
 							<span>{{ $t('productsPage.allSubcategories') }}</span>
 							<v-icon v-if="!selectedSubcategory" size="16">check</v-icon>
 						</button>
-						<button
+						<div
 							v-for="subcategory in category.categories"
 							:key="subcategory.id_category"
-							type="button"
-							class="aio-shop-sidebar__cat aio-shop-sidebar__cat--sub"
-							:class="{ 'aio-shop-sidebar__cat--active': selectedSubcategory === subcategory.id_category }"
-							@click="selectSubcategory(subcategory.id_category)"
+							class="aio-shop-sidebar__cat-group"
 						>
-							<span>{{ subcategory.name }}</span>
-							<v-icon
-								v-if="selectedSubcategory === subcategory.id_category"
-								size="16"
-							>check</v-icon>
-						</button>
+							<button
+								type="button"
+								class="aio-shop-sidebar__cat aio-shop-sidebar__cat--sub"
+								:class="{ 'aio-shop-sidebar__cat--active': sameId(selectedSubcategory, subcategory.id_category) }"
+								@click="selectSubcategory(subcategory.id_category)"
+							>
+								<span>{{ subcategory.name }}</span>
+								<v-icon
+									v-if="sameId(selectedSubcategory, subcategory.id_category)"
+									size="16"
+								>check</v-icon>
+							</button>
+							<div
+								v-if="isSubcategoryBranchActive(subcategory) && (subcategory.categories || []).length"
+								class="aio-shop-sidebar__subcategories aio-shop-sidebar__subcategories--nested"
+							>
+								<button
+									v-for="child in subcategory.categories"
+									:key="child.id_category"
+									type="button"
+									class="aio-shop-sidebar__cat aio-shop-sidebar__cat--sub"
+									:class="{ 'aio-shop-sidebar__cat--active': sameId(selectedSubcategory, child.id_category) }"
+									@click="selectSubcategory(child.id_category)"
+								>
+									<span>{{ child.name }}</span>
+									<v-icon
+										v-if="sameId(selectedSubcategory, child.id_category)"
+										size="16"
+									>check</v-icon>
+								</button>
+							</div>
+						</div>
 					</div>
-				</template>
+				</div>
 			</div>
 		</div>
 
@@ -110,7 +136,7 @@
 			</button>
 		</div>
 
-		<div class="aio-shop-sidebar__panel">
+		<div v-if="catalogCities.length > 0" class="aio-shop-sidebar__panel">
 			<h3 class="aio-shop-sidebar__title">{{ $t('productsPage.city') }}</h3>
 			<select
 				v-model="selectedCityId"
@@ -160,9 +186,12 @@ import { mapActions, mapGetters } from 'vuex';
 import {
 	buildCatalogQuery,
 	parseCatalogQuery,
+	catalogQueryEquals,
 	CATALOG_SORT_OPTIONS,
 	DEFAULT_CATALOG_SORT,
 } from 'Helpers/catalogQuery';
+
+const MAX_CITY_OPTIONS = 500;
 
 const SORT_LABEL_KEYS = {
 	name_asc: 'productsPage.sortNameAsc',
@@ -184,7 +213,7 @@ export default {
 			catalogCities: [],
 			searchDebounce: null,
 			isSearching: false,
-			skipRouteSync: false,
+			pendingRouteQuery: null,
 		};
 	},
 	computed: {
@@ -200,10 +229,10 @@ export default {
 		'$route.query': {
 			immediate: true,
 			handler(query) {
-				if (this.skipRouteSync) {
-					this.skipRouteSync = false;
+				if (this.isOwnRouteUpdate(query)) {
 					return;
 				}
+				this.pendingRouteQuery = null;
 				const parsed = parseCatalogQuery(query);
 				this.selectedCategory = parsed.categoryId;
 				this.selectedSubcategory = parsed.subcategoryId;
@@ -226,7 +255,9 @@ export default {
 		async loadCatalogCities() {
 			try {
 				const response = await api.get('/api/cities/catalog');
-				this.catalogCities = response?.data?.data || [];
+				const cities = response?.data?.data || [];
+				// Un listado desmedido rompe el render del sidebar (normalizeArrayChildren).
+				this.catalogCities = cities.slice(0, MAX_CITY_OPTIONS);
 			} catch (error) {
 				this.catalogCities = [];
 			}
@@ -248,8 +279,15 @@ export default {
 				page: 1,
 				limit: this.$route.query.limit || 12,
 			});
-			this.skipRouteSync = true;
+			this.pendingRouteQuery = query;
 			this.$router.replace({ path: '/products', query }).catch(() => {});
+		},
+		isOwnRouteUpdate(query) {
+			return !!this.pendingRouteQuery
+				&& catalogQueryEquals(
+					parseCatalogQuery(query),
+					parseCatalogQuery(this.pendingRouteQuery)
+				);
 		},
 		emitFilters() {
 			this.$emit('apply-filters', this.currentFilters());
@@ -278,6 +316,15 @@ export default {
 		selectSubcategory(subcategoryId) {
 			this.selectedSubcategory = subcategoryId;
 			this.applyFilters({ syncRoute: true });
+		},
+		sameId(left, right) {
+			return left !== null && left !== undefined && String(left) === String(right);
+		},
+		isSubcategoryBranchActive(subcategory) {
+			return this.sameId(this.selectedSubcategory, subcategory.id_category)
+				|| (subcategory.categories || []).some(
+					(child) => this.sameId(child.id_category, this.selectedSubcategory)
+				);
 		},
 		applyPriceFilter() {
 			this.applyFilters({ syncRoute: true });

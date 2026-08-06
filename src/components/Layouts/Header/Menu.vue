@@ -7,6 +7,14 @@
 					<ul class="sub-menu" v-if="menuItem.children && menuItem.children.length > 0">
 						<li v-for="(subMenuItem , subMenuKey) in menuItem.children" :key="subMenuKey">
 							<router-link :to="subMenuItem.path">{{ $t(subMenuItem.name) }}</router-link>
+							<ul
+								v-if="subMenuItem.children && subMenuItem.children.length > 0"
+								class="sub-menu"
+							>
+								<li v-for="(childItem, childKey) in subMenuItem.children" :key="childKey">
+									<router-link :to="childItem.path">{{ $t(childItem.name) }}</router-link>
+								</li>
+							</ul>
 						</li>
 					</ul>
 				</template>

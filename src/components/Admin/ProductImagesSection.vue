@@ -6,7 +6,10 @@
 			</span>
 			<div>
 				<h3>Imágenes del producto</h3>
-				<p>Sube JPG, PNG o WEBP (máx. 5 MB). La primera imagen se usa como portada.</p>
+				<p>
+					Sube JPG, PNG o WEBP (máx. 5 MB). La primera imagen se usa como portada.
+					<strong>Se guardan al seleccionarlas</strong>; no dependen del botón Guardar cambios.
+				</p>
 			</div>
 		</header>
 
@@ -117,8 +120,11 @@ export default {
 				this.localImages = Array.isArray(value) ? [...value] : [];
 			},
 		},
-		coverPreviewUrl(url) {
-			this.$emit('cover-change', url);
+		coverPreviewUrl: {
+			immediate: true,
+			handler(url) {
+				this.$emit('cover-change', url);
+			},
 		},
 	},
 	beforeDestroy() {

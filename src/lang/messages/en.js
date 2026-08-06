@@ -626,6 +626,7 @@ export default {
 		discard: 'Discard',
 		publish: 'Publish product',
 		saveChanges: 'Save changes',
+		saveBlockedHint: 'Complete these fields to enable Save:',
 		previewLabel: 'Store preview',
 		previewNameFallback: 'Product name',
 		previewCategoryFallback: 'Category',

@@ -25,8 +25,16 @@ export function isUserLoggedIn() {
 	return hasValue(token) && hasValue(userId);
 }
 
+export const ADMIN_ROL = '1';
+export const SUPER_ADMIN_ROL = '3';
+
 export function isAdminUser() {
-	return isUserLoggedIn() && String(localStorage.getItem('id_rol')) === '1';
+	const roleId = String(localStorage.getItem('id_rol'));
+	return isUserLoggedIn() && (roleId === ADMIN_ROL || roleId === SUPER_ADMIN_ROL);
+}
+
+export function isSuperAdminUser() {
+	return isUserLoggedIn() && String(localStorage.getItem('id_rol')) === SUPER_ADMIN_ROL;
 }
 
 export function requiresAuthentication(route) {

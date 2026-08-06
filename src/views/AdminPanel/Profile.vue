@@ -44,6 +44,7 @@
 
 <script>
 import { getUserDisplayName } from 'Helpers/auth';
+import { roleLabel } from 'Helpers/roles';
 
 export default {
 	computed: {
@@ -58,7 +59,7 @@ export default {
 				{ key: 'Apellido', value: lastName },
 				{ key: 'Correo electrónico', value: localStorage.getItem('email') || '—' },
 				{ key: 'Identificación', value: localStorage.getItem('identification_number') || '—' },
-				{ key: 'Rol', value: localStorage.getItem('id_rol') === '1' ? 'Administrador' : 'Usuario' },
+				{ key: 'Rol', value: roleLabel(localStorage.getItem('id_rol')) },
 			];
 		},
 	},

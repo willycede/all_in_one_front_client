@@ -38,7 +38,7 @@
 									class="aio-login__input aio-login__select"
 									:disabled="loadingCompanies"
 								>
-									<option value="">Selecciona una empresa</option>
+									<option value="">Todas las empresas (super admin)</option>
 									<option
 										v-for="company in companies"
 										:key="company.id_company"
@@ -48,7 +48,9 @@
 									</option>
 								</select>
 							</div>
-							<span v-if="companyError" class="aio-login__error">{{ companyError }}</span>
+							<span class="aio-login__hint">
+								Deja «Todas las empresas» solo si tu cuenta es super administrador.
+							</span>
 						</label>
 
 						<label class="aio-login__field">
@@ -165,10 +167,6 @@ export default {
 			const failed = this.passwordRules.find((rule) => rule(this.form.password) !== true);
 			return failed ? failed(this.form.password) : '';
 		},
-		companyError() {
-			if (!this.submitted && !this.form.company_id) return '';
-			return this.form.company_id ? '' : 'Selecciona una empresa';
-		},
 	},
 	async mounted() {
 		await this.loadCompanies();
@@ -191,8 +189,12 @@ export default {
 		validateForm() {
 			this.submitted = true;
 			return this.emailRules.every((rule) => rule(this.form.email) === true)
-				&& this.passwordRules.every((rule) => rule(this.form.password) === true)
-				&& !!this.form.company_id;
+				&& this.passwordRules.every((rule) => rule(this.form.password) === true);
+		},
+		// Vacío significa "sin empresa": el backend decide si la cuenta es super admin.
+		selectedCompanyId() {
+			const companyId = parseInt(this.form.company_id, 10);
+			return Number.isFinite(companyId) ? companyId : null;
 		},
 		saveDetails() {
 			if (!this.validateForm()) return;
@@ -201,7 +203,7 @@ export default {
 			api.post('/api/users/loginAdmin', {
 				email: this.form.email,
 				password: this.form.password,
-				company_id: parseInt(this.form.company_id, 10),
+				company_id: this.selectedCompanyId(),
 			})
 				.then((res) => {
 					const user = res.data.data;
@@ -218,13 +220,23 @@ export default {
 					completeAdminLogin(this, user, target);
 				})
 				.catch((err) => {
-					const message = (err.response && err.response.data && err.response.data.error && err.response.data.error.message)
-						|| 'No se pudo iniciar sesión como administrador';
-					this.$snotify.error(message, { timeout: 3500 });
+					this.$snotify.error(this.extractErrorMessage(err), { timeout: 4500 });
 				})
 				.finally(() => {
 					this.loading = false;
 				});
+		},
+		extractErrorMessage(err) {
+			const error = err && err.response && err.response.data && err.response.data.error;
+			if (!error) {
+				return 'No se pudo iniciar sesión como administrador';
+			}
+			if (error.message) {
+				return error.message;
+			}
+			const validation = error.validationObject || {};
+			const first = Object.keys(validation).find((key) => validation[key]);
+			return (first && validation[first]) || 'No se pudo iniciar sesión como administrador';
 		},
 		verifyTwoFactor() {
 			if (!this.twoFactorCode) return;
@@ -233,7 +245,7 @@ export default {
 				twoFactorToken: this.twoFactorToken,
 				code: this.twoFactorCode,
 				isAdmin: true,
-				company_id: parseInt(this.form.company_id, 10),
+				company_id: this.selectedCompanyId(),
 			})
 				.then((res) => {
 					const user = res.data.data;
@@ -437,6 +449,13 @@ export default {
 	margin-top: 0.375rem;
 	font-size: 0.75rem;
 	color: #dc2626;
+}
+
+.aio-login__hint {
+	display: block;
+	margin-top: 0.375rem;
+	font-size: 0.75rem;
+	color: #6b7280;
 }
 
 .aio-login__submit {

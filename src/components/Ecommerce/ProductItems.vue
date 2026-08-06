@@ -138,7 +138,7 @@ export default {
 			isInitialLoad: true,
 			isRefreshing: false,
 			isPageLoading: false,
-			suppressRouteWatch: false,
+			ownRouteQuery: null,
 			loadRequestId: 0,
 			activeCategoryId: undefined,
 			activeSubcategoryId: null,
@@ -198,7 +198,7 @@ export default {
 	watch: {
 		'$route.query': {
 			handler(newQuery, oldQuery) {
-				if (this.suppressRouteWatch || !oldQuery) return;
+				if (!oldQuery || this.isOwnRouteQuery(newQuery)) return;
 
 				const next = parseCatalogQuery(newQuery);
 				const prev = parseCatalogQuery(oldQuery);
@@ -261,6 +261,12 @@ export default {
 				limit: this.parseLimit(limit),
 			});
 		},
+		// Solo se ignoran los cambios de ruta que este componente acaba de escribir;
+		// un flag booleano descartaba también los clics del sidebar (filtro sin aplicar).
+		isOwnRouteQuery(query) {
+			return !!this.ownRouteQuery
+				&& catalogQueryEquals(parseCatalogQuery(query), parseCatalogQuery(this.ownRouteQuery));
+		},
 		async syncRouteQuery(page, limit, filters = {}) {
 			const nextQuery = this.buildRouteQuery(page, limit, filters);
 			const current = parseCatalogQuery(this.$route.query);
@@ -268,14 +274,8 @@ export default {
 
 			if (catalogQueryEquals(current, nextParsed)) return;
 
-			this.suppressRouteWatch = true;
-			try {
-				await this.$router.replace({ path: '/products', query: nextQuery }).catch(() => {});
-			} finally {
-				this.$nextTick(() => {
-					this.suppressRouteWatch = false;
-				});
-			}
+			this.ownRouteQuery = nextQuery;
+			await this.$router.replace({ path: '/products', query: nextQuery }).catch(() => {});
 		},
 		async loadProducts({
 			categoryId,
@@ -336,7 +336,9 @@ export default {
 					page: requestPage,
 					limit: requestLimit,
 				});
-				await this.syncRouteQuery(requestPage, requestLimit);
+				if (requestId === this.loadRequestId) {
+					await this.syncRouteQuery(requestPage, requestLimit);
+				}
 			} finally {
 				if (requestId === this.loadRequestId) {
 					this.isLoading = false;

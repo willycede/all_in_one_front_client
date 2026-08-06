@@ -29,7 +29,7 @@
 					<span class="font-weight-medium">{{ item.name }}</span>
 				</template>
 				<template v-slot:item.roleLabel="{ item }">
-					<v-chip small :color="item.id_rol === 1 ? 'primary' : 'grey lighten-3'" :text-color="item.id_rol === 1 ? 'white' : 'grey darken-2'">
+					<v-chip small :color="item.isAdmin ? 'primary' : 'grey lighten-3'" :text-color="item.isAdmin ? 'white' : 'grey darken-2'">
 						{{ item.roleLabel }}
 					</v-chip>
 				</template>
@@ -97,6 +97,7 @@
 
 <script>
 import api from 'Api';
+import { ROLE_OPTIONS, roleLabel, isAdminRole } from 'Helpers/roles';
 
 export default {
 	data() {
@@ -115,10 +116,7 @@ export default {
 				id_company: null,
 				id_rol: 2,
 			},
-			roleOptions: [
-				{ label: 'Administrador', value: 1 },
-				{ label: 'Cliente', value: 2 },
-			],
+			roleOptions: ROLE_OPTIONS,
 			emailRules: [
 				(v) => !!v || 'El correo es obligatorio',
 				(v) => /.+@.+/.test(v) || 'Correo inválido',
@@ -146,7 +144,8 @@ export default {
 				name: row.name_user || '—',
 				email: row.email || '—',
 				companyName: row.name || row.company_name || '—',
-				roleLabel: roleId === 1 ? 'Administrador' : 'Cliente',
+				roleLabel: roleLabel(roleId, 'Cliente'),
+				isAdmin: isAdminRole(roleId),
 			};
 		},
 		async loadCollaborators() {
