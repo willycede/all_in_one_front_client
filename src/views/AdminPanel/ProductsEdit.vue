@@ -456,8 +456,12 @@ export default {
 				this.$snotify.success(this.$t('adminProducts.updateSuccess'), { timeout: 2500 });
 				this.$router.push('/admin-panel/products');
 			} catch (error) {
-				const message = (error.response && error.response.data && error.response.data.error && error.response.data.error.message)
-					|| this.$t('adminProducts.updateError');
+				const apiError = error.response && error.response.data && error.response.data.error;
+				const validationObject = apiError && apiError.validationObject;
+				if (validationObject && typeof validationObject === 'object') {
+					this.fieldErrors = { ...this.fieldErrors, ...validationObject };
+				}
+				const message = (apiError && apiError.message) || this.$t('adminProducts.updateError');
 				this.$snotify.error(message, { timeout: 4000 });
 			} finally {
 				this.isSubmitting = false;
