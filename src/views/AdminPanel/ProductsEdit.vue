@@ -119,13 +119,15 @@
 							:items="catalogs"
 							item-text="name_catalog"
 							item-value="id_catalog"
-							:label="$t('adminProducts.catalogLabel')"
+							:label="$t('adminProducts.catalogLabelEdit')"
 							:placeholder="$t('adminProducts.catalogPlaceholder')"
 							outlined
 							dense
 							hide-details="auto"
 							:loading="loadingOptions"
 							:no-data-text="loadingOptions ? $t('adminProducts.loadingOptions') : $t('adminProducts.noCatalogs')"
+							:hint="!form.id_cod_catalog ? $t('adminProducts.catalogEditHint') : ''"
+							:persistent-hint="!form.id_cod_catalog"
 							:error-messages="fieldErrors.id_cod_catalog"
 						></v-select>
 
@@ -331,7 +333,6 @@ export default {
 			if (!this.form.name) blockers.push(this.$t('adminProducts.checkName'));
 			if (!this.form.cod_products) blockers.push(this.$t('adminProducts.checkSku'));
 			if (!this.isPriceValid) blockers.push(this.$t('adminProducts.checkPrice'));
-			if (!this.form.id_cod_catalog) blockers.push(this.$t('adminProducts.checkCatalog'));
 			if (!this.form.id_category) blockers.push(this.$t('adminProducts.checkCategory'));
 			return blockers;
 		},
@@ -404,9 +405,6 @@ export default {
 			if (!this.form.cod_products || !String(this.form.cod_products).trim()) {
 				errors.cod_products = this.$t('adminProducts.errors.skuRequired');
 			}
-			if (!this.form.id_cod_catalog) {
-				errors.id_cod_catalog = this.$t('adminProducts.errors.catalogRequired');
-			}
 			if (!this.form.id_category) {
 				errors.id_category = this.$t('adminProducts.errors.categoryRequired');
 			}
@@ -429,7 +427,9 @@ export default {
 				description: String(this.form.description || '').trim(),
 				price: parseFloat(this.form.price),
 				discount: parseFloat(this.form.discount) || 0,
-				id_cod_catalog: parseInt(this.form.id_cod_catalog, 10),
+				id_cod_catalog: this.form.id_cod_catalog
+					? parseInt(this.form.id_cod_catalog, 10)
+					: null,
 				id_category: parseInt(this.form.id_category, 10),
 				external_product_id: this.form.external_product_id
 					? String(this.form.external_product_id).trim()

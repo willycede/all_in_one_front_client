@@ -600,6 +600,8 @@ export default {
 		sectionClassTitle: 'Clasificación en la tienda',
 		sectionClassHint: 'Ubica el producto en catálogo y categoría para que aparezca en el marketplace.',
 		catalogLabel: 'Catálogo *',
+		catalogLabelEdit: 'Catálogo (opcional)',
+		catalogEditHint: 'Productos legacy pueden no tener catálogo. Puedes guardar otros cambios sin asignarlo.',
 		catalogPlaceholder: 'Selecciona un catálogo',
 		categoryLabel: 'Categoría *',
 		categoryPlaceholder: 'Selecciona una categoría',

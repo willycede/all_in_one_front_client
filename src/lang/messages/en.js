@@ -600,6 +600,8 @@ export default {
 		sectionClassTitle: 'Store classification',
 		sectionClassHint: 'Place the product in catalog and category so it appears in the marketplace.',
 		catalogLabel: 'Catalog *',
+		catalogLabelEdit: 'Catalog (optional)',
+		catalogEditHint: 'Legacy products may have no catalog. You can save other changes without assigning one.',
 		catalogPlaceholder: 'Select a catalog',
 		categoryLabel: 'Category *',
 		categoryPlaceholder: 'Select a category',
