@@ -109,11 +109,6 @@
 					<p class="aio-login__footer">
 						{{ $t('auth.noAccount') }}
 						<router-link to="/client/register">{{ $t('auth.createAccount') }}</router-link>
-						<br>
-						<span class="aio-login__footer-admin">
-							{{ $t('auth.isAdmin') }}
-							<router-link to="/client/admin-login">{{ $t('auth.adminAccess') }}</router-link>
-						</span>
 					</p>
 				</div>
 			</section>
