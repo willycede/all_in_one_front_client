@@ -43,7 +43,7 @@
 						</li>
 						<li>
 							<span class="aio-footer__contact-icon"><v-icon size="18">phone</v-icon></span>
-							<a href="tel:+593000000000">+593 00 000 0000</a>
+							<a href="tel:+593959908766">0959908766</a>
 						</li>
 						<li>
 							<span class="aio-footer__contact-icon"><v-icon size="18">email</v-icon></span>

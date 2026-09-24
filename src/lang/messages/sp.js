@@ -78,8 +78,6 @@ export default {
 		forgotPassword: '¿Olvidaste tu contraseña?',
 		noAccount: '¿No tienes cuenta?',
 		createAccount: 'Crea una aquí',
-		isAdmin: '¿Administrador?',
-		adminAccess: 'Accede al panel',
 		recoverTitle: 'Recuperar contraseña',
 		recoverSubtitle: 'Te enviaremos instrucciones a tu correo',
 		recoverSend: 'Enviar enlace',

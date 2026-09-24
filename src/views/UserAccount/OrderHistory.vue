@@ -374,7 +374,22 @@ export default {
 		applyOrderResponse(payload) {
 			if (payload?.items) {
 				this.tableData = payload.items;
-				this.pagination = { ...emptyPagination(), ...payload.pagination };
+				const merged = { ...emptyPagination(), ...payload.pagination };
+				const limit = this.parseLimit(merged.limit);
+				const total = Number(merged.total) || 0;
+				const totalPages = total > 0 ? Math.max(1, Math.ceil(total / limit)) : 0;
+				const page = totalPages > 0
+					? Math.min(Math.max(1, this.parsePage(merged.page)), totalPages)
+					: 1;
+				this.pagination = {
+					...merged,
+					limit,
+					total,
+					totalPages,
+					page,
+					hasNextPage: page < totalPages,
+					hasPrevPage: page > 1,
+				};
 				return;
 			}
 			this.tableData = Array.isArray(payload) ? payload : [];
